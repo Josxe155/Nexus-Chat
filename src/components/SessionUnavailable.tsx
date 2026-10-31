@@ -1,0 +1,2 @@
+import {CloudOff,RefreshCw,LogOut} from 'lucide-react';
+export default function SessionUnavailable({message,onRetry,onLogout}:{message:string;onRetry:()=>void;onLogout:()=>void}){return <main className="session-unavailable" role="alert"><section><img src="/nexus-icon.svg" width="58" height="58" alt="Nexus Chat"/><CloudOff size={34}/><h1>No pudimos sincronizar tu cuenta</h1><p>{message}</p><div><button onClick={onRetry}><RefreshCw size={18}/>Reintentar</button><button onClick={onLogout}><LogOut size={18}/>Cerrar sesión</button></div></section></main>;}

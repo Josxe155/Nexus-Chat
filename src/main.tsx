@@ -1,0 +1,42 @@
+import ReleaseManager from './features/ReleaseManager';
+import Availability from './features/Availability';
+
+
+import ErrorBoundary from './components/ErrorBoundary';
+import {StrictMode} from 'react';
+import {createRoot} from 'react-dom/client';
+import App from './App.tsx';
+import './index.css';
+import './modern.css';
+import './upgrade.css';
+import './settings.css';
+import './messenger.css';
+
+createRoot(document.getElementById('root')!).render(
+  <StrictMode>
+    <ErrorBoundary><Availability><App /><ReleaseManager/></Availability></ErrorBoundary>
+  </StrictMode>,
+);
+
+import './mobile-reference.css';
+import './desktop-reference.css';
+
+import './conversation-details.css';
+
+import './unified-interface.css';
+
+import './mobile-interactions.css';
+
+import './call-screen.css';
+
+import './call-history-media.css';
+
+import './production-polish.css';
+
+import './mobile-status.css';
+
+import './control-fixes.css';
+import './reference-enhancements.css';
+import './voice-style-refresh.css';
+
+import './official-reference.css';

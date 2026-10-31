@@ -1,0 +1,1 @@
+export function apiURL(input:string){return input;}export async function apiFetch(input:RequestInfo|URL,options?:RequestInit){if(typeof input==='string'&&input.startsWith('/api/')){const {staticRequest}=await import('./staticServices');return staticRequest(input,options);}return fetch(input,options);}

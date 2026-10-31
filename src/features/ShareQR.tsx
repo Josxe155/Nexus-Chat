@@ -1,0 +1,6 @@
+import {useEffect,useState} from 'react';import {Download} from 'lucide-react';
+export default function ShareQR({url,label='Código QR del enlace'}:{url:string;label?:string}){
+ const [image,setImage]=useState(''),[error,setError]=useState('');useEffect(()=>{let live=true;setImage('');setError('');let parsed:URL;try{parsed=new URL(url,location.origin);}catch{setError('El enlace no es válido.');return;}if(parsed.origin!==location.origin||url.length>2048){setError('Este enlace no se puede compartir.');return;}import('qrcode').then(qr=>(qr.default||qr).toDataURL(parsed.href,{width:320,margin:4,errorCorrectionLevel:'M',color:{dark:'#000000',light:'#ffffff'}})).then(value=>{if(live)setImage(value);}).catch(()=>{if(live)setError('No se pudo generar el código QR.');});return()=>{live=false;};},[url]);
+ return <section className="share-qr" aria-label={label}>{image?<><img src={image} width={256} height={256} alt={label}/><div><a href={image} download="nexus-chat-qr.png"><Download size={17}/>Guardar QR</a></div></>:<p>{error||'Preparando código QR…'}</p>}<small>Cualquier persona con este código puede abrir el enlace. Se mantienen sus permisos y su caducidad.</small>{image&&error&&<p role="alert">{error}</p>}</section>;
+}
+

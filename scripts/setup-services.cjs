@@ -1,0 +1,1 @@
+const fs=require('node:fs'),path=require('node:path');const target=path.join(__dirname,'../src/public-services.json'),example=path.join(__dirname,'../src/public-services.example.json');if(!fs.existsSync(target)){fs.copyFileSync(example,target);console.log('Configuración local creada en src/public-services.json. Añade tus claves para habilitar IA y Metered.');}

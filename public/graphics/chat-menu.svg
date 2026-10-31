@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg"><defs>
+<symbol id="group" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="7" r="3"/><path d="M2 20v-3c0-5 14-5 14 0v3H2m17-16v6m-3-3h6m-2 6c2 1 2 3 2 5"/></g></symbol>
+<symbol id="star" viewBox="0 0 24 24"><path d="m12 3 2.8 5.8 6.4.9-4.6 4.5 1.1 6.3-5.7-3-5.7 3 1.1-6.3L2.8 9.7l6.4-.9Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></symbol>
+<symbol id="select" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round"><rect x="4" y="4" width="16" height="16" rx="1.5"/><path d="m8 12 3 3 5-6"/></g></symbol>
+<symbol id="read" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round"><path d="M6 4h15v14H6zM3 8H1m2 4H1m2 4H1m8-7h8m-8 4h5"/></g></symbol>
+<symbol id="lock" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><rect x="5" y="10" width="14" height="11" rx="1.7"/><path d="M8 10V7a4 4 0 0 1 8 0v3m-4 4v3"/></g></symbol>
+<symbol id="logout" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M10 4H4v16h6m4-13 5 5-5 5m-6-5h11"/></g></symbol>
+</defs></svg>
