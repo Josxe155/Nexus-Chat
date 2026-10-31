@@ -17,3 +17,12 @@ Validación: TypeScript, 18 comprobaciones de llamadas con WebRTC local y 6 del 
 QR de enlaces: se generan localmente para Ajustes → Invitar amigos, invitaciones a grupos y enlaces de llamada. Se pueden guardar como PNG. Los enlaces conservan su autorización y caducidad; no sirven para vincular dispositivos ni contienen claves de cifrado. Se usa node-qrcode en el navegador, sin un servidor Node.js nuevo. La validación leyó tres QR con un lector independiente.
 
 El panel de actualización muestra ahora la descarga de forma central y conserva brevemente la confirmación con el total real antes de recargar. Solo aparece al aceptar una versión pendiente. Una pestaña que aún ejecute el código antiguo puede requerir una recarga completa para recibir este comportamiento; no se deben borrar los datos del sitio para hacerlo. Esta entrega no modifica el sistema de cifrado ni las bases de datos.
+
+
+## Corrección de clip y actualización
+
+31/10/2026: el clip de escritorio ofrece exactamente Documento, Fotos y videos, Cámara, Audio, Contacto, Encuesta, Evento y Nuevo sticker. Ubicación se mantiene solo en Messenger. Se eliminaron fondos, bordes y sombras del botón de envío, su icono y su contenedor, incluyendo el estado pendiente de notas de voz.
+
+El contador suma los bytes efectivamente leídos de las respuestas y calcula el total a partir de los tamaños de cada archivo. Solicita los archivos sin reutilizar la caché HTTP. La cifra corresponde al contenido de archivos descomprimido por el navegador, no a los bytes de tráfico de red comprimido. No se inventan incrementos ni se retrasa la descarga para animar el número. El panel tiene esquinas más redondeadas e icono animado, con respeto a movimiento reducido. La actualización sigue siendo manual.
+
+Esta publicación de interfaz excluye las claves nuevas de GIPHY y KLIPY, cuya exposición pública no ha sido autorizada. Las pruebas de integración y el código quedan preparados por separado.

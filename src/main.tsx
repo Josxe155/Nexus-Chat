@@ -44,3 +44,5 @@ import './official-reference.css';
 import './desktop-capture-reference.css';
 
 import './mobile-reference-followup.css';
+
+import './update-panel-polish.css';
