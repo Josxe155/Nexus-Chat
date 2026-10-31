@@ -40,3 +40,5 @@ import './reference-enhancements.css';
 import './voice-style-refresh.css';
 
 import './official-reference.css';
+
+import './desktop-capture-reference.css';

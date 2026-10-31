@@ -165,6 +165,7 @@ Nexus-Chat/
 
 | Guía | Contenido |
 | :--- | :--- |
+| [Interfaz de escritorio](REFERENCIA-ESCRITORIO-ADJUNTOS.md) | Vistas de adjuntos, selectores, formularios y separación de dispositivos. |
 | [Publicar la web](INSTRUCCIONES-FIREBASE-HOSTING.md) | Preparación y despliegue en Firebase. |
 | [Estado de las funciones](ESTADO-FUNCIONES.md) | Funciones y condiciones de la entrega. |
 | [Seguridad y llamadas](CIFRADO-Y-LLAMADAS.md) | Protección de datos, historial y comunicaciones. |

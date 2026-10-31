@@ -1,3 +1,4 @@
+import DesktopExpressions from './DesktopExpressions';import {useDesktopWeb} from './useDesktopWeb';
 import {useDismissOutside} from './useDismissOutside';
 import {useMobileBack} from './useMobileBack';
 import React,{useEffect,useMemo,useRef,useState} from 'react';
@@ -10,7 +11,7 @@ const categoryIcons=['🙂','👋','🐾','🍕','🌍','⚽','💡','🔣','�
 const groups:Record<string,string>={'Smileys & Emotion':'Caras y emociones','People & Body':'Personas y cuerpo','Animals & Nature':'Animales y naturaleza','Food & Drink':'Comida y bebida','Travel & Places':'Viajes y lugares','Activities':'Actividades','Objects':'Objetos','Symbols':'Símbolos','Flags':'Banderas'};
 const normalize=(text:string)=>text.normalize('NFD').replace(/\p{Diacritic}/gu,'').toLowerCase();
 export async function stickerFile(blob:Blob,name:string){const url=URL.createObjectURL(blob);try{const image=new Image();await new Promise<void>((resolve,reject)=>{const timer=setTimeout(()=>reject(Error('No se pudo preparar el sticker.')),10000);image.onload=()=>{clearTimeout(timer);resolve();};image.onerror=()=>{clearTimeout(timer);reject(Error('No se pudo abrir el sticker.'));};image.src=url;});const canvas=document.createElement('canvas');canvas.width=512;canvas.height=512;canvas.getContext('2d')!.drawImage(image,0,0,512,512);const png=await new Promise<Blob>((resolve,reject)=>canvas.toBlob(value=>value?resolve(value):reject(Error('No se pudo preparar el sticker.')),'image/png'));return new File([png],name+'.png',{type:'image/png'});}finally{URL.revokeObjectURL(url);}}
-export default function EmojiPicker({onSelect,onClose,onAsset,onCreateSticker}:{onSelect:(emoji:string)=>void;onClose:()=>void;onAsset?:(url:string,name:string,type:'sticker'|'image')=>Promise<void>;onCreateSticker?:()=>void}){
+function LegacyEmojiPicker({onSelect,onClose,onAsset,onCreateSticker}:{onSelect:(emoji:string)=>void;onClose:()=>void;onAsset?:(url:string,name:string,type:'sticker'|'image')=>Promise<void>;onCreateSticker?:()=>void}){
  useMobileBack(true,onClose,95);
  const [catalog,setCatalog]=useState<Catalog>(),[query,setQuery]=useState(''),[category,setCategory]=useState('all'),[page,setPage]=useState(0),[error,setError]=useState(''),[tab,setTab]=useState('emoji'),[busy,setBusy]=useState(false);
  const [assets,setAssets]=useState<{name:string;url:string}[]>([]),[recent,setRecent]=useState<string[]>(()=>{try{return JSON.parse(localStorage.getItem('nexus-recent-emoji')||'[]').slice(0,40);}catch{return [];}});
@@ -27,3 +28,5 @@ export default function EmojiPicker({onSelect,onClose,onAsset,onCreateSticker}:{
   {error&&<p role="alert">{error}</p>}
  </div>;
 }
+
+export default function EmojiPicker(props:Parameters<typeof LegacyEmojiPicker>[0]){const desktop=useDesktopWeb();return desktop?<DesktopExpressions {...props}/>:<LegacyEmojiPicker {...props}/>;}

@@ -65,7 +65,7 @@ export interface Message {
   pinExpiresAt?:number;
   pinnedAt?:number;
   pinnedBy?:string;
-  poll?: {closesAt?:number;closedAt?:any;question: string; options: {id: string; text: string}[]; multiple: boolean; optionIds:string[]; votes: Record<string,string[]>};
+  poll?: {hideVoterNames?:boolean;closesAt?:number;closedAt?:any;question: string; options: {id: string; text: string}[]; multiple: boolean; optionIds:string[]; votes: Record<string,string[]>};
 }
 
 export interface Chat {

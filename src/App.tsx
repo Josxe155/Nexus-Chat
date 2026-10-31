@@ -1,3 +1,4 @@
+import {useDesktopWeb} from './features/useDesktopWeb';
 
 import {readableMessage,encryptedPreview} from './features/encryption';
 import {resetVoicePlayback,voiceAllowedChats} from './features/voicePlayback';
@@ -58,6 +59,7 @@ import {playNotification} from './features/Sounds';
 import {clearMediaURLs,queueMediaDeletion,flushMediaDeletions} from './features/mediaTransfer';
 
 export default function App() {
+ useDesktopWeb();
   const [authUid,setAuthUid]=useState('');const accountRemoved=useRemovedAccount(authUid);
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
