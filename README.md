@@ -82,6 +82,8 @@ La instalación crea `src/public-services.json` desde la plantilla si el archivo
 <details>
 <summary><strong>Configurar IA, transcripción y llamadas</strong></summary>
 
+Para GIFs y stickers configura también `giphyKey` y, si tienes acceso habilitado, `tenorKey`. Los paquetes predeterminados se retiraron.
+
 Completa los campos de `src/public-services.json` con tus propias claves y los datos del proveedor. Sin esa configuración, la copia puede compilar, pero las funciones que dependen de esos servicios no estarán plenamente disponibles.
 
 - **Groq:** asistente y transcripción de audio.
@@ -165,6 +167,7 @@ Nexus-Chat/
 
 | Guía | Contenido |
 | :--- | :--- |
+| [Móvil y proveedores](SEGUIMIENTO-MOVIL-Y-PROVEEDORES.md) | Envíos consecutivos, teclado, emojis, actualización manual y claves de GIFs. |
 | [Interfaz de escritorio](REFERENCIA-ESCRITORIO-ADJUNTOS.md) | Vistas de adjuntos, selectores, formularios y separación de dispositivos. |
 | [Publicar la web](INSTRUCCIONES-FIREBASE-HOSTING.md) | Preparación y despliegue en Firebase. |
 | [Estado de las funciones](ESTADO-FUNCIONES.md) | Funciones y condiciones de la entrega. |

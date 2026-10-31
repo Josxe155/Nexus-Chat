@@ -1,3 +1,4 @@
+import MobileContacts from '../features/MobileContacts';
 import {useDesktopWeb} from '../features/useDesktopWeb';import {DesktopAttachmentReview,DesktopContacts,DesktopCamera,DesktopFileAudio} from '../features/DesktopAttachments';import DesktopEvent from '../features/DesktopEvent';
 import {Lock} from 'lucide-react';
 import ReactionDetails from '../features/ReactionDetails';
@@ -280,7 +281,7 @@ export default function ChatWindow({
       setEditingText('');
     } else {
       if (!inputText.trim()) return;
-      const contentToSend = preferences.chat.emojiReplacement?replaceEmojiText(inputText.trim()):inputText.trim();
+      const contentToSend = preferences.chat.emojiReplacement?replaceEmojiText(inputText.trim()):inputText.trim();setInputText('');
       setTypingStatus(false);
       
       await onSendMessage(
@@ -299,16 +300,16 @@ export default function ChatWindow({
             }
           : undefined
       );
-      setInputText('');
+      
       setReplyTarget(null);
     }
-    } catch (error) { setUploadError('No se pudo enviar. Tu mensaje se conserva para reintentar.'); }
-    finally { sendingRef.current = false; setIsSending(false); }
+    } catch (error) { if(!editingTarget)setInputText(current=>inputText+(current?'\n'+current:''));setUploadError('No se pudo enviar. Tu mensaje se conserva para reintentar.'); }
+    finally { sendingRef.current = false; setIsSending(false); if(!showEmojiPicker)textareaRef.current?.focus({preventScroll:true}); }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if ((e.ctrlKey||e.metaKey)&&!e.altKey&&!e.nativeEvent.isComposing) {const token=({b:'*',i:'_',s:'~'} as Record<string,string>)[e.key.toLowerCase()];if(token&&(e.key.toLowerCase()!=='s'||e.shiftKey)){e.preventDefault();format(token);return;}}
-    if (preferences.chat.enterSend && e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing) {
+    if ((mobileOptions||preferences.chat.enterSend) && e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing) {
       e.preventDefault();
       handleSend();
     }
@@ -710,7 +711,7 @@ export default function ChatWindow({
 
       {/* ----------------- INPUT FOOTER ----------------- */}
       {canSend?<footer className={`chat-composer px-3 sm:px-4 py-2.5 shrink-0 select-none z-10 flex flex-col relative ${theme === 'dark' ? 'bg-[#232732]' : 'bg-[#f0f2f5]'}`}>{recordMode==='audio'?<Recorder mode="audio" onClose={()=>setRecordMode(null)} onSend={sendMedia}/>:<>
-        {showEmojiPicker&&<EmojiPicker onClose={()=>setShowEmojiPicker(false)} onSelect={emoji=>{const field=textareaRef.current,value=editingTarget?editingText:inputText,start=field?.selectionStart??value.length,end=field?.selectionEnd??value.length,next=value.slice(0,start)+emoji+value.slice(end);if(editingTarget)setEditingText(next);else setInputText(next);setShowEmojiPicker(false);requestAnimationFrame(()=>{field?.focus();field?.setSelectionRange(start+emoji.length,start+emoji.length);});}} onAsset={async(url,name,type)=>{const response=await fetch(url);const blob=await response.blob();const file=type==='sticker'?await stickerFile(blob,name):new window.File([blob],name+'.gif',{type:blob.type});await sendMedia(file,type);}} onCreateSticker={()=>{setShowEmojiPicker(false);if(desktopWeb)stickerInput.current?.click();else setShowStickers(true);}}/>}
+        {showEmojiPicker&&<EmojiPicker onClose={()=>setShowEmojiPicker(false)} onSelect={emoji=>{const field=textareaRef.current,value=editingTarget?editingText:inputText,start=field?.selectionStart??value.length,end=field?.selectionEnd??value.length,next=value.slice(0,start)+emoji+value.slice(end);if(editingTarget)setEditingText(next);else setInputText(next);requestAnimationFrame(()=>{field?.setSelectionRange(start+emoji.length,start+emoji.length);});}} onAsset={async(url,name,type)=>{const response=await fetch(url);const blob=await response.blob();const file=type==='sticker'?await stickerFile(blob,name):new window.File([blob],name+'.gif',{type:blob.type});await sendMedia(file,type);}} onCreateSticker={()=>{setShowEmojiPicker(false);if(desktopWeb)stickerInput.current?.click();else setShowStickers(true);}}/>}
 
         {showAttachMenu&&<div className="attachment-panel attachment-complete" role="menu" aria-label="Adjuntar al chat">{[[File,'Documento',()=>chooseFiles('document')],[ImageIcon,'Fotos y videos',()=>chooseFiles('media')],[Camera,'Cámara',()=>{setShowCamera(true);setShowAttachMenu(false);}],[AudioLines,'Audio',()=>{setAudioOptions(true);setShowAttachMenu(false);}],[UserRound,'Contacto',()=>{setShowContacts(true);setShowAttachMenu(false);}],[MapPin,'Ubicación',()=>{setShowLocation(true);setShowAttachMenu(false);}],[BarChart3,'Encuesta',()=>{setShowPoll(true);setShowAttachMenu(false);}],[Calendar,'Evento',()=>{setShowEvent(true);setShowAttachMenu(false);}],[Smile,'Nuevo sticker',()=>{if(desktopWeb)stickerInput.current?.click();else setShowStickers(true);setShowAttachMenu(false);}]].map(([Icon,label,action]:any)=><button role="menuitem" key={label} onClick={action}><Icon size={20}/>{label}</button>)}</div>}
         <input type="file" multiple ref={fileInputRef} aria-label="Seleccionar archivos para enviar" onChange={e=>{const files=Array.from(e.target.files||[]);e.target.value='';if(files.length>10){setUploadError('Selecciona hasta 10 archivos por envío.');return;}setPendingFiles(files);setUploadError('');}} className="hidden"/>
@@ -736,7 +737,6 @@ export default function ChatWindow({
               <textarea ref={textareaRef}
                 aria-label="Escribe un mensaje"
                 spellCheck={preferences.chat.spellcheck}
-                disabled={isSending}
                 rows={inputText.split('\n').length > 1 ? Math.min(inputText.split('\n').length, 4) : 1}
                 maxLength={editingTarget?.type==='poll'?255:20000}
                 value={editingTarget ? editingText : inputText}
@@ -753,8 +753,10 @@ export default function ChatWindow({
           <div className={`shrink-0 ${theme === 'dark' ? 'text-[#727cf5]' : 'text-indigo-600'}`}>
             {(inputText.trim() || editingTarget) ? (
               <button 
+                onPointerDown={event=>{if(event.pointerType!=='mouse')event.preventDefault();}}
+                onMouseDown={event=>event.preventDefault()}
                 onClick={handleSend}
-                disabled={isSending}
+                aria-busy={isSending}
                 className="p-2.5 bg-[#727cf5] text-white rounded-full hover:bg-[#5964dd] active:scale-90 transition-all cursor-pointer shadow-md flex items-center justify-center outline-none"
                 title="Enviar mensaje"
               >
@@ -785,8 +787,7 @@ export default function ChatWindow({
       {audioOptions&&desktopWeb&&<div className="nx-web-modal-shade"><section className="nx-web-modal nx-web-audio-choice" role="dialog" aria-label="Compartir audio"><header><button aria-label="Cerrar audio" onClick={()=>setAudioOptions(false)}><X/></button><h2>Audio</h2></header><button onClick={()=>{setAudioOptions(false);chooseFiles('audio');}}>Elegir archivo de audio</button><button onClick={()=>{setAudioOptions(false);setRecordMode('audio');}}>Grabar nota de voz</button></section></div>}
       {audioOptions&&!desktopWeb&&<div className="feature-backdrop"><section className="feature-dialog" role="dialog" aria-label="Compartir audio"><button className="dialog-close" aria-label="Cerrar audio" onClick={()=>setAudioOptions(false)}><X/></button><h2>Comparte un audio</h2><div className="feature-actions"><button onClick={()=>chooseFiles('audio')}>Elegir archivo de audio</button><button onClick={()=>{setAudioOptions(false);setRecordMode('audio');}}>Grabar nota de voz</button></div></section></div>}
       {showContacts&&desktopWeb&&<DesktopContacts user={currentUser} users={users} onClose={()=>setShowContacts(false)} onSend={person=>onSendMessage(person.nombre,'contact',{fileUrl:'',fileName:'',fileSize:0,contact:{uid:person.uid,name:person.nombre,username:person.username}})}/>}
-      {showContacts&&!desktopWeb&&<div className="feature-backdrop"><section className="feature-dialog" role="dialog" aria-label="Compartir contacto"><button className="dialog-close" aria-label="Cerrar contactos" onClick={()=>setShowContacts(false)}><X/></button><h2>Comparte un contacto</h2><input aria-label="Buscar contacto para compartir" placeholder="Nombre o usuario" value={contactSearch} onChange={e=>setContactSearch(e.target.value)}/><p>Se comparte su nombre y usuario de Nexus, sin números de teléfono ni datos privados.</p>{users.filter(u=>(u.nombre+' '+u.username).toLowerCase().includes(contactSearch.toLowerCase())).map(u=><button className="share-contact-option" key={u.uid} disabled={fileBusy} onClick={async()=>{setFileBusy(true);try{await onSendMessage(u.nombre,'contact',{fileUrl:'',fileName:'',fileSize:0,contact:{uid:u.uid,name:u.nombre,username:u.username}});setShowContacts(false);}catch{setUploadError('No se pudo compartir el contacto.');}finally{setFileBusy(false);}}}><img src={avatar(u.foto)} alt=""/><span>{u.nombre}<small>@{u.username}</small></span></button>)}</section></div>}
-      {pendingFiles.length>0&&desktopWeb&&<DesktopAttachmentReview files={pendingFiles} documentMode={uploadKind.current==='document'} onFiles={setPendingFiles} onClose={()=>setPendingFiles([])} onEdit={setEditingPhoto} onSend={sendMedia}/>}
+      {showContacts&&!desktopWeb&&<MobileContacts user={currentUser} users={users} onClose={()=>setShowContacts(false)} onSend={person=>onSendMessage(person.nombre,'contact',{fileUrl:'',fileName:'',fileSize:0,contact:{uid:person.uid,name:person.nombre,username:person.username}})}/>}{pendingFiles.length>0&&desktopWeb&&<DesktopAttachmentReview files={pendingFiles} documentMode={uploadKind.current==='document'} onFiles={setPendingFiles} onClose={()=>setPendingFiles([])} onEdit={setEditingPhoto} onSend={sendMedia}/>}
       {pendingFiles.length>0&&!desktopWeb&&<div className="feature-backdrop"><section className="feature-dialog" role="dialog" aria-label="Revisar archivos"><button disabled={fileBusy} className="dialog-close" aria-label="Cancelar archivos" onClick={()=>setPendingFiles([])}><X/></button><h2>Revisa antes de enviar</h2><p>Revisa los archivos antes de compartirlos. Puedes adjuntar hasta diez por envío.</p><div className="pending-files">{pendingFiles.map((file,index)=><article key={index}>{uploadKind.current!=='document'&&file.type.startsWith('image/')&&<img src={previewURLs[index]} alt={file.name}/ >}{uploadKind.current!=='document'&&file.type.startsWith('video/')&&<video src={previewURLs[index]} controls playsInline/>}{file.type.startsWith('audio/')&&<audio src={previewURLs[index]} controls/>}<strong>{file.name}</strong>{uploadKind.current!=='document'&&['image/png','image/jpeg','image/webp'].includes(file.type)&&<button disabled={fileBusy} onClick={()=>setEditingPhoto(file)}>Editar foto</button>}<button disabled={fileBusy} aria-label={'Quitar '+file.name} onClick={()=>setPendingFiles(previous=>previous.filter(item=>item!==file))}>Quitar</button>{uploadKind.current!=='document'&&/^(image|video)\//.test(file.type)&&<label>Comentario<input aria-label={'Comentario de '+file.name} maxLength={2000} placeholder="Añade un comentario…" value={captions.get(file)||''} onChange={event=>setCaptions(previous=>new Map(previous).set(file,event.target.value))}/></label>}<small>{(file.size/1024/1024).toFixed(2)} MB</small></article>)}</div><button disabled={fileBusy} onClick={async()=>{setFileBusy(true);setUploadError('');try{const queue=[...pendingFiles];for(const file of queue){const type=uploadKind.current==='document'||file.type==='image/svg+xml'?'document':file.type.startsWith('image/')?'image':file.type.startsWith('video/')?'video':file.type.startsWith('audio/')?'audio':'document';await sendMedia(file,type,captions.get(file)||'');setPendingFiles(current=>current.slice(1));}}catch(e){setUploadError(e instanceof Error?e.message:'No se pudo enviar el archivo.');}finally{setFileBusy(false);}}}>{fileBusy?'Enviando…':'Enviar archivos'}</button>{uploadError&&<p role="alert">{uploadError}</p>}</section></div>}
       {editingPhoto&&<PhotoEditor file={editingPhoto} onClose={()=>setEditingPhoto(null)} onApply={file=>{const old=editingPhoto;setCaptions(previous=>{const next=new Map(previous);next.set(file,next.get(old)||'');next.delete(old);return next;});setPendingFiles(previous=>previous.map(item=>item===old?file:item));setDesktopSticker(previous=>previous.map(item=>item===old?file:item));setEditingPhoto(null);}}/>}
       <input ref={stickerInput} type="file" hidden accept="image/*" onChange={e=>{const file=e.target.files?.[0];e.target.value='';if(file)setDesktopSticker([file]);}}/>

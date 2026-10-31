@@ -4,5 +4,7 @@
   "meteredKey": "",
   "meteredHost": "the_nexus_chat.metered.live",
   "groqModel": "openai/gpt-oss-20b",
-  "openrouterModel": "openrouter/free"
+  "openrouterModel": "openrouter/free",
+  "giphyKey": "",
+  "tenorKey": ""
 }
