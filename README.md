@@ -73,7 +73,7 @@ La instalación crea `src/public-services.json` desde la plantilla si el archivo
 
 | Archivo | Qué debes configurar | ¿Se sube a Git? |
 | :--- | :--- | :---: |
-| `src/public-services.json` | Claves de Groq, OpenRouter y Metered. | **No** |
+| `src/public-services.json` | Claves de Groq, OpenRouter, Metered, GIPHY y KLIPY. | **No** |
 | `src/public-services.example.json` | Plantilla sin claves para crear la configuración local. | Sí |
 | `firebase-applet-config.json` | Identificadores públicos de tu proyecto Firebase. | Sí |
 | `.firebaserc` · `firebase.json` | Proyecto de destino y sitio de Hosting. | Sí |
@@ -82,7 +82,7 @@ La instalación crea `src/public-services.json` desde la plantilla si el archivo
 <details>
 <summary><strong>Configurar IA, transcripción y llamadas</strong></summary>
 
-Para GIFs y stickers configura también `giphyKey` y, si tienes acceso habilitado, `tenorKey`. Los paquetes predeterminados se retiraron.
+Para GIFs y stickers configura también `giphyKey` y `klipyKey`. Los paquetes predeterminados se retiraron.
 
 Completa los campos de `src/public-services.json` con tus propias claves y los datos del proveedor. Sin esa configuración, la copia puede compilar, pero las funciones que dependen de esos servicios no estarán plenamente disponibles.
 
@@ -167,6 +167,7 @@ Nexus-Chat/
 
 | Guía | Contenido |
 | :--- | :--- |
+| [GIFs y stickers](GIPHY-Y-KLIPY.md) | Integración verificada con GIPHY y KLIPY; configuración y cuotas. |
 | [Móvil y proveedores](SEGUIMIENTO-MOVIL-Y-PROVEEDORES.md) | Envíos consecutivos, teclado, emojis, actualización manual y claves de GIFs. |
 | [Interfaz de escritorio](REFERENCIA-ESCRITORIO-ADJUNTOS.md) | Vistas de adjuntos, selectores, formularios y separación de dispositivos. |
 | [Publicar la web](INSTRUCCIONES-FIREBASE-HOSTING.md) | Preparación y despliegue en Firebase. |

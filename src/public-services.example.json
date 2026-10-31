@@ -6,5 +6,5 @@
   "groqModel": "openai/gpt-oss-20b",
   "openrouterModel": "openrouter/free",
   "giphyKey": "",
-  "tenorKey": ""
+  "klipyKey": ""
 }

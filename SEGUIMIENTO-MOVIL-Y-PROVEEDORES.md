@@ -1,3 +1,5 @@
+> Actualización posterior: GIPHY y KLIPY ya están configurados y probados con las claves del propietario. KLIPY sustituye a Tenor. Consulta [GIPHY-Y-KLIPY.md](GIPHY-Y-KLIPY.md).
+
 # Seguimiento de referencias móviles — 31/10/2026
 
 Se revisaron las 40 capturas privadas del ZIP sin copiarlas al repositorio ni reproducir sus contactos, chats, fotos o estados. Las referencias incluyen interfaces nativas de Android que una web no puede sustituir, como el selector de aplicaciones y los permisos del sistema.
