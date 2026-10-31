@@ -1,12 +1,62 @@
+<div align="center">
+
+<img src="public/icons/nexus-192.png" alt="Logo de Nexus Chat" width="104" height="104" />
+
 # Nexus Chat
 
-Aplicación web responsive para móvil, tablet y escritorio, desarrollada con React, TypeScript y Vite.
+**Tus conversaciones, en un solo lugar.**
 
-Web publicada: https://nexus-chat-nc.web.app/
+Mensajería, llamadas y comunidad desde el navegador.<br />
+Una interfaz adaptable a móvil, tablet y computadora.
 
-## Preparar el proyecto
+[![Web](https://img.shields.io/badge/WEB-ABRIR%20NEXUS-20C472?style=for-the-badge&logo=firebase&logoColor=white)](https://nexus-chat-nc.web.app/)
+[![React](https://img.shields.io/badge/REACT-18-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](package.json)
+[![TypeScript](https://img.shields.io/badge/TYPESCRIPT-5.8-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](tsconfig.json)
+[![Firebase](https://img.shields.io/badge/FIREBASE-HOSTING%20%2B%20DATOS-FFCA28?style=for-the-badge&logo=firebase&logoColor=20232A)](firebase.json)
 
-Requiere Node.js 22 o posterior y npm.
+[![Comprobaciones](https://github.com/Josxe155/Nexus-Chat/actions/workflows/check.yml/badge.svg)](https://github.com/Josxe155/Nexus-Chat/actions/workflows/check.yml)
+![Plataforma](https://img.shields.io/badge/PLATAFORMA-WEB-7C5CFC?style=flat-square)
+![Diseño](https://img.shields.io/badge/DISE%C3%91O-RESPONSIVE-20C472?style=flat-square)
+![Arquitectura](https://img.shields.io/badge/ARQUITECTURA-FIREBASE-FFCA28?style=flat-square)
+
+[Ver la web](https://nexus-chat-nc.web.app/) · [Instalación](#-inicio-rápido) · [Configuración](#-configuración) · [Documentación](#-documentación)
+
+</div>
+
+---
+
+## ✨ El proyecto
+
+Nexus Chat reúne conversaciones, archivos, estados, comunidades y llamadas en una aplicación web con identidad propia. Utiliza **React + TypeScript** para la interfaz y **Firebase** para autenticación, datos y publicación.
+
+| 💬 Conversaciones | 📞 Voz y video | 🌐 En cualquier pantalla |
+| :--- | :--- | :--- |
+| Chats personales y grupos, respuestas, reacciones y mensajes destacados. | Llamadas con WebRTC y Metered como relé TURN cuando se necesita. | Interfaz adaptable a computadora, tablet y celular, directamente en el navegador. |
+
+| 📎 Archivos y audio | 🟢 Estados y comunidad | 🤖 Nexus AI |
+| :--- | :--- | :--- |
+| Fotos, videos, documentos, notas de voz y visualización de archivos. | Estados, canales, comunidades y controles de privacidad. | Asistente con Groq y OpenRouter; transcripción de audio con consentimiento. |
+
+> [!NOTE]
+> Es un proyecto en desarrollo. Las funciones dependen de los permisos del navegador, la conexión y las cuotas de los proveedores. El alcance y las diferencias pendientes se describen en [PENDIENTES-WHATSAPP.md](PENDIENTES-WHATSAPP.md).
+
+## 🧩 Tecnología
+
+| Capa | Tecnología | Función |
+| :--- | :--- | :--- |
+| Interfaz | React 18 · TypeScript · Vite | Componentes, navegación y compilación. |
+| Acceso | Firebase Authentication | Inicio de sesión y recuperación de cuentas. |
+| Conversaciones | Cloud Firestore | Perfiles, chats, mensajes, preferencias y permisos. |
+| Tiempo real | Firebase Realtime Database | Presencia, señalización y archivos fragmentados. |
+| Publicación | Firebase Hosting | Entrega de la web mediante HTTPS. |
+| Llamadas | WebRTC · Metered | Comunicación de voz y video; relé TURN. |
+| Inteligencia artificial | Groq · OpenRouter | Asistente y procesamiento de las solicitudes autorizadas. |
+
+**Node.js se utiliza para desarrollar y compilar.** Esta versión no necesita un servidor Node.js en producción.
+
+## 🚀 Inicio rápido
+
+**Requisitos:** Node.js 22 o posterior, npm y Git.
 
 ```sh
 git clone https://github.com/Josxe155/Nexus-Chat.git
@@ -15,44 +65,124 @@ npm ci
 npm run dev
 ```
 
-Abre http://localhost:3000. La instalación crea `src/public-services.json` a partir de la plantilla cuando no existe. Si ejecutas npm sin scripts, ejecuta `npm run setup` después. La plantilla no contiene claves de proveedores. Configura Groq, OpenRouter y Metered en ese archivo local si vas a utilizar inteligencia artificial, transcripción y TURN para llamadas. No lo subas al repositorio. Metered es un relé TURN para WebRTC; Firebase proporciona la señalización.
+Abre **http://localhost:3000**.
 
-Las claves que incluyas al compilar se entregan al navegador y se pueden extraer de la web publicada. Excluirlas de Git no las oculta en una aplicación que las utiliza desde el cliente. El archivo de configuración pública de Firebase identifica el proyecto Nexus existente; la protección de los datos depende de Authentication y de las reglas. Para desplegar una copia independiente, reemplaza `firebase-applet-config.json`, `.firebaserc` y el sitio en `firebase.json` por los de tu propio proyecto.
+La instalación crea `src/public-services.json` desde la plantilla si el archivo todavía no existe. Si instalaste con los scripts deshabilitados, ejecuta `npm run setup`.
 
-## Comprobar y compilar
+## ⚙️ Configuración
+
+| Archivo | Qué debes configurar | ¿Se sube a Git? |
+| :--- | :--- | :---: |
+| `src/public-services.json` | Claves de Groq, OpenRouter y Metered. | **No** |
+| `src/public-services.example.json` | Plantilla sin claves para crear la configuración local. | Sí |
+| `firebase-applet-config.json` | Identificadores públicos de tu proyecto Firebase. | Sí |
+| `.firebaserc` · `firebase.json` | Proyecto de destino y sitio de Hosting. | Sí |
+| `firestore.rules` · `database.rules.json` | Permisos de acceso a los datos. | Sí |
+
+<details>
+<summary><strong>Configurar IA, transcripción y llamadas</strong></summary>
+
+Completa los campos de `src/public-services.json` con tus propias claves y los datos del proveedor. Sin esa configuración, la copia puede compilar, pero las funciones que dependen de esos servicios no estarán plenamente disponibles.
+
+- **Groq:** asistente y transcripción de audio.
+- **OpenRouter:** alternativa para el asistente.
+- **Metered:** credenciales TURN para mejorar la conectividad de las llamadas.
+
+Excluir las claves de Git **no las oculta en la web compilada**: cualquier clave utilizada desde el navegador puede extraerse de los archivos o de las solicitudes de la aplicación.
+
+</details>
+
+<details>
+<summary><strong>Usar un proyecto Firebase diferente</strong></summary>
+
+El repositorio contiene los identificadores públicos del proyecto Nexus existente. Para publicar una copia independiente, reemplaza:
+
+1. La configuración de `firebase-applet-config.json`.
+2. El proyecto de `.firebaserc`.
+3. El sitio de Hosting de `firebase.json`.
+
+Configura los proveedores de Authentication, los dominios autorizados, las reglas y los índices en tu propio proyecto. Publicar en el proyecto existente requiere una cuenta autorizada.
+
+</details>
+
+## 🛠️ Comandos
+
+| Comando | Acción |
+| :--- | :--- |
+| `npm ci` | Instala las dependencias del archivo de bloqueo y prepara la configuración local. |
+| `npm run setup` | Crea la configuración local si todavía no existe. |
+| `npm run dev` | Inicia la web de desarrollo en el puerto 3000. |
+| `npm run lint` | Comprueba los tipos de TypeScript. |
+| `npm run build:hosting` | Compila la web y genera el manifiesto de actualización. |
+| `npm run preview` | Permite revisar una compilación local. |
+
+## ☁️ Publicación en Firebase
 
 ```sh
 npm run lint
 npm run build:hosting
-```
-
-El resultado se genera en `dist/`, junto con el manifiesto de versiones y tamaños para la actualización manual de la web. Los archivos compilados y las dependencias no se versionan.
-
-## Firebase
-
-- Authentication: inicio de sesión y recuperación de cuentas.
-- Firestore: conversaciones, mensajes, perfiles, preferencias y permisos.
-- Realtime Database: presencia, señalización y archivos fragmentados.
-- Hosting: publicación HTTPS de la web.
-
-```sh
 npx firebase-tools login
 npx firebase-tools deploy --only hosting,firestore:rules,firestore:indexes,database --project nexus-chat-56d9d
 ```
 
-Publicar en el proyecto existente requiere una cuenta autorizada. No hace falta un servidor Node.js en producción. Node.js se utiliza para desarrollar y compilar. La web no ofrece instalación como aplicación ni vinculación de dispositivos. Cámara y micrófono requieren un contexto seguro y los permisos del navegador.
+El sitio publicado es **[nexus-chat-nc.web.app](https://nexus-chat-nc.web.app/)**. La carpeta generada es `dist/`; sus archivos y las dependencias no se versionan.
 
-## Seguridad actual
+Consulta el procedimiento completo en [INSTRUCCIONES-FIREBASE-HOSTING.md](INSTRUCCIONES-FIREBASE-HOSTING.md).
 
-Los mensajes y archivos nuevos no utilizan cifrado de extremo a extremo. Se retiró la creación de claves para evitar que una pérdida de claves del navegador impidiera conversar. HTTPS protege el transporte y las reglas restringen las conversaciones a sus miembros; Firebase puede acceder al contenido. Se conserva únicamente la lectura del historial cifrado anterior y la importación/exportación de sus copias. Sin sus claves originales no se puede reconstruir ese historial. No se borraron datos.
+## 🔐 Privacidad y alcance
 
-Consulta [CIFRADO-Y-LLAMADAS.md](CIFRADO-Y-LLAMADAS.md), [PENDIENTES-WHATSAPP.md](PENDIENTES-WHATSAPP.md) y [ACTUALIZACIONES-Y-ERRORES.md](ACTUALIZACIONES-Y-ERRORES.md) para conocer el estado y las limitaciones. Nexus es un proyecto independiente y no es un producto oficial de WhatsApp ni de Meta.
+| Aspecto | Estado actual |
+| :--- | :--- |
+| Transporte | HTTPS para la web y las conexiones con Firebase. |
+| Acceso a conversaciones | Reglas de Firebase que restringen el acceso a sus participantes. |
+| Mensajes y archivos nuevos | **Sin cifrado de extremo a extremo. Firebase puede acceder a su contenido.** |
+| Historial cifrado anterior | Se conserva su lector y la importación/exportación de copias. Requiere sus claves originales. |
+| Cámara y micrófono | Requieren permisos y un contexto seguro del navegador. |
+| Instalación y vinculación | No se ofrece instalación como aplicación ni vinculación multidispositivo. |
+| Repositorio | Sin claves de proveedores, cuentas de servicio ni datos de usuarios. |
 
-## Contenido del repositorio
+La pérdida de las claves originales del historial cifrado anterior no permite reconstruir su contenido. Consulta [CIFRADO-Y-LLAMADAS.md](CIFRADO-Y-LLAMADAS.md) para conocer el modelo de seguridad vigente.
 
-- `src/`: interfaz y lógica de la web.
-- `public/` y `assents/`: iconos, emojis, sonidos y recursos gráficos.
-- `scripts/`: desarrollo, configuración y compilación.
-- Reglas e índices de Firebase y documentación de la entrega.
+## 📂 Estructura
 
-No se incluyen bases de datos, datos de usuarios, credenciales administrativas, claves de proveedores ni conectores de servidores retirados. Las licencias de terceros incluidas con los recursos deben conservarse.
+```text
+Nexus-Chat/
+├── .github/workflows/             Comprobaciones de TypeScript y compilación
+├── assents/                       Recursos gráficos del proyecto
+├── public/                        Iconos, emojis, sonidos y archivos estáticos
+├── scripts/                       Desarrollo, configuración y compilación
+├── src/                           Interfaz y lógica de la aplicación
+│   └── public-services.example.json
+├── firebase-applet-config.json    Configuración pública de Firebase
+├── firebase.json                  Configuración de Hosting y servicios
+├── firestore.rules               Reglas de Firestore
+├── firestore.indexes.json         Índices de consultas
+├── database.rules.json            Reglas de Realtime Database
+└── package.json                   Dependencias y comandos
+```
+
+## 📚 Documentación
+
+| Guía | Contenido |
+| :--- | :--- |
+| [Publicar la web](INSTRUCCIONES-FIREBASE-HOSTING.md) | Preparación y despliegue en Firebase. |
+| [Estado de las funciones](ESTADO-FUNCIONES.md) | Funciones y condiciones de la entrega. |
+| [Seguridad y llamadas](CIFRADO-Y-LLAMADAS.md) | Protección de datos, historial y comunicaciones. |
+| [Actualizaciones y errores](ACTUALIZACIONES-Y-ERRORES.md) | Actualización manual y pantallas de error. |
+| [Alcance y pendientes](PENDIENTES-WHATSAPP.md) | Diferencias, limitaciones y trabajo pendiente. |
+| [Referencias de interfaz](REVISION-REFERENCIAS-WHATSAPP.md) | Referencias consultadas para la experiencia de uso. |
+
+## 🔄 Mantenimiento
+
+Los cambios de Nexus Chat se guardan también en este repositorio. GitHub Actions ejecuta las comprobaciones de TypeScript y compilación en cada subida y pull request. **Esto no publica automáticamente en Firebase.**
+
+---
+
+<div align="center">
+
+**Nexus Chat** · Conversaciones con identidad propia.
+
+Proyecto independiente, sin afiliación con WhatsApp ni Meta.<br />
+Las licencias de terceros incluidas con los recursos deben conservarse.
+
+</div>
