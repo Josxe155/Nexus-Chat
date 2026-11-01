@@ -167,7 +167,7 @@ Nexus-Chat/
 
 | Guía | Contenido |
 | :--- | :--- |
-| [GIFs y stickers](GIPHY-Y-KLIPY.md) | Integración verificada con GIPHY y KLIPY; configuración y cuotas. |
+| [GIFs y stickers](GIPHY-Y-KLIPY.md) | GIFs con GIPHY y stickers con KLIPY; configuración y cuotas. |
 | [Móvil y proveedores](SEGUIMIENTO-MOVIL-Y-PROVEEDORES.md) | Envíos consecutivos, teclado, emojis, actualización manual y claves de GIFs. |
 | [Interfaz de escritorio](REFERENCIA-ESCRITORIO-ADJUNTOS.md) | Vistas de adjuntos, selectores, formularios y separación de dispositivos. |
 | [Publicar la web](INSTRUCCIONES-FIREBASE-HOSTING.md) | Preparación y despliegue en Firebase. |
