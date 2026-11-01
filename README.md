@@ -40,6 +40,15 @@ Nexus Chat reúne conversaciones, archivos, estados, comunidades y llamadas en u
 > [!NOTE]
 > Es un proyecto en desarrollo. Las funciones dependen de los permisos del navegador, la conexión y las cuotas de los proveedores. El alcance y las diferencias pendientes se describen en [PENDIENTES-WHATSAPP.md](PENDIENTES-WHATSAPP.md).
 
+## 🎞️ Expresiones en Nexus Web
+
+| GIFs · GIPHY | Stickers · KLIPY | Visor de stickers |
+| :--- | :--- | :--- |
+| Búsqueda por categorías y cuadrícula de resultados animados. | Cuadrícula de cinco columnas, búsqueda y acceso a crear stickers. | Vista amplia con remitente, fecha y acciones del mensaje. |
+| Seleccionar abre una revisión con comentario y miniatura; se envía al pulsar la flecha. | Los favoritos guardados se encuentran en Destacados de este navegador. | Responder, destacar, fijar cuando hay permiso, eliminar, reenviar y añadir a favoritos. |
+
+Esta distribución es exclusiva de computadora. Nexus Messenger conserva sus pantallas móviles. Se usan los datos reales del chat y del proveedor; no se inventan nombres de paquetes de stickers.
+
 ## 🧩 Tecnología
 
 | Capa | Tecnología | Función |
@@ -167,6 +176,7 @@ Nexus-Chat/
 
 | Guía | Contenido |
 | :--- | :--- |
+| [Referencias de GIFs y stickers](GIFS-STICKERS-ESCRITORIO.md) | Revisión de envío, cuadrículas y visor de stickers en computadora. |
 | [GIFs y stickers](GIPHY-Y-KLIPY.md) | GIFs con GIPHY y stickers con KLIPY; configuración y cuotas. |
 | [Móvil y proveedores](SEGUIMIENTO-MOVIL-Y-PROVEEDORES.md) | Envíos consecutivos, teclado, emojis, actualización manual y claves de GIFs. |
 | [Interfaz de escritorio](REFERENCIA-ESCRITORIO-ADJUNTOS.md) | Vistas de adjuntos, selectores, formularios y separación de dispositivos. |
