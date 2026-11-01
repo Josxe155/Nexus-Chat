@@ -189,6 +189,12 @@ Nexus-Chat/
 
 ## 🔄 Mantenimiento
 
+| Estabilidad | Comportamiento |
+| --- | --- |
+| Actualizaciones | Descarga manual con contador de bytes, cancelación y recuperación si la conexión no responde. |
+| GIF y stickers | Búsquedas con tiempo de espera; favoritos locales con recuperación de registros válidos. |
+
+
 Los cambios de Nexus Chat se guardan también en este repositorio. GitHub Actions ejecuta las comprobaciones de TypeScript y compilación en cada subida y pull request. **Esto no publica automáticamente en Firebase.**
 
 ---

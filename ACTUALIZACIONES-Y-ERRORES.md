@@ -25,4 +25,11 @@ El panel de actualización muestra ahora la descarga de forma central y conserva
 
 El contador suma los bytes efectivamente leídos de las respuestas y calcula el total a partir de los tamaños de cada archivo. Solicita los archivos sin reutilizar la caché HTTP. La cifra corresponde al contenido de archivos descomprimido por el navegador, no a los bytes de tráfico de red comprimido. No se inventan incrementos ni se retrasa la descarga para animar el número. El panel tiene esquinas más redondeadas e icono animado, con respeto a movimiento reducido. La actualización sigue siendo manual.
 
-Esta publicación de interfaz excluye las claves nuevas de GIPHY y KLIPY, cuya exposición pública no ha sido autorizada. Las pruebas de integración y el código quedan preparados por separado.
+GIPHY y KLIPY se consultan desde el navegador con la autorización expresa del propietario. Las claves públicas de la entrega no se incluyen en el repositorio; se utiliza la plantilla de configuración sin claves.
+
+
+## Revisión de estabilidad
+
+Las descargas pueden cancelarse sin recargar ni borrar conversaciones. Si una respuesta deja de transmitir datos durante 30 segundos, el panel ofrece reintentar. El manifiesto queda fijo mientras se descarga para que una comprobación de fondo no cambie el contador. Se rechazan archivos duplicados, tamaños incoherentes y direcciones ajenas al sitio. Un audio pausado permite actualizar; una reproducción, grabación o llamada activa continúa bloqueándolo.
+
+Las búsquedas de GIF y stickers finalizan con un aviso si el proveedor no responde en 20 segundos. Un registro de favoritos dañado ya no oculta los demás stickers válidos. Al alcanzar el límite de 80 favoritos se eliminan también las imágenes locales desplazadas para no acumular almacenamiento.
