@@ -45,7 +45,7 @@ Nexus Chat reúne conversaciones, archivos, estados, comunidades y llamadas en u
 | GIFs · GIPHY | Stickers · KLIPY | Visor de stickers |
 | :--- | :--- | :--- |
 | Búsqueda por categorías y cuadrícula de resultados animados. | Cuadrícula de cinco columnas, búsqueda y acceso a crear stickers. | Vista amplia con remitente, fecha y acciones del mensaje. |
-| Seleccionar abre una revisión con comentario y miniatura; se envía al pulsar la flecha. | Los favoritos guardados se encuentran en la pestaña visible Favoritos de este navegador. | Responder, destacar, fijar cuando hay permiso, eliminar y reenviar. Añadir o quitar favoritos vuelve al chat. |
+| Seleccionar abre una revisión con comentario y miniatura; se envía al pulsar la flecha. | Los favoritos guardados se encuentran en la pestaña visible Favoritos de este navegador. | Responder, destacar, fijar cuando hay permiso, eliminar y reenviar. El sticker se amplía desde el chat al abrirlo. Añadir o quitar favoritos muestra una confirmación animada y vuelve al chat con una transición; respeta movimiento reducido. |
 
 Esta distribución es exclusiva de computadora. Nexus Messenger conserva sus pantallas móviles. Se usan los datos reales del chat y del proveedor; no se inventan nombres de paquetes de stickers.
 
