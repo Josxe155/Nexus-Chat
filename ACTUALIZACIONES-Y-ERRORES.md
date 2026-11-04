@@ -36,7 +36,7 @@ Las búsquedas de GIF y stickers finalizan con un aviso si el proveedor no respo
 
 ## Pausa y continuación
 
-En móvil no se mantiene una barra de actualización pendiente. El usuario abre el panel desde Ajustes → Chats → Actualizaciones de Nexus Chat. En escritorio se conserva el aviso de versión.
+En móvil y escritorio se mantiene un aviso de actualización pendiente. Al cerrarlo queda un botón persistente para retomarlo. El usuario también abre el panel desde Ajustes → Chats → Actualizaciones de Nexus Chat.
 
 Cancelar guarda el fragmento recibido y conserva el número, incluso al cerrar y volver a abrir el panel. Continuar omite los archivos completos. Para un archivo parcial se vuelve a solicitar el cuerpo y se descarta el prefijo ya guardado: no se suma dos veces al contador, pero puede volver a consumir tráfico. El navegador puede eliminar la caché si necesita espacio. No se afirma que exista reanudación HTTP por rangos.
 

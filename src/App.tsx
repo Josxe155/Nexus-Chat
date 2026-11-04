@@ -376,7 +376,7 @@ export default function App() {
   useEffect(()=>{const next=Math.min(...paged.messages.map(message=>message.expiresAt||Infinity).filter(time=>time>Date.now()));if(!Number.isFinite(next))return;const timer=setTimeout(()=>setExpiryRevision(value=>value+1),Math.min(2147483647,Math.max(1,next-Date.now()+10)));return()=>clearTimeout(timer);},[paged.messages,expiryRevision]);
 
   if(accountRemoved)return <main className="account-removed" role="alert"><h1>Cuenta desactivada</h1><p>Tu cuenta se retiró tras recibir varios reportes.</p><button onClick={()=>signOut(auth)}>Cerrar sesión</button></main>;
-  if (loading||currentUser&&!sessionError&&(!chatsLoaded||!usersLoaded||!personal.loaded)) return <StartupScreen progress={startupProgress}/>;
+  if (loading||currentUser&&!sessionError&&(!chatsLoaded||!usersLoaded||!personal.loaded)) return <StartupScreen phase={authUid?'conversations':'session'} progress={authUid?startupProgress:null}/>;
 
   if(auth.currentUser?.providerData.some(p=>p.providerId==='password')&&(!auth.currentUser.emailVerified||sessionError.includes('Completa el registro')||sessionError.includes('ocupado')))return <EmailVerificationGate initialComplete={auth.currentUser.emailVerified}/>;
   if (sessionError) return <SessionUnavailable message={sessionError} onRetry={()=>setSessionAttempt(value=>value+1)} onLogout={async()=>{try{await disablePush().catch(()=>{});await signOut(auth);setSessionError('');}catch{setSessionError('No se pudo cerrar la sesión. Inténtalo de nuevo.');}}}/>;

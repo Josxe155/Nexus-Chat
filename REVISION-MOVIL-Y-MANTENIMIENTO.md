@@ -1,5 +1,7 @@
 # Revisión de interfaz y mantenimiento
 
+El HTML inicial y la comprobación de sesión muestran «Abriendo Nexus Chat». «Preparando tus conversaciones» y su porcentaje se reservan para después de confirmar una sesión autenticada. Una visita sin sesión desemboca en el formulario de acceso, sin anunciar una carga de chats.
+
 | Apartado | Comportamiento verificado |
 | --- | --- |
 | Chat móvil | Campo con fondo y bordes redondeados reales; botón de voz o envío separado. |
@@ -13,7 +15,7 @@
 
 ## Actualizaciones
 
-Las actualizaciones se aplican solo tras pulsar Actualizar. En móvil, el panel se abre desde Ajustes → Chats → Actualizaciones de Nexus Chat. En computadora permanece disponible el aviso de versión pendiente.
+Las actualizaciones se aplican solo tras pulsar Actualizar. El aviso de versión pendiente aparece automáticamente tanto en móvil como en computadora. Al cerrarlo queda un botón persistente para retomarlo. El panel también se abre desde Ajustes → Chats → Actualizaciones de Nexus Chat.
 
 El contador mide bytes de archivos preparados a partir de sus cuerpos descargados, no bytes comprimidos facturados por la red. Se conservan archivos completos y fragmentos en Cache Storage. Al cancelar se guarda el fragmento y el contador; al continuar se omiten los archivos completos. Si un archivo estaba a medias, se vuelve a solicitar y se descarta su prefijo ya guardado: puede consumir tráfico de nuevo, pero ese prefijo no se cuenta dos veces. El navegador puede eliminar la caché por falta de espacio o al borrar los datos del sitio.
 

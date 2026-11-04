@@ -191,7 +191,7 @@ Nexus-Chat/
 
 | Estabilidad | Comportamiento |
 | --- | --- |
-| Actualizaciones | Descarga manual con bytes medidos, pausa, guardado local y continuación. En móvil se abre desde Ajustes → Chats; no hay una barra persistente. |
+| Actualizaciones | Descarga manual con bytes medidos, pausa, guardado local y continuación. Aviso persistente en móvil y computadora; también accesible desde Ajustes → Chats. |
 | Limpieza mensual | Preparación desactivada: conserva cuentas, perfiles, contactos, grupos, comunidades y sus imágenes. No existe una tarea automática activa. [Detalles](maintenance/README.md). |
 | Rendimiento | Las ondas de audio se calculan al acercarse a la pantalla; los audios inactivos evitan renders en cada avance de reproducción. |
 | GIF y stickers | Búsquedas con tiempo de espera; favoritos locales con recuperación de registros válidos. |
@@ -219,7 +219,7 @@ Las licencias de terceros incluidas con los recursos deben conservarse.
 | Transcripciones | Ajustes → Chats permite activar la transcripción automática de audios visibles mediante Groq. Desactivada por defecto; consentimiento en el ajuste, caché temporal y sin almacenar el texto en Firebase. |
 | Colores | Paleta predeterminada con fondo, barras y burbujas diferenciados; se conservan las paletas elegidas por el usuario. |
 
-Actualización móvil: acceso desde Ajustes → Chats, sin aviso persistente sobre la navegación. Vista previa de audio con control de posición limitado a las ondas, compositor redondeado y recuperación del dispositivo predeterminado si una selección guardada ya no existe. La revisión inicial explica cámara, micrófono, notificaciones, ubicación, almacenamiento y selección de fotos. Cada permiso lo decide el navegador; denegarlo no bloquea los mensajes de texto. Las fotos elegidas se guardan solo en este dispositivo y aparecen como recientes al crear estados.
+Actualización móvil: aviso persistente de versión pendiente sobre la navegación y acceso adicional desde Ajustes → Chats. Vista previa de audio con control de posición limitado a las ondas, compositor redondeado y recuperación del dispositivo predeterminado si una selección guardada ya no existe. La revisión inicial explica cámara, micrófono, notificaciones, ubicación, almacenamiento y selección de fotos. Cada permiso lo decide el navegador; denegarlo no bloquea los mensajes de texto. Las fotos elegidas se guardan solo en este dispositivo y aparecen como recientes al crear estados.
 
 ## Referencias móviles de noviembre
 
