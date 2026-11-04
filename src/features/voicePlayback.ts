@@ -6,7 +6,7 @@ const emit=(patch:Partial<Playback>)=>{state={...state,...patch};listeners.forEa
 export const voiceSnapshot=()=>state;
 export const subscribeVoice=(listener:()=>void)=>{listeners.add(listener);return()=>{listeners.delete(listener);};};
 const remember=()=>{if(state.track&&state.time>0){positions.delete(state.track.key);positions.set(state.track.key,state.time);if(positions.size>100)positions.delete(positions.keys().next().value!);}};
-function player(){if(audio)return audio;audio=new Audio();audio.preload='metadata';
+function player(){if(audio)return audio;audio=new Audio();audio.preload='metadata';audio.setAttribute('playsinline','');audio.style.display='none';document.body.appendChild(audio);
  audio.ontimeupdate=()=>{emit({time:Number.isFinite(audio!.currentTime)?audio!.currentTime:0});remember();};
  audio.onloadedmetadata=()=>{const duration=Number.isFinite(audio!.duration)?audio!.duration:0,position=state.track?positions.get(state.track.key)||0:0;emit({duration:duration||state.duration});if(position>0&&(!duration||position<duration-.2))audio!.currentTime=position;};
  audio.ondurationchange=()=>{if(Number.isFinite(audio!.duration)&&audio!.duration>0)emit({duration:audio!.duration});};

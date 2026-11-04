@@ -52,3 +52,5 @@ import './desktop-sticker-reference.css';
 import './audio-palette-polish.css';
 
 import './mobile-reference-nov4.css';
+
+import './mobile-voice-correction.css';
