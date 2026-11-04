@@ -1,3 +1,8 @@
+import {rememberRecentSticker} from '../features/stickerLibrary';
+import SingleListenAudio from '../features/SingleListenAudio';
+import TemporaryBadge from '../features/TemporaryBadge';
+import {beginMobileVoice} from '../features/mobileVoiceGesture';
+import {MessageCircle as ConversationIcon,Timer as TemporaryIcon} from 'lucide-react';
 import DesktopStickerViewer from '../features/DesktopStickerViewer';
 import MobileContacts from '../features/MobileContacts';
 import {useDesktopWeb} from '../features/useDesktopWeb';import {DesktopAttachmentReview,DesktopContacts,DesktopCamera,DesktopFileAudio} from '../features/DesktopAttachments';import DesktopEvent from '../features/DesktopEvent';
@@ -137,7 +142,7 @@ export default function ChatWindow({
   const preferences=usePreferences(currentUser.uid);const [manualMedia,setManualMedia]=useState<Record<string,string>>({});
   const appearance=useAppearance(currentUser.uid,activeChat.id),resolvedMedia=useMediaURLs(messages.filter(message=>!realtime?.media[message.transferId||'']),currentUser.uid);
   const voiceTrack=(message:Message):VoiceTrack=>({key:currentUser.uid+':'+activeChat.id+':'+message.id,uid:currentUser.uid,chatId:activeChat.id,messageId:message.id,src:manualMedia[message.id]||resolvedMedia[message.id]||realtime?.media[message.transferId||'']||(!isPrivateMedia(message.fileUrl)?message.fileUrl||'':''),label:message.senderId===currentUser.uid?'Tú':users.find(user=>user.uid===message.senderId)?.nombre||'Contacto Nexus',photo:users.find(user=>user.uid===message.senderId)?.foto||(message.senderId===currentUser.uid?currentUser.foto:''),expiresAt:message.expiresAt});
-  const followingVoice=(id:string)=>{const after=messages.slice(messages.findIndex(message=>message.id===id)+1),stop=after.findIndex(message=>message.type!=='audio'||!!message.deletedAt);return (stop<0?after:after.slice(0,stop)).map(voiceTrack).reduce<VoiceTrack[]>((list,track,index,tracks)=>{if(track.src&&tracks.slice(0,index).every(value=>!!value.src))list.push(track);return list;},[]);};
+  const followingVoice=(id:string)=>{const after=messages.slice(messages.findIndex(message=>message.id===id)+1),stop=after.findIndex(message=>message.type!=='audio'||!!message.deletedAt||!!message.fileName?.startsWith('nota-unica-'));return (stop<0?after:after.slice(0,stop)).map(voiceTrack).reduce<VoiceTrack[]>((list,track,index,tracks)=>{if(track.src&&tracks.slice(0,index).every(value=>!!value.src))list.push(track);return list;},[]);};
   useEffect(()=>{invalidateVoice(activeChat.id,new Set(messages.filter(message=>!message.deletedAt&&(!message.expiresAt||message.expiresAt>Date.now())).map(message=>message.id)),new Set(incomingMessages.map(message=>message.id)));},[activeChat.id,incomingMessages.map(message=>message.id+':'+message.deletedAt+':'+message.expiresAt).join('|')]);
   const [showAppearance,setShowAppearance]=useState(false),[presenceNow,setPresenceNow]=useState(Date.now());
   const [clipboardMessage,setClipboardMessage]=useState<Message|null>(null);const chatRoot=useRef<HTMLDivElement>(null);
@@ -326,6 +331,7 @@ export default function ChatWindow({
     if(type==='image')file=await preparePhoto(file,preferences.chat.uploadQuality);
     const attachment={...await realtime.sendFile(activeChat,file),...(type==='audio'&&/^nota-/.test(file.name)?{voiceNote:true}:{})};
     await onSendMessage(caption.trim()||(attachment.voiceNote?'Mensaje de voz':file.name),type,attachment,replyTarget?{id:replyTarget.id,senderName:replyTarget.senderId===currentUser.uid?'Tú':users.find(user=>user.uid===replyTarget.senderId)?.nombre||'Contacto',content:replyTarget.content,type:replyTarget.type}:undefined);
+    if(type==='sticker')void rememberRecentSticker(currentUser.uid,file).catch(()=>{});
     setReplyTarget(null);
   };
   const handleFileChange=async(e:React.ChangeEvent<HTMLInputElement>,mediaType:Message['type'])=>{
@@ -408,7 +414,7 @@ export default function ChatWindow({
     <div hidden={restricted} ref={chatRoot} onDragEnter={event=>{if(event.dataTransfer.types.includes('Files')){event.preventDefault();dragDepth.current++;setDragging(true);}}} onDragOver={event=>{if(event.dataTransfer.types.includes('Files'))event.preventDefault();}} onDragLeave={()=>{dragDepth.current=Math.max(0,dragDepth.current-1);if(!dragDepth.current)setDragging(false);}} onDrop={event=>{if(!event.dataTransfer.files.length)return;event.preventDefault();dragDepth.current=0;setDragging(false);if(event.dataTransfer.files.length>10){setUploadError('Selecciona hasta diez archivos.');return;}uploadKind.current='media';setPendingFiles(Array.from(event.dataTransfer.files));}} style={{'--own-bubble':appearance.bubble||bubbleDefault,'--own-ink':contrastColor(appearance.bubble||bubbleDefault),'--mic-color':appearance.microphoneColor||bubbleDefault,'--mic-ink':contrastColor(appearance.microphoneColor||bubbleDefault)} as React.CSSProperties} data-doodles={appearance.doodles!==false} data-bubble={appearance.bubbleShape||'soft'} data-microphone={appearance.microphone||'round'} className={`nexus-chat-window flex-1 min-w-0 min-h-0 flex flex-col h-full overflow-hidden relative ${theme === 'dark' ? 'bg-[#101218]' : 'bg-[#efeae2]'}`}>
       
       {dragging&&<div className="chat-drop-overlay"><Paperclip size={42}/><strong>Suelta los archivos para enviarlos</strong></div>}
-      {(selectedIds.length>0||selectingMessages)&&<div className="selection-toolbar"><button aria-label="Cancelar selección" onClick={()=>{setSelectedIds([]);setSelectingMessages(false);}}><X/></button><strong>{selectedIds.length} seleccionados</strong><button title="Copiar seleccionados" disabled={!selectedIds.length} onClick={()=>copyText(selected)}><Copy/></button><button title="Destacar seleccionados" disabled={!selectedIds.length} onClick={()=>star(selected).catch(error=>setUploadError(error.message))}><Star/></button><button title="Reenviar seleccionados" disabled={!selectedIds.length||selected.some(message=>!!message.localState)} onClick={()=>setForwarding(selected)}><Forward/></button><button title="Eliminar seleccionados" disabled={!selectedIds.length} onClick={()=>setDeleting(selected)}><Trash2/></button></div>}
+      {(selectedIds.length>0||selectingMessages)&&<div className="selection-toolbar"><button aria-label="Cancelar selección" onClick={()=>{setSelectedIds([]);setSelectingMessages(false);}}><X/></button><strong>{selectedIds.length} seleccionados</strong><button title="Copiar seleccionados" disabled={!selectedIds.length} onClick={()=>copyText(selected)}><Copy/></button><button title="Destacar seleccionados" disabled={!selectedIds.length} onClick={()=>star(selected).catch(error=>setUploadError(error.message))}><Star/></button><button title="Reenviar seleccionados" disabled={!selectedIds.length||selected.some(message=>!!message.localState||!!message.fileName?.startsWith('nota-unica-'))} onClick={()=>setForwarding(selected)}><Forward/></button><button title="Eliminar seleccionados" disabled={!selectedIds.length} onClick={()=>setDeleting(selected)}><Trash2/></button></div>}
       {/* ---------------- HEADER ----------------- */}
       <header hidden={selectedIds.length>0||selectingMessages} className={`px-4 h-[60px] flex items-center justify-between shrink-0 select-none z-10 shadow-sm ${theme === 'dark' ? 'bg-[#232732]' : 'bg-[#f0f2f5]'}`}>
         <div className="flex items-center gap-3 min-w-0">
@@ -427,7 +433,7 @@ export default function ChatWindow({
               className="w-10 h-10 rounded-full border bg-white object-cover"
               referrerPolicy="no-referrer"
             />
-            {otherUser?.online && (
+            {!desktopWeb&&!!activeChat.disappearingMs&&<TemporaryBadge/>}{otherUser?.online && (
               <span className="absolute bottom-0 right-0 w-3 h-3 bg-indigo-500 border-2 border-white dark:border-[#232732] rounded-full" />
             )}
           </button>
@@ -442,7 +448,7 @@ export default function ChatWindow({
                   <span className="text-indigo-400 font-medium animate-pulse">escribiendo...</span>
                 ) : 'En línea'
               ) : otherUser?.lastSeen ? (
-                lastSeenLabel(otherUser.lastSeen,presenceNow)
+                lastSeenLabel(otherUser.lastSeen,presenceNow,!desktopWeb)
               ) : ''}
             </p>
           </button>
@@ -546,11 +552,12 @@ export default function ChatWindow({
         {messages.length === 0 && (
           <div className="h-32 flex items-center justify-center">
             <span className={`text-[11px] px-3 py-1.5 rounded-lg shadow-sm font-medium ${theme === 'dark' ? 'bg-[#1a1e27] text-[#727cf5]' : 'bg-[#ffeec1] text-amber-900'}`}>
-              Este puede ser el comienzo de una buena conversación.
+              {desktopWeb?'Este puede ser el comienzo de una buena conversación.':<><ConversationIcon size={16}/>Este puede ser el comienzo de una buena conversación. Comparte un saludo, una foto o una nota de voz para empezar a conectar.</>}
             </span>
           </div>
         )}
 
+        {!desktopWeb&&!!activeChat.disappearingMs&&<div className="mobile-temporary-notice"><TemporaryIcon size={18}/><span>Los mensajes nuevos de este chat desaparecen después de {activeChat.disappearingMs===86400000?'24 horas':activeChat.disappearingMs===604800000?'7 días':'90 días'}. Puedes cambiar la duración desde la información del chat.</span></div>}
         {hasOlder&&<button className="load-older" disabled={loadingOlder} onClick={()=>{previousHeight.current=messageAreaRef.current?.scrollHeight||0;onLoadOlder?.();}}>{loadingOlder?'Cargando mensajes…':'Cargar mensajes anteriores'}</button>}
         {Object.keys(messageGroups).map(dateStr => (
           <div key={dateStr} className="space-y-3">
@@ -618,7 +625,7 @@ export default function ChatWindow({
                         {msg.type==='poll'&&<PollCard message={msg} userId={currentUser.uid} users={users}/>}
                         {['image','sticker','video','video-note','document'].includes(msg.type)&&<AttachmentCard message={msg} url={mediaURL} onOpen={()=>{setClipboardMessage(msg);setImageViewer(msg.id);}}/>}
                         {['image','video'].includes(msg.type)&&msg.content&&msg.content!==msg.fileName&&<div className="media-caption"><RichText text={msg.content}/></div>}
-                        {msg.type === 'audio'&&(desktopWeb&&!msg.voiceNote?<DesktopFileAudio track={voiceTrack(msg)} following={followingVoice(msg.id)}/>:<AudioPlayer src={mediaURL||''} track={voiceTrack(msg)} following={followingVoice(msg.id)}/>)}
+                        {msg.type === 'audio'&&(msg.fileName?.startsWith('nota-unica-')?<SingleListenAudio uid={currentUser.uid} chatId={activeChat.id} messageId={msg.id} src={mediaURL||''} sender={msg.senderId===currentUser.uid}/>:desktopWeb&&!msg.voiceNote?<DesktopFileAudio track={voiceTrack(msg)} following={followingVoice(msg.id)}/>:<AudioPlayer src={mediaURL||''} track={voiceTrack(msg)} following={followingVoice(msg.id)}/>)}
                         
                         {msg.transferId&&!msg.fileUrl&&!realtime?.media[msg.transferId]&&<small>Archivo directo: disponible en los dispositivos que completaron la transferencia.</small>}
 
@@ -647,7 +654,7 @@ export default function ChatWindow({
                               <div className="message-menu-emojis">{['👍','❤️','😂','😮','😢','🙏'].map(emoji => <button key={emoji} aria-label={`Reaccionar ${emoji}`} onClick={() => {handleReactionClick(msg.id,emoji);setOpenMessageId(null);}}>{emoji}</button>)}</div>
                               <button onClick={() => {setReplyTarget(msg);setOpenMessageId(null);}}><CornerUpLeft size={17} />Responder</button>
                               {isMine && !msg.sealed && !msg.localState && ['text','poll'].includes(msg.type) && Date.now()-(msg.serverSentAt?.toMillis?.()||msg.timestamp)<=15*60*1000 && <button onClick={() => {setEditingTarget(msg);setEditingText(msg.poll?.question||msg.content);setOpenMessageId(null);}}><Edit3 size={17} />{msg.type==='poll'?'Editar pregunta':'Editar mensaje'}</button>}
-<button onClick={()=>{if(['image','sticker'].includes(msg.type)&&mediaURL)copyPicture(mediaURL);else copyText([msg]);setOpenMessageId(null);}}><Copy size={17}/>{['image','sticker'].includes(msg.type)?'Copiar imagen':'Copiar'}</button><button disabled={!!msg.localState} onClick={()=>{setForwarding([msg]);setOpenMessageId(null);}}><Forward size={17}/>Reenviar</button>{msg.fileUrl&&['audio','image','sticker','video','video-note','document'].includes(msg.type)&&<button onClick={()=>{downloadMedia(msg.fileUrl!,msg.fileName||'nota-de-voz.webm',msg.fileSize).catch(error=>setUploadError(error.message));setOpenMessageId(null);}}><Download size={17}/>{msg.type==='audio'?'Descargar audio':'Guardar archivo'}</button>}<button onClick={()=>{star([msg]).catch(error=>setUploadError(error.message));setOpenMessageId(null);}}><Star size={17}/>{starred?'Quitar de destacados':'Destacar mensaje'}</button><button onClick={()=>{setSelectedIds([msg.id]);setOpenMessageId(null);}}><CheckSquare size={17}/>Seleccionar</button>{isMine&&<button onClick={()=>{setInformation(msg);setOpenMessageId(null);}}><Info size={17}/>Información</button>}
+<button onClick={()=>{if(['image','sticker'].includes(msg.type)&&mediaURL)copyPicture(mediaURL);else copyText([msg]);setOpenMessageId(null);}}><Copy size={17}/>{['image','sticker'].includes(msg.type)?'Copiar imagen':'Copiar'}</button><button disabled={!!msg.localState||!!msg.fileName?.startsWith('nota-unica-')} onClick={()=>{setForwarding([msg]);setOpenMessageId(null);}}><Forward size={17}/>Reenviar</button>{!msg.fileName?.startsWith('nota-unica-')&&msg.fileUrl&&['audio','image','sticker','video','video-note','document'].includes(msg.type)&&<button onClick={()=>{downloadMedia(msg.fileUrl!,msg.fileName||'nota-de-voz.webm',msg.fileSize).catch(error=>setUploadError(error.message));setOpenMessageId(null);}}><Download size={17}/>{msg.type==='audio'?'Descargar audio':'Guardar archivo'}</button>}<button onClick={()=>{star([msg]).catch(error=>setUploadError(error.message));setOpenMessageId(null);}}><Star size={17}/>{starred?'Quitar de destacados':'Destacar mensaje'}</button><button onClick={()=>{setSelectedIds([msg.id]);setOpenMessageId(null);}}><CheckSquare size={17}/>Seleccionar</button>{isMine&&<button onClick={()=>{setInformation(msg);setOpenMessageId(null);}}><Info size={17}/>Información</button>}
                               {!mobileOptions&&<button onClick={()=>{localStorage.setItem('nexus-ai-draft:'+currentUser.uid,'Ayúdame a entender este mensaje:\n'+msg.content);setOpenMessageId(null);window.dispatchEvent(new CustomEvent('nexus:navigate',{detail:'assistant'}));}}><Sparkles size={17}/>Pregúntale a Nexus AI</button>}
                               {((activeChat.kind!=='group'&&activeChat.kind!=='channel')||(activeChat.kind==='group'&&activeChat.membersCanEdit)||activeChat.admins?.includes(currentUser.uid))&&<button onClick={()=>{if(messagePinned(msg,activeChat))setMessagePin(activeChat.id,msg.id,0).catch(e=>setUploadError(e.message));else setPinTarget(msg);setOpenMessageId(null);}}><Pin size={17}/>{messagePinned(msg,activeChat)?'Desfijar mensaje':'Fijar mensaje'}</button>}
                               
@@ -735,6 +742,7 @@ export default function ChatWindow({
             </button>
           </div>
 
+          {!desktopWeb&&<button className="mobile-composer-camera" title="Cámara" onClick={()=>setShowCamera(true)}><Camera size={22}/></button>}
           <div className="flex-1 min-w-0 relative">
               <textarea ref={textareaRef}
                 aria-label="Escribe un mensaje"
@@ -766,7 +774,7 @@ export default function ChatWindow({
               </button>
             ) : (
               <button 
-                onClick={()=>setRecordMode('audio')}
+                onPointerDown={event=>{if(!desktopWeb){event.preventDefault();beginMobileVoice(event.nativeEvent,()=>setRecordMode('audio'));}}} onClick={event=>{if(desktopWeb||event.detail===0)setRecordMode('audio');}}
                 className={`p-2.5 rounded-full flex items-center justify-center cursor-pointer transition-all ${
                   isRecording ? 'bg-red-500 text-white hover:bg-red-600 animate-bounce' : 'bg-indigo-500 text-white hover:bg-indigo-600'
                 }`}

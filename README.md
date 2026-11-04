@@ -218,3 +218,9 @@ Las licencias de terceros incluidas con los recursos deben conservarse.
 | Colores | Paleta predeterminada con fondo, barras y burbujas diferenciados; se conservan las paletas elegidas por el usuario. |
 
 Actualización móvil: aviso de versión sobre la navegación, vista previa de audio con control de posición limitado a las ondas, compositor ajustado y recuperación del dispositivo predeterminado si una selección guardada ya no existe. Las llamadas y grabaciones requieren permiso de micrófono; se solicita cámara solo para video.
+
+## Referencias móviles de noviembre
+
+Barra de estados visible al abrir, anillos por actualización, indicador de novedades, respuestas a estados con texto/emojis/stickers guardados y Me gusta persistente. Grabación móvil con mantener pulsado, cancelar al deslizar, bloqueo hacia arriba, pausa/reanudación y envío al soltar. La velocidad ocupa la foto al seleccionar un audio. El compositor y estos estilos se aplican solo a Messenger.
+
+Audio de una sola escucha: la apertura se registra mediante una transacción en el registro privado del destinatario. Al abrir se consume, incluso si después se interrumpe la reproducción. La interfaz excluye estos audios de reproducción automática, biblioteca, descarga y reenvío. Es un control de la aplicación: no impide grabaciones externas ni extracción de datos por un cliente modificado; no borra automáticamente el archivo del almacenamiento. Los últimos seis stickers enviados se conservan localmente para responder a estados.
