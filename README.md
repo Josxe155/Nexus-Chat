@@ -216,3 +216,5 @@ Las licencias de terceros incluidas con los recursos deben conservarse.
 | Reproductor superior | Se muestra al salir del chat de origen, con pausa, progreso y cierre; sin selector de velocidad. |
 | Transcripciones | Ajustes → Chats permite activar la transcripción automática de audios visibles mediante Groq. Desactivada por defecto; consentimiento en el ajuste, caché temporal y sin almacenar el texto en Firebase. |
 | Colores | Paleta predeterminada con fondo, barras y burbujas diferenciados; se conservan las paletas elegidas por el usuario. |
+
+Actualización móvil: aviso de versión sobre la navegación, vista previa de audio con control de posición limitado a las ondas, compositor ajustado y recuperación del dispositivo predeterminado si una selección guardada ya no existe. Las llamadas y grabaciones requieren permiso de micrófono; se solicita cámara solo para video.
