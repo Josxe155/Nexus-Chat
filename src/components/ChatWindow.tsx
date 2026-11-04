@@ -1,9 +1,8 @@
 import MobileChatComposer from '../features/MobileChatComposer';
 import {rememberRecentSticker} from '../features/stickerLibrary';
 import SingleListenAudio from '../features/SingleListenAudio';
-import TemporaryBadge from '../features/TemporaryBadge';
 import {beginMobileVoice} from '../features/mobileVoiceGesture';
-import {MessageCircle as ConversationIcon,Timer as TemporaryIcon} from 'lucide-react';
+import {MessageCircle as ConversationIcon} from 'lucide-react';
 import DesktopStickerViewer from '../features/DesktopStickerViewer';
 import MobileContacts from '../features/MobileContacts';
 import {useDesktopWeb} from '../features/useDesktopWeb';import {DesktopAttachmentReview,DesktopContacts,DesktopCamera,DesktopFileAudio} from '../features/DesktopAttachments';import DesktopEvent from '../features/DesktopEvent';
@@ -11,7 +10,6 @@ import {Lock} from 'lucide-react';
 import ReactionDetails from '../features/ReactionDetails';
 import {excludeVoice,invalidateVoice,type VoiceTrack} from '../features/voicePlayback';
 import PinMessageDialog,{messagePinned,setMessagePin,usePinClock,useSharedPins} from '../features/MessagePins';
-import ProfileQuickView from '../features/ProfileQuickView';
 import {useMobileBack} from '../features/useMobileBack';
 import MediaViewer from '../features/MediaViewer';
 import AttachmentCard from '../features/AttachmentCard';
@@ -165,7 +163,7 @@ export default function ChatWindow({
   const [showEvent,setShowEvent]=useState(false),[conversationTool,setConversationTool]=useState<'mute'|'lists'|'temporary'|null>(null);
   const [showPoll,setShowPoll]=useState(false);
   const [pinTarget,setPinTarget]=useState<Message|null>(null);const sharedPins=useSharedPins(activeChat,currentUser.uid);const pinClock=usePinClock([...messages,...sharedPins]);const pinnedInView=Array.from(new Map([...messages,...sharedPins].map(message=>[message.id,message])).values()).filter(message=>messagePinned(message,activeChat,pinClock)&&visibleMessage(message,personal.conversations[activeChat.id],personal.flags));
-  const [quickProfile,setQuickProfile]=useState(false);
+
   useMobileBack(true,onBack,10);
   useMobileBack(showContact,()=>setShowContact(false),40);
   useMobileBack(showGroupSettings,()=>setShowGroupSettings(false),50);
@@ -427,19 +425,19 @@ export default function ChatWindow({
             <ArrowLeft className="w-5 h-5" />
           </button>
 
-          <button className="contact-avatar-trigger relative shrink-0" aria-label="Ver foto del contacto" onClick={()=>setQuickProfile(true)}>
+          <button className="contact-avatar-trigger relative shrink-0" aria-label={activeChat.kind==='group'?'Información del grupo':'Información del contacto'} onClick={()=>{setContactView('info');setShowContact(true);}}>
             <img 
               src={avatar(otherUser?.foto)} 
               alt="Foto del contacto" 
               className="w-10 h-10 rounded-full border bg-white object-cover"
               referrerPolicy="no-referrer"
             />
-            {!desktopWeb&&!!activeChat.disappearingMs&&<TemporaryBadge/>}{otherUser?.online && (
+            {otherUser?.online && (
               <span className="absolute bottom-0 right-0 w-3 h-3 bg-indigo-500 border-2 border-white dark:border-[#232732] rounded-full" />
             )}
           </button>
 
-          <button className="min-w-0 leading-tight contact-title-trigger" onClick={()=>setShowContact(true)}>
+          <button className="min-w-0 leading-tight contact-title-trigger" onClick={()=>{setContactView('info');setShowContact(true);}}>
             <h2 className={`font-semibold text-sm truncate ${theme === 'dark' ? 'text-gray-100' : 'text-gray-800'}`}>
               {otherUser?.nombre || 'Contacto Nexus'}
             </h2>
@@ -558,7 +556,7 @@ export default function ChatWindow({
           </div>
         )}
 
-        {!desktopWeb&&!!activeChat.disappearingMs&&<div className="mobile-temporary-notice"><TemporaryIcon size={18}/><span>Los mensajes nuevos de este chat desaparecen después de {activeChat.disappearingMs===86400000?'24 horas':activeChat.disappearingMs===604800000?'7 días':'90 días'}. Puedes cambiar la duración desde la información del chat.</span></div>}
+        {!desktopWeb&&!!activeChat.disappearingMs&&<div className="mobile-temporary-notice temporary-duration-notice"><span><strong>Mensajes temporales</strong>Los mensajes nuevos desaparecen después de {activeChat.disappearingMs===86400000?'24 horas':activeChat.disappearingMs===604800000?'7 días':'90 días'}.</span><button onClick={()=>{setContactView('info');setShowContact(true);}}>Ver ajuste</button></div>}
         {hasOlder&&<button className="load-older" disabled={loadingOlder} onClick={()=>{previousHeight.current=messageAreaRef.current?.scrollHeight||0;onLoadOlder?.();}}>{loadingOlder?'Cargando mensajes…':'Cargar mensajes anteriores'}</button>}
         {Object.keys(messageGroups).map(dateStr => (
           <div key={dateStr} className="space-y-3">
@@ -684,7 +682,6 @@ export default function ChatWindow({
       {deleting&&<DeleteMessagesDialog messages={deleting} uid={currentUser.uid} onMine={()=>mine(deleting)} onEveryone={()=>everyone(deleting)} onClose={()=>setDeleting(null)}/>}
       {information&&<MessageInformation message={messages.find(message=>message.id===information.id)||information} chat={activeChat} user={currentUser} users={users} onClose={()=>setInformation(null)}/>}
       {pinTarget&&<PinMessageDialog chat={activeChat} message={pinTarget} onClose={()=>setPinTarget(null)}/>}
-      {quickProfile&&<ProfileQuickView chat={activeChat} user={currentUser} person={otherUser} onClose={()=>setQuickProfile(false)} onMessage={()=>setQuickProfile(false)} onInfo={()=>{setQuickProfile(false);setContactView('info');setShowContact(true);}}/>}
       {showContact&&activeChat.kind==='channel'&&<ChannelDetails chat={activeChat} user={currentUser} onClose={()=>setShowContact(false)} onReport={()=>{setShowContact(false);setReporting(true);}} onLeave={()=>{setShowContact(false);onBack();}}/>}
       {showContact&&activeChat.kind!=='channel'&&<ContactDetails initialView={contactView} chat={activeChat} user={currentUser} person={otherUser} users={users} messages={messages} onClose={()=>setShowContact(false)} onAction={conversationAction} onGroupSettings={openGroup} onClear={()=>{if(confirm('¿Vaciar solo tu historial de esta conversación?'))onClearChatHistory(activeChat.id).then(()=>setShowContact(false)).catch(error=>setUploadError(error.message));}}/>}
       {/* ----------------- EDIT BAR ----------------- */}

@@ -82,9 +82,9 @@ Los mensajes, estados y reacciones anteriores al inicio de la sesión de avisos 
 Se normalizaron las áreas de los botones de cierre, su centrado y los indicadores numéricos de chats, archivados y barra lateral. Pasaron 12 comprobaciones que incluyen distribución de contadores en cinco tamaños, cierre centrado, historial silencioso, notificación nueva y actualización aplazada hasta terminar una llamada.
 
 ## Ajustes de gestos, perfiles y retroceso móvil (28 de octubre de 2026)
-- La barra de estados empieza oculta en chats móviles. Se despliega al jalar hacia abajo desde el inicio de la lista; un gesto corto no la abre. Se repliega al deslizar hacia arriba desde el inicio o con su control de cierre. Escritorio conserva su sección independiente.
+- Vigente: se retiran la barra y el gesto de estados dentro de Chats. Los estados se consultan en Novedades; escritorio conserva su sección independiente.
 - Corregido el respaldo de fotos en StatusRing: un contacto sin foto muestra el avatar gris, nunca la foto del usuario conectado. Las fotos públicas de grupo también se conservan en sus paneles.
-- Vista rápida del perfil desde la foto de la lista o del encabezado: imagen ampliable, nombre y acciones reales de mensaje, voz, video e información de contacto/grupo. Respeta el tema del espacio de trabajo y los permisos actuales.
+- Vista rápida del perfil desde la foto de la lista: imagen ampliable, nombre y acciones reales de mensaje, voz, video e información de contacto/grupo. En la cabecera del chat, foto y nombre abren directamente la información. El indicador de mensajes temporales se limita a la lista.
 - Atrás del navegador/sistema en móvil vuelve dentro de la interfaz: primero cierra superposiciones, luego subpáginas de configuración y finalmente el chat. Las pantallas raíz permiten salir normalmente. No cambia las cuentas ni sus datos.
 - Quitado el resaltado táctil azul; se conserva el foco visible para accesibilidad con teclado.
 - Retirados Traducir, Elegir otro emoji y Pregúntale a Nexus AI del menú contextual de mensajes móvil. No se ha añadido todavía una nueva barra superior de acciones.
@@ -182,6 +182,6 @@ Se eliminó la integración externa de voz y su código. Las llamadas usan WebRT
 
 ## Revisión basada en documentación oficial — 30 de octubre de 2026
 
-Se compararon las plataformas con el Centro de ayuda oficial de WhatsApp. Se sustituyeron los recorridos de perfil, temas, listas, difusiones, notificaciones, almacenamiento, ayuda y creación de comunidades; se corrigieron búsqueda, encuestas e imágenes de comunidades/canales. Las difusiones se limitan a móvil y los eventos se crean desde las conversaciones.
+Se compararon las plataformas con el Centro de ayuda oficial de WhatsApp. Se sustituyeron los recorridos de perfil, temas, listas, difusiones, notificaciones, almacenamiento, ayuda y creación de comunidades; se corrigieron búsqueda, encuestas e imágenes de comunidades/canales. Las difusiones se retiraron posteriormente por decisión del propietario; las reglas rechazan nuevas escrituras de sus listas privadas. Los eventos se crean desde las conversaciones.
 
 La comparación completa, las fuentes oficiales y las diferencias pendientes están en REVISION-REFERENCIAS-WHATSAPP.md. La revisión no usa las capturas del propietario como referencia y no afirma equivalencia del 100 %.

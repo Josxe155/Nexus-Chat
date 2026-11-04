@@ -89,7 +89,7 @@ Revisión: 31 de octubre de 2026. Esta lista describe el código y las pruebas d
 
 ## Límites que se conservan
 
-- Seis participantes por llamada, cien por grupo/canal, veinte destinatarios por difusión y veinte MB por archivo en el almacenamiento actual.
+- Seis participantes por llamada, cien por grupo/canal y veinte MB por archivo en el almacenamiento actual.
 - Firebase, Metered, Groq y OpenRouter conservan sus cuotas y condiciones. No se habilita facturación nueva ni un proveedor adicional para cubrir las diferencias.
 - Las credenciales de proveedores del frontend siguen siendo públicas según la autorización previa del propietario. No se ocultan mediante bloqueo de F12.
 - Los permisos del navegador y del sistema operativo siguen siendo obligatorios. La web no puede garantizar micrófono, cámara, ubicación, sonido o avisos cuando el sistema los bloquea.

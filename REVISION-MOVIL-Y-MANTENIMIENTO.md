@@ -6,11 +6,14 @@ El HTML inicial y la comprobación de sesión muestran «Abriendo Nexus Chat». 
 | --- | --- |
 | Chat móvil | Campo con fondo y bordes redondeados reales; botón de voz o envío separado. |
 | Nexus AI | Un único campo redondeado, sin capas rectangular y circular superpuestas. |
-| Cabecera móvil | Menú accesible desde el título; se retiran búsqueda y tres puntos junto al nombre principal. |
-| Estados | Plegados al entrar, con avatares compactos de estados disponibles. Un gesto desde el inicio de la lista o un toque los despliega. |
-| Permisos | Revisión inicial en móvil y reapertura desde Ajustes → Chats. Cámara y micrófono se detienen tras comprobar el permiso. |
+| Cabecera móvil | Título Nexus Chat, menú de tres puntos a la derecha y sin lupa junto al título. |
+| Estados | Se consultan en Novedades. Chats no contiene una barra de estados ni gestos para desplegarla. Los anillos de las fotos mantienen su centro. |
+| Permisos | Panel móvil con cámara, micrófono, notificaciones y ubicación; marcas solo para permisos concedidos. Cámara y micrófono se detienen tras comprobar el permiso. Sin almacenamiento ni selección de fotos. |
 | Galería | El usuario selecciona fotos y videos con el selector del sistema; no hay acceso automático al álbum completo. Recientes locales limitados a 18 elementos y 40 MB. |
-| Menús | Transiciones breves y respeto de movimiento reducido. Botones de reordenación de encuestas separados. |
+| Menús | Transiciones breves y respeto de movimiento reducido. Se retira Listas de difusión; las listas de organización de chats se conservan. |
+| Perfiles | Vista rápida con mensaje, voz, video e información desde la foto de la lista. Dentro de un chat, foto y nombre abren directamente la información de contacto o grupo. |
+| Mensajes temporales | Indicador centrado sobre la foto únicamente en listas de chats; ausente en vista rápida y cabecera. Duraciones con opciones seleccionables y aviso móvil legible. |
+| Nexus AI | Acceso con símbolo vectorial propio y animación breve de entrada/interacción en móvil y escritorio. Respeta movimiento reducido y el ajuste de animaciones de Nexus. |
 | Reproducción | Ondas calculadas al acercarse al área visible y suscripciones estables para audios inactivos. |
 
 ## Actualizaciones
