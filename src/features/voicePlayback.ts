@@ -8,7 +8,8 @@ export const subscribeVoice=(listener:()=>void)=>{listeners.add(listener);return
 const remember=()=>{if(state.track&&state.time>0){positions.delete(state.track.key);positions.set(state.track.key,state.time);if(positions.size>100)positions.delete(positions.keys().next().value!);}};
 function player(){if(audio)return audio;audio=new Audio();audio.preload='metadata';
  audio.ontimeupdate=()=>{emit({time:Number.isFinite(audio!.currentTime)?audio!.currentTime:0});remember();};
- audio.onloadedmetadata=()=>{const duration=Number.isFinite(audio!.duration)?audio!.duration:0,position=state.track?positions.get(state.track.key)||0:0;emit({duration});if(position>0&&(!duration||position<duration-.2))audio!.currentTime=position;};
+ audio.onloadedmetadata=()=>{const duration=Number.isFinite(audio!.duration)?audio!.duration:0,position=state.track?positions.get(state.track.key)||0:0;emit({duration:duration||state.duration});if(position>0&&(!duration||position<duration-.2))audio!.currentTime=position;};
+ audio.ondurationchange=()=>{if(Number.isFinite(audio!.duration)&&audio!.duration>0)emit({duration:audio!.duration});};
  audio.onplay=()=>{emit({playing:true,error:''});window.dispatchEvent(new CustomEvent('nexus:audio-start',{detail:'global-voice'}));};
  audio.onpause=()=>{if(audio!.paused){remember();emit({playing:false});}};
  audio.onerror=()=>emit({playing:false,error:'No se pudo reproducir el audio. Vuelve a intentarlo.'});

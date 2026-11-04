@@ -207,3 +207,12 @@ Proyecto independiente, sin afiliación con WhatsApp ni Meta.<br />
 Las licencias de terceros incluidas con los recursos deben conservarse.
 
 </div>
+
+## Audio y apariencia
+
+| Apartado | Comportamiento |
+| --- | --- |
+| Audio en el chat | Ondas y control de posición alineados; contador de tiempo transcurrido durante la reproducción. |
+| Reproductor superior | Se muestra al salir del chat de origen, con pausa, progreso y cierre; sin selector de velocidad. |
+| Transcripciones | Ajustes → Chats permite activar la transcripción automática de audios visibles mediante Groq. Desactivada por defecto; consentimiento en el ajuste, caché temporal y sin almacenar el texto en Firebase. |
+| Colores | Paleta predeterminada con fondo, barras y burbujas diferenciados; se conservan las paletas elegidas por el usuario. |

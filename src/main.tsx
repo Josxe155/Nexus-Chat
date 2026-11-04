@@ -48,3 +48,5 @@ import './mobile-reference-followup.css';
 import './update-panel-polish.css';
 
 import './desktop-sticker-reference.css';
+
+import './audio-palette-polish.css';

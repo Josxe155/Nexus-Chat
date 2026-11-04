@@ -1,3 +1,4 @@
+import VoiceTranscript from './VoiceTranscript';
 import {SharedVoicePlayer} from './VoicePlaybackControls';import type {VoiceTrack} from './voicePlayback';
 import {useEffect,useRef,useState} from 'react';
 import {X,Plus,SendHorizontal,File as FileIcon,Headphones,Image as ImageIcon,Pencil,Camera,Search,Check,Download,Smile} from 'lucide-react';
@@ -20,4 +21,4 @@ export function DesktopCamera({onClose,onCapture}:{onClose:()=>void;onCapture:(f
  return <section className="nx-web-review nx-web-camera" role="dialog" aria-modal="true" aria-label="Cámara"><header><button aria-label="Cerrar cámara" onClick={onClose}><X/></button><strong>Tomar foto</strong></header><div className="nx-web-review-stage"><video ref={video} autoPlay playsInline muted onCanPlay={()=>setReady(true)} onClick={()=>video.current?.play().catch(()=>{})}/></div>{error&&<p role="alert">{error}</p>}<footer><button className="nx-web-send" aria-label="Tomar foto" disabled={!ready} onClick={()=>{const current=video.current;if(!current?.videoWidth)return;const canvas=document.createElement('canvas');canvas.width=current.videoWidth;canvas.height=current.videoHeight;canvas.getContext('2d')!.drawImage(current,0,0);canvas.toBlob(blob=>{if(blob)onCapture(new File([blob],'foto-'+Date.now()+'.jpg',{type:'image/jpeg'}));},'image/jpeg',.92);}}><Camera/></button></footer></section>;
 }
 
-export function DesktopFileAudio({track,following}:{track:VoiceTrack;following:VoiceTrack[]}){return <div className="nx-web-file-audio"><span className="nx-web-headphones"><Headphones size={24}/></span><SharedVoicePlayer track={track} following={following}/></div>;}
+export function DesktopFileAudio({track,following}:{track:VoiceTrack;following:VoiceTrack[]}){return <div className="nx-web-file-audio"><span className="nx-web-headphones"><Headphones size={24}/></span><div style={{flex:1,minWidth:0}}><SharedVoicePlayer track={track} following={following}/><VoiceTranscript src={track.src}/></div></div>;}

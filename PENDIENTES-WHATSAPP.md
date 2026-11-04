@@ -38,7 +38,7 @@ Revisión: 31 de octubre de 2026. Esta lista describe el código y las pruebas d
 
 ### Audio y ubicación
 
-- Transcripción voluntaria por nota de voz, con idioma seleccionado o detección. Antes de enviar se informa de que ese audio se compartirá con Groq. La transcripción queda en la vista actual y no se guarda automáticamente en Firebase ni en el chat. No equivale a la transcripción local de WhatsApp. Está sujeta a la cuota disponible del proveedor existente.
+- Transcripción automática opcional de audios visibles desde Ajustes → Chats. Activarla autoriza enviar esos audios a Groq; la caché es temporal y el texto no se guarda en Firebase. No equivale a transcripción local de WhatsApp.
 - Ubicación en tiempo real durante quince minutos, una hora u ocho horas. Se solicita permiso al elegir compartir, se limitan las actualizaciones aproximadamente a una cada quince segundos y aparece un aviso con opción de detenerlas.
 - Las coordenadas se cifran para los participantes antes de almacenarlas. Firebase impide que un destinatario modifique la ubicación del remitente, extienda su duración o reanude un registro detenido.
 - El seguimiento necesita que el navegador mantenga Nexus funcionando y conceda acceso a la ubicación. Al salir de la página se detiene el seguimiento local y se intenta confirmar la detención. Al llegar a la duración máxima deja de actualizarse y de mostrarse como activo aunque no se pueda confirmar la escritura final.
