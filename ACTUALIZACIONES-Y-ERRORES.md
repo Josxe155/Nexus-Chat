@@ -23,7 +23,7 @@ El panel de actualización muestra ahora la descarga de forma central y conserva
 
 31/10/2026: el clip de escritorio ofrece exactamente Documento, Fotos y videos, Cámara, Audio, Contacto, Encuesta, Evento y Nuevo sticker. Ubicación se mantiene solo en Messenger. Se eliminaron fondos, bordes y sombras del botón de envío, su icono y su contenedor, incluyendo el estado pendiente de notas de voz.
 
-El contador suma los bytes efectivamente leídos de las respuestas y calcula el total a partir de los tamaños de cada archivo. Solicita los archivos sin reutilizar la caché HTTP. La cifra corresponde al contenido de archivos descomprimido por el navegador, no a los bytes de tráfico de red comprimido. No se inventan incrementos ni se retrasa la descarga para animar el número. El panel tiene esquinas más redondeadas e icono animado, con respeto a movimiento reducido. La actualización sigue siendo manual.
+El contador suma los bytes preparados y calcula el total a partir de los tamaños de cada archivo. Conserva archivos completos y fragmentos de la versión pendiente en Cache Storage. La cifra corresponde al contenido de archivos descomprimido por el navegador, no a los bytes de tráfico de red comprimido. No se inventan incrementos ni se retrasa la descarga para animar el número. El panel tiene esquinas más redondeadas e icono animado, con respeto a movimiento reducido. La actualización sigue siendo manual.
 
 GIPHY y KLIPY se consultan desde el navegador con la autorización expresa del propietario. Las claves públicas de la entrega no se incluyen en el repositorio; se utiliza la plantilla de configuración sin claves.
 
@@ -33,3 +33,11 @@ GIPHY y KLIPY se consultan desde el navegador con la autorización expresa del p
 Las descargas pueden cancelarse sin recargar ni borrar conversaciones. Si una respuesta deja de transmitir datos durante 30 segundos, el panel ofrece reintentar. El manifiesto queda fijo mientras se descarga para que una comprobación de fondo no cambie el contador. Se rechazan archivos duplicados, tamaños incoherentes y direcciones ajenas al sitio. Un audio pausado permite actualizar; una reproducción, grabación o llamada activa continúa bloqueándolo.
 
 Las búsquedas de GIF y stickers finalizan con un aviso si el proveedor no responde en 20 segundos. Un registro de favoritos dañado ya no oculta los demás stickers válidos. Al alcanzar el límite de 80 favoritos se eliminan también las imágenes locales desplazadas para no acumular almacenamiento.
+
+## Pausa y continuación
+
+En móvil no se mantiene una barra de actualización pendiente. El usuario abre el panel desde Ajustes → Chats → Actualizaciones de Nexus Chat. En escritorio se conserva el aviso de versión.
+
+Cancelar guarda el fragmento recibido y conserva el número, incluso al cerrar y volver a abrir el panel. Continuar omite los archivos completos. Para un archivo parcial se vuelve a solicitar el cuerpo y se descarta el prefijo ya guardado: no se suma dos veces al contador, pero puede volver a consumir tráfico. El navegador puede eliminar la caché si necesita espacio. No se afirma que exista reanudación HTTP por rangos.
+
+Consulta [REVISION-MOVIL-Y-MANTENIMIENTO.md](REVISION-MOVIL-Y-MANTENIMIENTO.md) para las comprobaciones de interfaz y el estado pendiente de la limpieza mensual.

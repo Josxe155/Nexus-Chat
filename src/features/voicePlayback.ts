@@ -4,6 +4,7 @@ let state:Playback={track:null,playing:false,time:0,duration:0,speed:1,error:''}
 const listeners=new Set<()=>void>(),positions=new Map<string,number>();
 const emit=(patch:Partial<Playback>)=>{state={...state,...patch};listeners.forEach(listener=>listener());};
 export const voiceSnapshot=()=>state;
+let idle:Playback={...state};export function voiceTrackSnapshot(key:string){if(state.track?.key===key)return state;if(idle.speed!==state.speed)idle={track:null,playing:false,time:0,duration:0,speed:state.speed,error:''};return idle;}
 export const subscribeVoice=(listener:()=>void)=>{listeners.add(listener);return()=>{listeners.delete(listener);};};
 const remember=()=>{if(state.track&&state.time>0){positions.delete(state.track.key);positions.set(state.track.key,state.time);if(positions.size>100)positions.delete(positions.keys().next().value!);}};
 function player(){if(audio)return audio;audio=new Audio();audio.preload='metadata';audio.setAttribute('playsinline','');audio.style.display='none';document.body.appendChild(audio);

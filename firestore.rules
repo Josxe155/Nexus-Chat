@@ -175,6 +175,7 @@ service cloud.firestore {
     allow delete: if signedIn() && (uid==request.auth.uid || status().owner==request.auth.uid);
    }
   }
+  match /publicConfig/cleanup {allow read: if signedIn();allow write: if false;}
   match /{document=**}{allow read,write: if false;}
  }
 }

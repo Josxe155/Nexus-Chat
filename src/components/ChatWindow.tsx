@@ -1,3 +1,4 @@
+import MobileChatComposer from '../features/MobileChatComposer';
 import {rememberRecentSticker} from '../features/stickerLibrary';
 import SingleListenAudio from '../features/SingleListenAudio';
 import TemporaryBadge from '../features/TemporaryBadge';
@@ -724,7 +725,7 @@ export default function ChatWindow({
 
         {showAttachMenu&&<div className="attachment-panel attachment-complete" role="menu" aria-label="Adjuntar al chat">{[[File,'Documento',()=>chooseFiles('document')],[ImageIcon,'Fotos y videos',()=>chooseFiles('media')],[Camera,'Cámara',()=>{setShowCamera(true);setShowAttachMenu(false);}],[AudioLines,'Audio',()=>{setAudioOptions(true);setShowAttachMenu(false);}],[UserRound,'Contacto',()=>{setShowContacts(true);setShowAttachMenu(false);}],[MapPin,'Ubicación',()=>{setShowLocation(true);setShowAttachMenu(false);}],[BarChart3,'Encuesta',()=>{setShowPoll(true);setShowAttachMenu(false);}],[Calendar,'Evento',()=>{setShowEvent(true);setShowAttachMenu(false);}],[Smile,'Nuevo sticker',()=>{if(desktopWeb)stickerInput.current?.click();else setShowStickers(true);setShowAttachMenu(false);}]].filter(([,label])=>mobileOptions||label!=='Ubicación').map(([Icon,label,action]:any)=><button role="menuitem" key={label} onClick={action}><Icon size={20}/>{label}</button>)}</div>}
         <input type="file" multiple ref={fileInputRef} aria-label="Seleccionar archivos para enviar" onChange={e=>{const files=Array.from(e.target.files||[]);e.target.value='';if(files.length>10){setUploadError('Selecciona hasta 10 archivos por envío.');return;}setPendingFiles(files);setUploadError('');}} className="hidden"/>
-        <div className="composer-row flex items-center gap-2 sm:gap-3">
+        {!desktopWeb?<MobileChatComposer input={textareaRef} value={editingTarget?editingText:inputText} editing={!!editingTarget} busy={isSending} spellcheck={preferences.chat.spellcheck} onChange={editingTarget?e=>setEditingText(e.target.value):handleInputChange} onKeyDown={handleKeyDown} onSend={handleSend} onEmoji={()=>setShowEmojiPicker(!showEmojiPicker)} onAttach={()=>setShowAttachMenu(!showAttachMenu)} onCamera={()=>setShowCamera(true)} onRecord={()=>setRecordMode('audio')}/>:<div className="composer-row flex items-center gap-2 sm:gap-3">
           <div className={`flex items-center gap-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
             <button 
               onClick={() => setShowAttachMenu(!showAttachMenu)}
@@ -784,7 +785,7 @@ export default function ChatWindow({
               </button>
             )}
           </div>
-        </div>
+        </div>}
       </>}</footer>:<div className="readonly-channel">Solo los administradores pueden publicar en este espacio.</div>}
       {showAppearance&&<div className="feature-backdrop"><section className="feature-dialog" role="dialog" aria-label="Personalizar chat"><button className="dialog-close" aria-label="Cerrar personalización" onClick={()=>setShowAppearance(false)}><X/></button><h2>Estilo de este chat</h2><AppearancePanel uid={currentUser.uid} chatId={activeChat.id}/></section></div>}
       {reactionInfo&&messages.find(message=>message.id===reactionInfo)&&<ReactionDetails message={messages.find(message=>message.id===reactionInfo)!} user={currentUser} users={users} onRemove={emoji=>handleReactionClick(reactionInfo,emoji)} onClose={()=>setReactionInfo(null)}/>}

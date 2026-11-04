@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "enabled": false,
+  "projectId": "nexus-chat-56d9d",
+  "firstDueAt": "2026-12-04T05:15:00.000Z",
+  "warningDays": 3,
+  "timeZone": "America/Guayaquil",
+  "preserve": ["users", "profiles", "contacts", "groups", "communities", "settings", "profile-images"],
+  "remove": ["messages", "chat-media", "statuses"]
+}

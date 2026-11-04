@@ -1,0 +1,5 @@
+function nextMonthlyDate(anchor,index){const date=new Date(anchor),year=date.getUTCFullYear(),month=date.getUTCMonth()+index,day=date.getUTCDate();const target=new Date(Date.UTC(year,month,1,date.getUTCHours(),date.getUTCMinutes(),date.getUTCSeconds()));const last=new Date(Date.UTC(target.getUTCFullYear(),target.getUTCMonth()+1,0)).getUTCDate();target.setUTCDate(Math.min(day,last));return target;}
+function nextAfter(anchor,due){for(let index=0;index<1200;index++){const next=nextMonthlyDate(anchor,index);if(next.getTime()>due)return next.getTime();}throw Error('Calendario fuera de rango.');}
+function protectedMediaIds(records){const ids=new Set();const walk=value=>{if(typeof value==='string'){for(const match of value.matchAll(/\/api\/media\/([a-zA-Z0-9_-]+)/g))ids.add(match[1]);}else if(value&&typeof value==='object')for(const entry of Object.values(value))walk(entry);};records.forEach(walk);return ids;}
+function mayRemoveMedia(file,id,protectedIds,cutoff){return ['chat','status'].includes(file.scope)&&!protectedIds.has(id)&&Number.isFinite(file.createdAt)&&file.createdAt<cutoff;}
+module.exports={nextMonthlyDate,nextAfter,protectedMediaIds,mayRemoveMedia};
