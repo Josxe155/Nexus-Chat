@@ -1,3 +1,4 @@
+import {MobileFullscreenExit} from '../features/MobileFullscreenSetting';
 
 import VoicePlaybackBar from '../features/VoicePlaybackControls';
 import {pauseVoice} from '../features/voicePlayback';
@@ -20,5 +21,5 @@ export default function WorkspaceLayout({theme,showChat,sidebar,children}: Props
     window.addEventListener('resize', update);
     return () => {viewport?.removeEventListener('resize', update); window.removeEventListener('resize', update);};
   }, []);
-  return <div style={{height: viewportHeight ? `min(100dvh, ${viewportHeight}px)` : undefined}} className="nexus-workspace" data-theme={theme}><AppLock uid={auth.currentUser?.uid||''} onLock={setLocked}/>{!locked&&<VoicePlaybackBar uid={auth.currentUser?.uid}/ >}{!locked&&<div className="workspace-frame"><aside className={`workspace-sidebar ${showChat ? 'mobile-hidden' : ''}`} aria-label="Conversaciones y perfil">{sidebar}</aside><main className={`workspace-chat ${showChat ? '' : 'mobile-hidden'}`} aria-label="Conversación">{children}<div id="workspace-detail-host"/></main></div>}</div>;
+  return <div style={{height: viewportHeight ? `min(100dvh, ${viewportHeight}px)` : undefined}} className="nexus-workspace" data-theme={theme}><MobileFullscreenExit/><AppLock uid={auth.currentUser?.uid||''} onLock={setLocked}/>{!locked&&<VoicePlaybackBar uid={auth.currentUser?.uid}/ >}{!locked&&<div className="workspace-frame"><aside className={`workspace-sidebar ${showChat ? 'mobile-hidden' : ''}`} aria-label="Conversaciones y perfil">{sidebar}</aside><main className={`workspace-chat ${showChat ? '' : 'mobile-hidden'}`} aria-label="Conversación">{children}<div id="workspace-detail-host"/></main></div>}</div>;
 }

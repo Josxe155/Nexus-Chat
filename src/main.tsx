@@ -61,3 +61,6 @@ import './contact-interface-polish.css';
 import './chat-interface-refinement.css';
 
 import './voice-reference-bars.css';
+
+import './fullscreen-polish.css';
+import './features/release-notice.css';

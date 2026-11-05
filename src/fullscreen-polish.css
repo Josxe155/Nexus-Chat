@@ -1,0 +1,12 @@
+.mobile-fullscreen-setting .setting-row{min-height:66px;align-items:center}
+.mobile-fullscreen-setting .setting-row>svg{color:var(--nx-accent,#21c063)}
+.mobile-fullscreen-setting .setting-row[aria-pressed=true]>svg{background:var(--nx-field,#202c33);border-radius:8px;padding:4px;box-sizing:content-box}
+.mobile-fullscreen-exit{position:fixed;right:max(12px,env(safe-area-inset-right));bottom:calc(84px + env(safe-area-inset-bottom) + var(--fullscreen-keyboard-inset,0px));z-index:45000;max-width:calc(100vw - 24px);pointer-events:none}
+.mobile-fullscreen-exit>button{display:flex;align-items:center;justify-content:center;gap:7px;min-width:44px;min-height:44px;padding:10px 12px;border:1px solid var(--nx-border,#ffffff20);border-radius:24px;background:var(--nx-field,#202c33);color:var(--nx-text,#e9edef);box-shadow:0 3px 16px #0004;pointer-events:auto;font:inherit;font-size:11px;line-height:1.4}
+.mobile-fullscreen-exit>button>svg{flex:none}.mobile-fullscreen-exit>button:disabled{opacity:.55}.mobile-fullscreen-exit>button:focus-visible{outline:2px solid var(--nx-accent,#21c063);outline-offset:3px}
+.mobile-fullscreen-exit>p{pointer-events:auto;position:absolute;right:0;bottom:50px;width:min(260px,calc(100vw - 24px));padding:12px;border-radius:14px;background:var(--nx-field,#202c33);color:var(--nx-text,#e9edef);box-shadow:0 3px 16px #0004;font-size:12px;line-height:1.5}
+body:has(.nexus-update-notice,.nexus-update-reopen) .mobile-fullscreen-exit{top:max(12px,env(safe-area-inset-top));bottom:auto}
+body:has(.nexus-update-notice,.nexus-update-reopen) .mobile-fullscreen-exit>p{top:50px;bottom:auto}
+@media(max-width:500px){.mobile-fullscreen-exit>button{padding:10px}.mobile-fullscreen-exit>button>span{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}}
+@media(prefers-reduced-motion:no-preference){.mobile-fullscreen-exit>button{animation:nexus-fullscreen-exit-in .18s ease-out}@keyframes nexus-fullscreen-exit-in{from{opacity:0;transform:scale(.85)}to{opacity:1;transform:none}}}
+html[data-motion=off] .mobile-fullscreen-exit>button{animation:none!important}

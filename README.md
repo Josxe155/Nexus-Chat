@@ -271,3 +271,15 @@ La documentación complementaria está organizada en [docs/INDICE.md](docs/INDIC
 | --- | --- |
 | Reproductor fuera del chat | Pausa o reproducción a la izquierda, foto y nombre del remitente en el centro, cierre a la derecha y progreso real del audio en el borde inferior. Tocar el remitente vuelve a la conversación. |
 | Barra móvil de mensajes | Campo en forma de cápsula con expresiones, adjuntos y cámara; botón de micrófono o envío separado. Conserva el tema de Nexus y los gestos de grabación. |
+
+### Revisión de escritorio y herramientas · 5 de noviembre de 2026
+
+| Apartado | Mejoras |
+| --- | --- |
+| Actualizaciones móviles | Aviso independiente de los paneles de la aplicación, recuperación del pendiente al volver, comprobación al restaurar una pestaña y reintento si falla la red. La descarga sigue siendo manual, con bytes medidos y pausa/reanudación. |
+| Escritorio | Submenús con flechas, Inicio/Fin y Escape; retorno al control de origen sin quitar el foco a un diálogo nuevo. La posición se adapta al redimensionar o desplazar. |
+| Pantalla completa | Solo móvil/tablet. Botón de salida accesible desde cualquier apartado, adaptable al teclado y separado del aviso de actualización. Distingue pantalla completa de la página y de un video. |
+| Estadísticas del dashboard | CSV de recuentos, fecha de lectura y opción para detener el escaneo. No exporta el contenido de los mensajes. |
+| Acciones del dashboard | Protección contra doble clic y ciclos automáticos repetidos; validación de fechas y detención si otra pestaña pausa o reprograma el plan. |
+
+Una sesión que ya ha cargado la versión vigente no muestra una actualización pendiente ficticia. Una sesión antigua detecta la publicación al volver a primer plano o durante la comprobación periódica. La pantalla completa depende de la API del navegador y no instala una aplicación. No se ejecutó ninguna limpieza de producción durante esta revisión.

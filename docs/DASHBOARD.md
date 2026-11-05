@@ -40,3 +40,11 @@ La introducción de permisos se marca al mostrarse por primera vez en ese navega
 ## Pollinations
 
 Nexus AI reconoce órdenes como «genera una imagen de…», crea la imagen, permite ampliarla y descargarla, y conserva hasta ocho imágenes o 40 MB localmente por cuenta. Usa Pollinations con la clave pública de la entrega, cuya exposición en el navegador fue autorizada expresamente por el propietario. La clave no se incluye en GitHub; cualquier visitante puede extraerla de la web compilada y consumir su saldo. No se cambió la facturación de Firebase.
+
+## Controles adicionales
+
+- Las acciones bloquean un segundo clic mientras se ejecutan; el cierre de sesión también queda bloqueado durante una operación.
+- La limpieza valida su fecha antes de empezar y comprueba entre lotes que el plan siga activo, con la misma fecha y el mismo identificador de ejecución. Una pausa, reprogramación o toma de control por otra pestaña detiene el ciclo antiguo. No revierte los lotes ya completados.
+- El modo automático intenta cada fecha una sola vez. Si quedan ciclos vencidos después de una ejecución, se detiene para que el administrador revise el plan.
+- Las estadísticas indican cuándo terminaron de leerse; se pueden exportar como CSV o detener durante el escaneo, conservando el último resultado completo. La cancelación evita continuar leyendo otras páginas; las solicitudes ya enviadas pueden terminar.
+- Los recuentos y archivos CSV contienen cantidades, no textos de chats ni identidades de usuarios. No se modificó la autorización del panel.
