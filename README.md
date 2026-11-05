@@ -61,7 +61,7 @@ Esta distribución es exclusiva de computadora. Nexus Messenger conserva sus pan
 | Llamadas | WebRTC · Metered | Comunicación de voz y video; relé TURN. |
 | Inteligencia artificial | Groq · OpenRouter | Asistente y procesamiento de las solicitudes autorizadas. |
 
-**La web no necesita un servidor Node.js propio en producción.** La herramienta opcional de mantenimiento usa Node.js y Firebase Admin, permanece desactivada y no se ejecuta desde GitHub.
+**La web no necesita un servidor Node.js propio en producción.** El panel privado `/dashboard.html` ejecuta acciones directamente con Firebase desde el navegador autorizado; no usa GitHub Actions ni un servidor externo.
 
 ## 🚀 Inicio rápido
 
@@ -176,6 +176,7 @@ Nexus-Chat/
 
 | Guía | Contenido |
 | :--- | :--- |
+| [Panel de acciones](DASHBOARD.md) | Acceso privado con Google, limpieza mensual y acciones locales sin backend. |
 | [Referencias de GIFs y stickers](GIFS-STICKERS-ESCRITORIO.md) | Revisión de envío, cuadrículas y visor de stickers en computadora. |
 | [GIFs y stickers](GIPHY-Y-KLIPY.md) | GIFs con GIPHY y stickers con KLIPY; configuración y cuotas. |
 | [Móvil y proveedores](SEGUIMIENTO-MOVIL-Y-PROVEEDORES.md) | Envíos consecutivos, teclado, emojis, actualización manual y claves de GIFs. |
@@ -192,7 +193,7 @@ Nexus-Chat/
 | Estabilidad | Comportamiento |
 | --- | --- |
 | Actualizaciones | Descarga manual con bytes medidos, pausa, guardado local y continuación. Aviso persistente en móvil y computadora; también accesible desde Ajustes → Chats. |
-| Limpieza mensual | Preparación desactivada: conserva cuentas, perfiles, contactos, grupos, comunidades y sus imágenes. No existe una tarea automática activa. [Detalles](maintenance/README.md). |
+| Limpieza mensual | Plan activable desde el [dashboard](DASHBOARD.md), con revisión previa y aviso de tres días. Requiere el panel abierto; conserva cuentas, perfiles y grupos. No se activa hasta que el propietario lo elija. |
 | Rendimiento | Las ondas de audio se calculan al acercarse a la pantalla; los audios inactivos evitan renders en cada avance de reproducción. |
 | GIF y stickers | Búsquedas con tiempo de espera; favoritos locales con recuperación de registros válidos. |
 
@@ -219,7 +220,7 @@ Las licencias de terceros incluidas con los recursos deben conservarse.
 | Transcripciones | Ajustes → Chats permite activar la transcripción automática de audios visibles mediante Groq. Desactivada por defecto; consentimiento en el ajuste, caché temporal y sin almacenar el texto en Firebase. |
 | Colores | Paleta predeterminada con fondo, barras y burbujas diferenciados; se conservan las paletas elegidas por el usuario. |
 
-Actualización móvil: aviso persistente de versión pendiente sobre la navegación y acceso adicional desde Ajustes → Chats. Vista previa de audio con control de posición limitado a las ondas, compositor redondeado y recuperación del dispositivo predeterminado si una selección guardada ya no existe. La revisión inicial muestra únicamente cámara, micrófono, notificaciones y ubicación. Cada permiso lo decide el navegador; denegarlo no bloquea los mensajes de texto. Los archivos se eligen al compartirlos, sin un permiso de almacenamiento ni un selector de fotos en esta revisión.
+Actualización móvil: aviso persistente de versión pendiente sobre la navegación y acceso adicional desde Ajustes → Chats. Vista previa de audio con control de posición limitado a las ondas, compositor redondeado y recuperación del dispositivo predeterminado si una selección guardada ya no existe. La revisión inicial aparece una sola vez por navegador y muestra únicamente cámara, micrófono, notificaciones y ubicación. Cada permiso lo decide el navegador; denegarlo no bloquea los mensajes de texto. Los archivos se eligen al compartirlos, sin un permiso de almacenamiento ni un selector de fotos en esta revisión.
 
 ## Referencias móviles de noviembre
 

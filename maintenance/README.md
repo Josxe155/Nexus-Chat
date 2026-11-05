@@ -1,3 +1,5 @@
+> Modalidad vigente: el propietario eligió ejecutar las acciones desde `/dashboard.html`, sin GitHub Actions ni Cloud Functions. Consulta [DASHBOARD.md](../DASHBOARD.md). El programa Node.js de este directorio es una herramienta anterior y no está programado ni activo.
+
 # Mantenimiento de contenido · pendiente de activación
 
 | Estado | Alcance |

@@ -8,6 +8,7 @@ import {defineConfig} from 'vite';
 export default defineConfig(() => {
   return {
     plugins: [react(), tailwindcss()],
+    build:{rollupOptions:{input:{app:path.resolve(projectDirectory,'index.html'),dashboard:path.resolve(projectDirectory,'dashboard.html')}}},
     resolve: {
       alias: {
         '@': path.resolve(projectDirectory, '.'),

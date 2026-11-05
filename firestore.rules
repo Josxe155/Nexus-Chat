@@ -3,6 +3,9 @@ service cloud.firestore {
  match /databases/{database}/documents {
   // Permanent production rules: no global date limit, unmatched paths denied.
   function signedIn(){return request.auth != null && (request.auth.token.get('firebase',{}).get('sign_in_provider','')!='password' || request.auth.token.get('email_verified',false)==true) && !exists(/databases/$(database)/documents/deletedAccounts/$(request.auth.uid));}
+  function operator(){return signedIn() && request.auth.token.get('email_verified',false)==true && request.auth.token.get('firebase',{}).get('sign_in_provider','')=='google.com' && exists(/databases/$(database)/documents/dashboardAdmins/$(request.auth.uid)) && get(/databases/$(database)/documents/dashboardAdmins/$(request.auth.uid)).data.enabled==true;}
+  function cleanupDue(time){return operator() && get(/databases/$(database)/documents/publicConfig/cleanup).data.enabled==true && get(/databases/$(database)/documents/publicConfig/cleanup).data.execution=='browser' && get(/databases/$(database)/documents/publicConfig/cleanup).data.nextDueAt<=request.time.toMillis() && time<get(/databases/$(database)/documents/publicConfig/cleanup).data.nextDueAt;}
+  match /dashboardAdmins/{uid}{allow get: if signedIn() && request.auth.uid==uid;allow list,write: if false;}
   function privacy(uid){return exists(/databases/$(database)/documents/users/$(uid)/private/privacy)?get(/databases/$(database)/documents/users/$(uid)/private/privacy).data:{};}
   function audienceAllowed(uid,field,excluded){let p=privacy(uid);let mode=p.get(field,'everyone');let viewer=request.auth.uid;return viewer==uid || (!(viewer in p.get('blockedIds',[])) && !(uid in privacy(viewer).get('blockedIds',[])) && (mode=='everyone' || (mode in ['contacts','except'] && viewer in p.get('contactIds',[]) && (mode!='except' || !(viewer in p.get(excluded,[]))))));}
   function receiptsAllowed(chatId,sender){return room(chatId).get('kind','direct') in ['group','channel'] || (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('privacy',{}).get('readReceipts',true) && get(/databases/$(database)/documents/users/$(sender)).data.get('privacy',{}).get('readReceipts',true));}
@@ -48,7 +51,7 @@ service cloud.firestore {
   match /nexusNumberReservations/{number}{allow get: if signedIn();allow create: if signedIn() && number.matches('[1-9][0-9]{6,14}') && request.resource.data.keys().hasOnly(['uid']) && request.resource.data.uid==request.auth.uid && getAfter(/databases/$(database)/documents/nexusNumbers/$(request.auth.uid)).data.numberKey=='+'+number;allow list,update,delete: if false;}
   match /communityReports/{id}{allow read: if signedIn() && resource.data.reporter==request.auth.uid;allow create,update: if signedIn() && request.resource.data.keys().hasOnly(['reporter','kind','targetId','chatId','reason','at']) && request.resource.data.reporter==request.auth.uid && request.resource.data.kind in ['user','group','channel'] && request.resource.data.reason is string && request.resource.data.reason.size()>0 && request.resource.data.reason.size()<=1000 && request.resource.data.at<=request.time.toMillis()+60000 && member(request.resource.data.chatId) && (request.resource.data.kind=='user' ? request.resource.data.targetId in room(request.resource.data.chatId).participants && request.resource.data.targetId!=request.auth.uid : request.resource.data.targetId==request.resource.data.chatId) && (!exists(/databases/$(database)/documents/communityReports/$(id)) || resource.data.reporter==request.auth.uid);allow delete: if false;}
   function mediaRead(d){return d.owner==request.auth.uid || (d.complete && (d.scope=='chat' ? member(d.chatId) && d.createdAt>=room(d.chatId).get('historyStartsAt',{}).get(request.auth.uid,0) : d.scope=='group' ? member(d.chatId) : d.scope=='profile' ? audienceAllowed(d.owner,'photoAudience','photoExcluded') : d.scope=='status' ? exists(/databases/$(database)/documents/statuses/$(d.referenceId)) && get(/databases/$(database)/documents/statuses/$(d.referenceId)).data.expiresAt>request.time.toMillis() && request.auth.uid in get(/databases/$(database)/documents/statuses/$(d.referenceId)).data.audienceIds : d.scope=='community' && request.auth.uid in get(/databases/$(database)/documents/communities/$(d.referenceId)).data.members));}
-  match /mediaFiles/{id}{allow get: if signedIn() && mediaRead(resource.data);allow list: if signedIn() && resource.data.owner==request.auth.uid;allow create: if signedIn() && request.resource.data.keys().hasOnly(['owner','scope','chatId','referenceId','name','type','size','key','createdAt','expiresAt','complete','chunks','sealedKey']) && request.resource.data.owner==request.auth.uid && request.resource.data.size>0 && request.resource.data.size<=20971520 && validMediaKey(request.resource.data,id) && request.resource.data.complete==false && request.resource.data.chunks>=1 && request.resource.data.chunks<=20 && request.resource.data.scope in ['chat','profile','status','community','group'] && (!(request.resource.data.scope in ['chat','group'])||member(request.resource.data.chatId)) && (request.resource.data.scope!='group'||(request.resource.data.type in ['image/png','image/jpeg','image/webp'] && request.resource.data.size<=5242880 && (admin(room(request.resource.data.chatId))||room(request.resource.data.chatId).get('membersCanEdit',false))));allow update: if signedIn() && resource.data.owner==request.auth.uid && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['complete']) && request.resource.data.complete==true;allow delete: if signedIn() && resource.data.owner==request.auth.uid;}
+  match /mediaFiles/{id}{allow read: if operator();allow delete: if resource.data.scope in ['chat','status'] && cleanupDue(resource.data.createdAt);allow get: if signedIn() && mediaRead(resource.data);allow list: if signedIn() && resource.data.owner==request.auth.uid;allow create: if signedIn() && request.resource.data.keys().hasOnly(['owner','scope','chatId','referenceId','name','type','size','key','createdAt','expiresAt','complete','chunks','sealedKey']) && request.resource.data.owner==request.auth.uid && request.resource.data.size>0 && request.resource.data.size<=20971520 && validMediaKey(request.resource.data,id) && request.resource.data.complete==false && request.resource.data.chunks>=1 && request.resource.data.chunks<=20 && request.resource.data.scope in ['chat','profile','status','community','group'] && (!(request.resource.data.scope in ['chat','group'])||member(request.resource.data.chatId)) && (request.resource.data.scope!='group'||(request.resource.data.type in ['image/png','image/jpeg','image/webp'] && request.resource.data.size<=5242880 && (admin(room(request.resource.data.chatId))||room(request.resource.data.chatId).get('membersCanEdit',false))));allow update: if signedIn() && resource.data.owner==request.auth.uid && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['complete']) && request.resource.data.complete==true;allow delete: if signedIn() && resource.data.owner==request.auth.uid;}
   match /users/{uid} {
    allow read: if signedIn();
    allow create: if signedIn() && request.auth.uid == uid && request.resource.data.uid == uid && validPublicProfile(request.resource.data);
@@ -68,6 +71,7 @@ service cloud.firestore {
    }
    match /moderationNotices/{id}{allow read: if signedIn() && request.auth.uid==uid;allow update: if signedIn() && request.auth.uid==uid && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['seen']) && request.resource.data.seen==true;allow create,delete: if false;}
    match /private/{id} {
+    allow get: if id=='profile' && operator();
     allow delete: if signedIn() && request.auth.uid == uid && true;
     allow read: if signedIn() && request.auth.uid == uid;
     allow create,update: if signedIn() && request.auth.uid == uid && id != 'e2eeBackup' && !id.matches('broadcast-.*') && (id != 'e2eeBackup' || (request.resource.data.keys().hasOnly(['v','iterations','salt','iv','cipher']) && request.resource.data.v==1 && request.resource.data.iterations==600000 && request.resource.data.salt is string && request.resource.data.salt.size()==44 && request.resource.data.iv is string && request.resource.data.iv.size()==16 && request.resource.data.cipher is string && request.resource.data.cipher.size()>=24 && request.resource.data.cipher.size()<=16000)) && (id != 'preferences' || (request.resource.data.get('pinnedChatIds',[]) is list && request.resource.data.get('pinnedChatIds',[]).size() <= 3));
@@ -76,6 +80,7 @@ service cloud.firestore {
   match /deletedAccounts/{uid}{allow create: if request.auth!=null && request.auth.uid==uid && request.resource.data.uid==uid && !exists(/databases/$(database)/documents/deletedAccounts/$(uid));allow get: if request.auth!=null && request.auth.uid==uid;allow list,update,delete: if false;}
   match /usernames/{name}{allow read: if signedIn();allow create: if signedIn() && name.matches('[a-z0-9_.]{3,32}') && request.resource.data.uid==request.auth.uid;allow update: if signedIn() && resource.data.uid==request.auth.uid && request.resource.data.uid==request.auth.uid;allow delete: if signedIn() && resource.data.uid==request.auth.uid;}
   match /chats/{chatId} {
+   allow read: if operator();allow update: if operator() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['lastMessage','messagePins','unreadCount']);
    allow read: if signedIn() && request.auth.uid in resource.data.participants;
    allow create: if signedIn() && !request.resource.data.get('moderationRemoved',false) && request.resource.data.id == chatId
     && request.resource.data.get('e2ee','')=='' && validDuration(request.resource.data) && groupExtras(request.resource.data) && request.resource.data.get('createdBy',request.auth.uid)==request.auth.uid && request.resource.data.participants is list && request.resource.data.participants.size() >= 1 && request.resource.data.participants.size() <= 100
@@ -116,6 +121,7 @@ service cloud.firestore {
     allow delete: if member(chatId) && resource.data.senderId==request.auth.uid;
    }
    match /messages/{mid} {
+    allow read: if operator();allow delete: if cleanupDue(resource.data.timestamp);
     allow get: if member(chatId) && !exists(/databases/$(database)/documents/chats/$(chatId)/messages/$(mid));
     allow read: if member(chatId) && resource.data.timestamp >= room(chatId).get('historyStartsAt',{}).get(request.auth.uid,0);
     allow create: if member(chatId) && maySend(room(chatId)) && notBlocked(room(chatId)) && request.resource.data.id==mid && request.resource.data.chatId==chatId && request.resource.data.senderId==request.auth.uid
@@ -151,6 +157,7 @@ service cloud.firestore {
    }
   }
   match /communities/{id} {
+   allow read: if operator();
    allow read: if signedIn() && request.auth.uid in resource.data.members;
    allow create: if signedIn() && request.resource.data.owner==request.auth.uid && validCommunity(request.resource.data) && request.auth.uid in request.resource.data.members && request.auth.uid in request.resource.data.admins;
    allow update: if (admin(resource.data) && validCommunity(request.resource.data) && request.resource.data.owner==resource.data.owner) || (signedIn() && request.auth.uid in resource.data.members && request.auth.uid!=resource.data.owner && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['members','admins']) && request.resource.data.members==resource.data.members.removeAll([request.auth.uid]) && request.resource.data.admins==resource.data.admins.removeAll([request.auth.uid]));
@@ -163,19 +170,21 @@ service cloud.firestore {
    allow delete: if signedIn() && resource.data.owner==request.auth.uid;
   }
   match /statuses/{id} {
+   allow read: if operator();allow delete: if cleanupDue(resource.data.createdAt);
    allow get: if signedIn() && (resource.data.owner==request.auth.uid || (request.auth.uid in resource.data.get('audienceIds',[]) && resource.data.expiresAt>request.time.toMillis()));
    allow list: if signedIn() && (resource.data.owner==request.auth.uid || request.auth.uid in resource.data.get('audienceIds',[]));
    allow create: if signedIn() && request.resource.data.id==id && request.resource.data.owner==request.auth.uid && request.resource.data.audienceIds is list && request.resource.data.audienceIds.size()<=500 && request.resource.data.text is string && request.resource.data.text.size()<=1000 && request.resource.data.get('fileUrl','') is string && request.resource.data.get('fileSize',0)<=104857600 && request.resource.data.expiresAt<=request.time.toMillis()+86460000 && request.resource.data.expiresAt>request.time.toMillis();
    allow update: if signedIn() && resource.data.owner==request.auth.uid && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['audienceIds']) && request.resource.data.audienceIds is list && request.resource.data.audienceIds.size()<=500;
    allow delete: if signedIn() && resource.data.owner==request.auth.uid;
    match /reactions/{uid}{
+    allow read: if operator();allow delete: if cleanupDue(get(/databases/$(database)/documents/statuses/$(id)).data.createdAt);
     function status(){return get(/databases/$(database)/documents/statuses/$(id)).data;}
     allow read: if signedIn() && (status().owner==request.auth.uid || (uid==request.auth.uid && request.auth.uid in status().audienceIds));
     allow create,update: if signedIn() && uid==request.auth.uid && request.auth.uid in status().audienceIds && status().expiresAt>request.time.toMillis() && request.resource.data.keys().hasOnly(['emoji','at']) && request.resource.data.emoji is string && request.resource.data.emoji.size()<=32 && request.resource.data.at is number;
     allow delete: if signedIn() && (uid==request.auth.uid || status().owner==request.auth.uid);
    }
   }
-  match /publicConfig/cleanup {allow read: if signedIn();allow write: if false;}
+  match /publicConfig/cleanup {allow read: if signedIn();allow create,update: if operator() && request.resource.data.keys().hasOnly(['enabled','execution','firstDueAt','nextDueAt','warningDays','status','leaseUntil','runId','lastCompletedAt','counts']) && request.resource.data.enabled is bool && request.resource.data.execution=='browser' && request.resource.data.nextDueAt is number && request.resource.data.warningDays==3 && request.resource.data.status in ['scheduled','running','error'];allow delete: if false;}
   match /{document=**}{allow read,write: if false;}
  }
 }

@@ -26,6 +26,4 @@ No se recarga durante una llamada, grabación o edición pendiente. Se verifica 
 
 ## Limpieza mensual
 
-Preparación sin activar. Se revisó el motor con datos de prueba y una simulación de solo lectura en Firebase; no se ejecutaron borrados. No se utiliza GitHub para ejecutarlo. La programación exclusivamente en Firebase requiere decidir sobre Blaze; no se ha habilitado facturación. Véase [maintenance/README.md](maintenance/README.md).
-
-La regla de `publicConfig/cleanup` permite leer el aviso a cuentas autorizadas, pero impide que un cliente lo escriba, active o elimine. Las demás restricciones de Firestore y Realtime Database permanecen vigentes, sin una fecha global de caducidad.
+El plan mensual puede activarse desde `/dashboard.html`, limitado a la cuenta de Google autorizada. Se ejecuta en el navegador mientras el panel esté abierto; no existe un proceso de servidor ni una ejecución desde GitHub. Incluye revisión previa, confirmación manual y aviso de tres días. Consulta [DASHBOARD.md](DASHBOARD.md).
