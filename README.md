@@ -14,6 +14,16 @@ Una interfaz adaptable a móvil, tablet y computadora.
 [![TypeScript](https://img.shields.io/badge/TYPESCRIPT-5.8-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](tsconfig.json)
 [![Firebase](https://img.shields.io/badge/FIREBASE-HOSTING%20%2B%20DATOS-FFCA28?style=for-the-badge&logo=firebase&logoColor=20232A)](firebase.json)
 
+
+[![WebRTC](https://img.shields.io/badge/LLAMADAS-WEBRTC-333333?style=for-the-badge&logo=webrtc&logoColor=white)](docs/CIFRADO-Y-LLAMADAS.md)
+[![Estados](https://img.shields.io/badge/ESTADOS-24%20HORAS-20C472?style=for-the-badge)](#-el-proyecto)
+[![Nexus AI](https://img.shields.io/badge/NEXUS%20AI-TEXTO%20%2B%20VOZ%20%2B%20IMAGEN-9272FF?style=for-the-badge)](#ajustes-de-conversación-y-voz)
+[![Archivos](https://img.shields.io/badge/ARCHIVOS-FOTOS%20%2B%20VIDEOS%20%2B%20DOCUMENTOS-3B82F6?style=for-the-badge)](#-el-proyecto)
+[![Dispositivos](https://img.shields.io/badge/DISE%C3%91O-M%C3%93VIL%20%2B%20TABLET%20%2B%20PC-06B6D4?style=for-the-badge)](docs/DISENO-RESPONSIVE.md)
+[![Actualización](https://img.shields.io/badge/ACTUALIZACI%C3%93N-MANUAL-F59E0B?style=for-the-badge)](#-comandos)
+[![Acceso](https://img.shields.io/badge/ACCESO-GOOGLE%20%2B%20CORREO-EA4335?style=for-the-badge&logo=google&logoColor=white)](#-configuración)
+[![Documentación](https://img.shields.io/badge/DOCUMENTACI%C3%93N-VER%20GU%C3%8DAS-64748B?style=for-the-badge&logo=readthedocs&logoColor=white)](docs/INDICE.md)
+
 [![Comprobaciones](https://github.com/Josxe155/Nexus-Chat/actions/workflows/check.yml/badge.svg)](https://github.com/Josxe155/Nexus-Chat/actions/workflows/check.yml)
 ![Plataforma](https://img.shields.io/badge/PLATAFORMA-WEB-7C5CFC?style=flat-square)
 ![Diseño](https://img.shields.io/badge/DISE%C3%91O-RESPONSIVE-20C472?style=flat-square)
@@ -35,10 +45,10 @@ Nexus Chat reúne conversaciones, archivos, estados, comunidades y llamadas en u
 
 | 📎 Archivos y audio | 🟢 Estados y comunidad | 🤖 Nexus AI |
 | :--- | :--- | :--- |
-| Fotos, videos, documentos, notas de voz y visualización de archivos. | Estados, canales, comunidades y controles de privacidad. | Asistente con Groq y OpenRouter; creación de imágenes con Pollinations y transcripción de audio con consentimiento. |
+| Fotos, videos, documentos, notas de voz y visualización de archivos. | Estados, comunidades y controles de privacidad. La categoría de canales está retirada. | Asistente con Groq y OpenRouter; creación de imágenes con Pollinations y transcripción de audio con consentimiento. |
 
 > [!NOTE]
-> Es un proyecto en desarrollo. Las funciones dependen de los permisos del navegador, la conexión y las cuotas de los proveedores. El alcance y las diferencias pendientes se describen en [PENDIENTES-WHATSAPP.md](PENDIENTES-WHATSAPP.md).
+> Es un proyecto en desarrollo. Las funciones dependen de los permisos del navegador, la conexión y las cuotas de los proveedores. El alcance y las diferencias pendientes se describen en [PENDIENTES-WHATSAPP.md](docs/PENDIENTES-WHATSAPP.md).
 
 ## 🎞️ Expresiones en Nexus Web
 
@@ -138,7 +148,7 @@ npx firebase-tools deploy --only hosting,firestore:rules,firestore:indexes,datab
 
 El sitio publicado es **[nexus-chat-nc.web.app](https://nexus-chat-nc.web.app/)**. La carpeta generada es `dist/`; sus archivos y las dependencias no se versionan.
 
-Consulta el procedimiento completo en [INSTRUCCIONES-FIREBASE-HOSTING.md](INSTRUCCIONES-FIREBASE-HOSTING.md).
+Consulta el procedimiento completo en [INSTRUCCIONES-FIREBASE-HOSTING.md](docs/INSTRUCCIONES-FIREBASE-HOSTING.md).
 
 ## 🔐 Privacidad y alcance
 
@@ -152,7 +162,7 @@ Consulta el procedimiento completo en [INSTRUCCIONES-FIREBASE-HOSTING.md](INSTRU
 | Instalación y vinculación | No se ofrece instalación como aplicación ni vinculación multidispositivo. |
 | Repositorio | Sin claves de proveedores, cuentas de servicio ni datos de usuarios. |
 
-La pérdida de las claves originales del historial cifrado anterior no permite reconstruir su contenido. Consulta [CIFRADO-Y-LLAMADAS.md](CIFRADO-Y-LLAMADAS.md) para conocer el modelo de seguridad vigente.
+La pérdida de las claves originales del historial cifrado anterior no permite reconstruir su contenido. Consulta [CIFRADO-Y-LLAMADAS.md](docs/CIFRADO-Y-LLAMADAS.md) para conocer el modelo de seguridad vigente.
 
 ## 📂 Estructura
 
@@ -160,6 +170,7 @@ La pérdida de las claves originales del historial cifrado anterior no permite r
 Nexus-Chat/
 ├── .github/workflows/             Comprobaciones de TypeScript y compilación
 ├── assents/                       Recursos gráficos del proyecto
+├── docs/                          Guías, revisiones e índice de documentación
 ├── public/                        Iconos, emojis, sonidos y archivos estáticos
 ├── scripts/                       Desarrollo, configuración y compilación
 ├── src/                           Interfaz y lógica de la aplicación
@@ -176,24 +187,24 @@ Nexus-Chat/
 
 | Guía | Contenido |
 | :--- | :--- |
-| [Panel de acciones](DASHBOARD.md) | Google o contraseña de la misma identidad, estadísticas, limpieza mensual y acciones locales sin backend. |
-| [Referencias de GIFs y stickers](GIFS-STICKERS-ESCRITORIO.md) | Revisión de envío, cuadrículas y visor de stickers en computadora. |
-| [GIFs y stickers](GIPHY-Y-KLIPY.md) | GIFs con GIPHY y stickers con KLIPY; configuración y cuotas. |
-| [Móvil y proveedores](SEGUIMIENTO-MOVIL-Y-PROVEEDORES.md) | Envíos consecutivos, teclado, emojis, actualización manual y claves de GIFs. |
-| [Interfaz de escritorio](REFERENCIA-ESCRITORIO-ADJUNTOS.md) | Vistas de adjuntos, selectores, formularios y separación de dispositivos. |
-| [Publicar la web](INSTRUCCIONES-FIREBASE-HOSTING.md) | Preparación y despliegue en Firebase. |
-| [Estado de las funciones](ESTADO-FUNCIONES.md) | Funciones y condiciones de la entrega. |
-| [Seguridad y llamadas](CIFRADO-Y-LLAMADAS.md) | Protección de datos, historial y comunicaciones. |
-| [Actualizaciones y errores](ACTUALIZACIONES-Y-ERRORES.md) | Actualización manual y pantallas de error. |
-| [Alcance y pendientes](PENDIENTES-WHATSAPP.md) | Diferencias, limitaciones y trabajo pendiente. |
-| [Referencias de interfaz](REVISION-REFERENCIAS-WHATSAPP.md) | Referencias consultadas para la experiencia de uso. |
+| [Panel de acciones](docs/DASHBOARD.md) | Google o contraseña de la misma identidad, estadísticas, limpieza mensual y acciones locales sin backend. |
+| [Referencias de GIFs y stickers](docs/GIFS-STICKERS-ESCRITORIO.md) | Revisión de envío, cuadrículas y visor de stickers en computadora. |
+| [GIFs y stickers](docs/GIPHY-Y-KLIPY.md) | GIFs con GIPHY y stickers con KLIPY; configuración y cuotas. |
+| [Móvil y proveedores](docs/SEGUIMIENTO-MOVIL-Y-PROVEEDORES.md) | Envíos consecutivos, teclado, emojis, actualización manual y claves de GIFs. |
+| [Interfaz de escritorio](docs/REFERENCIA-ESCRITORIO-ADJUNTOS.md) | Vistas de adjuntos, selectores, formularios y separación de dispositivos. |
+| [Publicar la web](docs/INSTRUCCIONES-FIREBASE-HOSTING.md) | Preparación y despliegue en Firebase. |
+| [Estado de las funciones](docs/ESTADO-FUNCIONES.md) | Funciones y condiciones de la entrega. |
+| [Seguridad y llamadas](docs/CIFRADO-Y-LLAMADAS.md) | Protección de datos, historial y comunicaciones. |
+| [Actualizaciones y errores](docs/ACTUALIZACIONES-Y-ERRORES.md) | Actualización manual y pantallas de error. |
+| [Alcance y pendientes](docs/PENDIENTES-WHATSAPP.md) | Diferencias, limitaciones y trabajo pendiente. |
+| [Referencias de interfaz](docs/REVISION-REFERENCIAS-WHATSAPP.md) | Referencias consultadas para la experiencia de uso. |
 
 ## 🔄 Mantenimiento
 
 | Estabilidad | Comportamiento |
 | --- | --- |
 | Actualizaciones | Descarga manual con bytes medidos, pausa, guardado local y continuación. Aviso persistente en móvil y computadora; también accesible desde Ajustes → Chats. |
-| Limpieza mensual | Plan activable desde el [dashboard](DASHBOARD.md), con revisión previa y aviso visible únicamente en los tres días anteriores. Requiere el panel abierto; conserva cuentas, perfiles y grupos. No se activa hasta que el propietario lo elija. |
+| Limpieza mensual | Plan activable desde el [dashboard](docs/DASHBOARD.md), con revisión previa y aviso visible únicamente en los tres días anteriores. Requiere el panel abierto; conserva cuentas, perfiles y grupos. No se activa hasta que el propietario lo elija. |
 | Rendimiento | Las ondas de audio se calculan al acercarse a la pantalla; los audios inactivos evitan renders en cada avance de reproducción. |
 | GIF y stickers | Búsquedas con tiempo de espera; favoritos locales con recuperación de registros válidos. |
 
@@ -245,3 +256,11 @@ Interfaz propia con propuestas, conversación, búsqueda, emojis y creación de 
 | Entrada por voz de IA | Graba con permiso de micrófono, procesa la voz y envía la consulta transcrita. La grabación no se guarda como archivo de chat. |
 | Canales | Categoría retirada de la navegación de escritorio y móvil; no se borran los datos existentes. |
 | Llamadas | Accesos a nueva llamada, programación y creación de enlace. |
+
+### Pantalla completa en móviles y tablets
+
+En **Configuración → Pantalla completa** se puede ocultar la interfaz del navegador cuando su API lo permite. El control refleja el estado real y permite salir. No aparece en computadora, no instala una aplicación y no se activa sin una pulsación. Los navegadores que no admiten pantalla completa de páginas muestran la opción como no disponible.
+
+El indicador de mensajes temporales conserva su diseño circular anterior en la lista de chats.
+
+La documentación complementaria está organizada en [docs/INDICE.md](docs/INDICE.md); el README principal describe el estado vigente del proyecto.

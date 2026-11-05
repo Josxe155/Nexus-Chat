@@ -1,0 +1,17 @@
+> Actualización 27/10/2026: el acceso y la verificación por SMS se retiraron. El teléfono actual es un dato privado sin verificar. Consulta REGISTRO-Y-PROTECCION.md. El contenido siguiente conserva la revisión histórica anterior.
+
+# Perfil, contactos y menú de computadora
+
+Se conservan los apartados existentes y se corrigen los puntos solicitados.
+
+- **Editar perfil:** mantiene foto, nombre, usuario e información. Incluye teléfono y acceso a su verificación por SMS, con selector de país y prefijo internacional. «Otro país» permite introducir cualquier prefijo internacional compatible. Un número ya escrito con `+` se acepta sin duplicar el código de país.
+- **Vincular/cambiar teléfono:** se verifica desde la cuenta autenticada y se conserva su identificador y sus chats. No se usa el acceso independiente para sustituir la sesión al añadir un teléfono al perfil. Si el número pertenece a otra cuenta, se informa del conflicto; no se fusionan cuentas automáticamente. Puede requerirse un inicio de sesión reciente.
+- **Mis contactos excepto…:** se sincroniza la lista cuando cambia la agenda de Nexus. Las personas guardadas con cuenta en Nexus aparecen en el selector y se pueden excluir. Se ofrece Añadir contacto cuando la lista está vacía. Un número externo sin cuenta todavía no tiene una identidad de Nexus a la que aplicar permisos; se mantiene como contacto privado e invitación.
+- **Contactos:** se mantienen las opciones actuales bajo «Opciones», y se muestran «Mis contactos» y «Personas en Nexus». Mis contactos incluye al propio usuario con su teléfono verificado, las personas guardadas y números externos. Personas en Nexus muestra el resto de las cuentas registradas. No se agregan personas ficticias.
+- **Añadir contacto:** se puede guardar una persona de Nexus por usuario o añadir un teléfono con nombre y apellido. El servidor busca el número exacto verificado en Authentication; nunca se confía en un teléfono escrito en un perfil público. Los números externos se pueden editar, quitar o invitar mediante una acción explícita del usuario. Editar y volver a guardar comprueba de nuevo si ya están en Nexus. La agenda se guarda privadamente en la cuenta; no se presenta como sincronización automática con la agenda del sistema operativo.
+- **Menú de chats de computadora:** contiene exactamente Nuevo grupo, Mensajes destacados, Seleccionar chats, Marcar todos como leídos, Bloqueo de aplicación y Cerrar sesión. El menú móvil conserva sus opciones propias.
+- **Bloqueo de aplicación:** permite configurar una contraseña local, bloquear y desbloquear la pantalla. Se almacena una derivación de la contraseña, no su texto. Se aplica de nuevo al abrir la web en ese navegador. No es cifrado de extremo a extremo ni sustituye el inicio de sesión; es un bloqueo local de la interfaz. Los mensajes no se marcan como leídos por estar abierta la pantalla de bloqueo.
+
+La búsqueda por teléfono requiere el backend de Nexus. La API exige autenticación, limita solicitudes y no devuelve fotos, correo ni teléfono del propietario. Las cuentas desactivadas o retiradas y los contactos que hayan bloqueado al solicitante no se revelan por esta consulta.
+
+No se enviaron SMS reales durante las pruebas, no se modificó facturación y no se vincularon teléfonos a cuentas reales. La prueba de entrega real queda pendiente de un dominio HTTPS autorizado y los requisitos SMS de Firebase. Se mantienen los límites y pendientes de Hosting documentados anteriormente.

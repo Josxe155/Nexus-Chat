@@ -166,13 +166,13 @@ Las reglas y la estructura de Firestore y Realtime Database no se abren ni se su
 
 ## Cifrado y sala Mumble — 29 de octubre de 2026
 
-Se incorporó cifrado de extremo a extremo activable para mensajes y adjuntos nuevos en conversaciones privadas y grupos. Requiere claves de cada participante y una frase de recuperación; no migra mensajes antiguos ni cubre canales, estados o metadatos. Usa Web Crypto, AES-GCM, ECDH/HKDF y firmas ECDSA. Las reglas rechazan texto sin cifrar tras la activación. No es un protocolo auditado ni ofrece secreto hacia adelante. Instrucciones y límites completos: [CIFRADO-Y-MUMBLE.md](CIFRADO-Y-MUMBLE.md).
+Se incorporó cifrado de extremo a extremo activable para mensajes y adjuntos nuevos en conversaciones privadas y grupos. Requiere claves de cada participante y una frase de recuperación; no migra mensajes antiguos ni cubre canales, estados o metadatos. Usa Web Crypto, AES-GCM, ECDH/HKDF y firmas ECDSA. Las reglas rechazan texto sin cifrar tras la activación. No es un protocolo auditado ni ofrece secreto hacia adelante. Instrucciones y límites completos: [CIFRADO-Y-LLAMADAS.md](CIFRADO-Y-LLAMADAS.md).
 
 El conector Node.js de voz es un servicio opcional separado para Hidencloud, solicitado posteriormente. No forma parte de Firebase Hosting. La conexión de prueba a jacob.hidencloud.com:24684, canal Root, fue satisfactoria fijando la huella del certificado observado. La sala del navegador necesita la URL WebSocket pública del conector desplegado; no se ha inventado esa dirección ni publicado un proceso Node sin acceso al alojamiento.
 
 
 ## Actualización: cifrado automático y solo web
-La guía vigente para claves automáticas, recuperación y conexión de voz es CIFRADO-Y-MUMBLE.md. Se retiraron los flujos de instalación y el manifiesto instalable. La web conserva adaptación a dispositivos y notificaciones. Voz requiere publicar el conector de Hidencloud; video mantiene WebRTC/Metered.
+La guía vigente para claves automáticas, recuperación y conexión de voz es CIFRADO-Y-LLAMADAS.md. Se retiraron los flujos de instalación y el manifiesto instalable. La web conserva adaptación a dispositivos y notificaciones. Voz requiere publicar el conector de Hidencloud; video mantiene WebRTC/Metered.
 
 Voz y salas: WebRTC/Firebase/Metered por defecto, sin dominio ni WebSocket externo. El acceso público independiente a Mumble queda oculto hasta configurarse expresamente.
 
