@@ -1,0 +1,2 @@
+import {doc,runTransaction,serverTimestamp} from 'firebase/firestore';import {db,auth} from '../firebase';
+export async function recordVisit(uid:string){if(auth.currentUser?.uid!==uid)return;const target=doc(db,'dashboardVisits',uid);await runTransaction(db,async tx=>{const s=await tx.get(target);tx.set(target,{uid,lastVisitAt:serverTimestamp(),firstVisitAt:s.exists()?s.data().firstVisitAt:serverTimestamp()});});}

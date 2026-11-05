@@ -4,7 +4,13 @@ El panel se publica en `/dashboard.html`, dentro del mismo Firebase Hosting. No 
 
 ## Acceso
 
-Solo la cuenta de Google designada por el propietario puede entrar. Las autorizaciones se guardan en Firebase (`dashboardAdmins/<uid>`), nunca en un correo oculto en JavaScript ni en una contraseña incluida en el HTML. Los clientes no pueden crear o modificar esas autorizaciones. Las reglas verifican una sesión de Google con correo verificado y la autorización correspondiente en cada base de datos. No se versionan identidades personales ni credenciales.
+Solo la identidad de Nexus designada por el propietario puede entrar, con Google o con la contraseña alternativa añadida a esa misma cuenta. No se creó otra cuenta administradora. Las autorizaciones se guardan en Firebase (`dashboardAdmins/<uid>`), nunca en un correo oculto en JavaScript ni en una contraseña incluida en el HTML. Los clientes no pueden crear o modificar esas autorizaciones. Las reglas verifican una sesión con correo verificado, proveedor Google o contraseña, y la autorización correspondiente en cada base de datos. La contraseña se verifica en Firebase Authentication; nunca se incluye en el HTML, JavaScript ni repositorio. No se versionan identidades personales ni credenciales.
+
+La sesión Google de Nexus ya iniciada se restaura automáticamente. El navegador no puede leer cualquier cuenta abierta en Google. El acceso con correo y contraseña usa una sesión administrativa separada por pestaña, para no cerrar la sesión normal de Nexus de otra cuenta.
+
+## Estadísticas
+
+Recuentos de cuentas, mensajes conservados, mensajes con al menos una recepción confirmada, archivos, espacio y salas de llamada conservadas. Incluye actividad diaria de mensajes y distribución por tipo. Los usuarios que han entrado se cuentan por UID en `dashboardVisits`, desde esta actualización; no se inventa historial de visitas ni se registran visitantes sin iniciar sesión. Solo el usuario y el administrador pueden consultar su registro. No se guardan IP ni detalles del dispositivo.
 
 ## Acciones
 
@@ -23,7 +29,7 @@ Solo la cuenta de Google designada por el propietario puede entrar. Las autoriza
 
 **El navegador debe permanecer abierto, con sesión de administrador.** El HTML no se ejecuta si el equipo está apagado, la pestaña está cerrada o el navegador la suspende. Si pasa la fecha, la tarea queda pendiente hasta que el administrador vuelva y la ejecute o habilite la ejecución con el panel abierto. Esto no equivale a un cron de servidor ni garantiza puntualidad.
 
-El plan está desactivado hasta que el propietario lo active en el panel. La primera fecha propuesta es un mes desde la activación; se conserva el día del mes cuando es posible. El aviso se destaca tres días antes en las visitas de los usuarios a Nexus.
+El plan está desactivado hasta que el propietario lo active en el panel. La primera fecha propuesta es un mes desde la activación; se conserva el día del mes cuando es posible. El aviso aparece únicamente durante los tres días anteriores, una vez por ciclo en ese navegador. No hay etiqueta permanente, opción de limpieza en Ajustes ni botón Abrir mis archivos.
 
 El borrado es irreversible y consume operaciones y transferencia de Firebase. Se procesa por lotes, con bloqueo temporal entre pestañas; si se interrumpe puede retomarse después de liberar el bloqueo. No se borran documentos de chats ni de grupos: se elimina su contenido antiguo y se limpia su resumen. Los archivos nuevos, los de alcances desconocidos y los referenciados por perfiles o portadas se preservan. Los administradores tienen permisos técnicos de eliminación de archivos en Realtime Database: la protección de referencias de fotos se aplica además en el programa. No modificar ese control sin revisar el impacto.
 
@@ -33,4 +39,4 @@ La introducción de permisos se marca al mostrarse por primera vez en ese navega
 
 ## Pollinations
 
-La generación de imágenes y las órdenes «genera una imagen de…» se integrarán en Nexus AI cuando el propietario facilite la configuración y lo ordene. Esta entrega no publica claves ni activa solicitudes de generación.
+Nexus AI reconoce órdenes como «genera una imagen de…», crea la imagen, permite ampliarla y descargarla, y conserva hasta ocho imágenes o 40 MB localmente por cuenta. Usa Pollinations con la clave pública de la entrega, cuya exposición en el navegador fue autorizada expresamente por el propietario. La clave no se incluye en GitHub; cualquier visitante puede extraerla de la web compilada y consumir su saldo. No se cambió la facturación de Firebase.

@@ -3,8 +3,9 @@ service cloud.firestore {
  match /databases/{database}/documents {
   // Permanent production rules: no global date limit, unmatched paths denied.
   function signedIn(){return request.auth != null && (request.auth.token.get('firebase',{}).get('sign_in_provider','')!='password' || request.auth.token.get('email_verified',false)==true) && !exists(/databases/$(database)/documents/deletedAccounts/$(request.auth.uid));}
-  function operator(){return signedIn() && request.auth.token.get('email_verified',false)==true && request.auth.token.get('firebase',{}).get('sign_in_provider','')=='google.com' && exists(/databases/$(database)/documents/dashboardAdmins/$(request.auth.uid)) && get(/databases/$(database)/documents/dashboardAdmins/$(request.auth.uid)).data.enabled==true;}
+  function operator(){return signedIn() && request.auth.token.get('email_verified',false)==true && request.auth.token.get('firebase',{}).get('sign_in_provider','') in ['google.com','password'] && exists(/databases/$(database)/documents/dashboardAdmins/$(request.auth.uid)) && get(/databases/$(database)/documents/dashboardAdmins/$(request.auth.uid)).data.enabled==true;}
   function cleanupDue(time){return operator() && get(/databases/$(database)/documents/publicConfig/cleanup).data.enabled==true && get(/databases/$(database)/documents/publicConfig/cleanup).data.execution=='browser' && get(/databases/$(database)/documents/publicConfig/cleanup).data.nextDueAt<=request.time.toMillis() && time<get(/databases/$(database)/documents/publicConfig/cleanup).data.nextDueAt;}
+  match /dashboardVisits/{uid}{allow read: if operator() || (signedIn() && request.auth.uid==uid);allow create,update: if signedIn() && request.auth.uid==uid && request.resource.data.keys().hasOnly(['uid','firstVisitAt','lastVisitAt']) && request.resource.data.uid==uid && request.resource.data.lastVisitAt==request.time && (resource==null ? request.resource.data.firstVisitAt==request.time : request.resource.data.firstVisitAt==resource.data.firstVisitAt);allow delete: if false;}
   match /dashboardAdmins/{uid}{allow get: if signedIn() && request.auth.uid==uid;allow list,write: if false;}
   function privacy(uid){return exists(/databases/$(database)/documents/users/$(uid)/private/privacy)?get(/databases/$(database)/documents/users/$(uid)/private/privacy).data:{};}
   function audienceAllowed(uid,field,excluded){let p=privacy(uid);let mode=p.get(field,'everyone');let viewer=request.auth.uid;return viewer==uid || (!(viewer in p.get('blockedIds',[])) && !(uid in privacy(viewer).get('blockedIds',[])) && (mode=='everyone' || (mode in ['contacts','except'] && viewer in p.get('contactIds',[]) && (mode!='except' || !(viewer in p.get(excluded,[]))))));}
@@ -188,7 +189,3 @@ service cloud.firestore {
   match /{document=**}{allow read,write: if false;}
  }
 }
-
-
-
-

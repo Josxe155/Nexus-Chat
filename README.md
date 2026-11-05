@@ -35,7 +35,7 @@ Nexus Chat reúne conversaciones, archivos, estados, comunidades y llamadas en u
 
 | 📎 Archivos y audio | 🟢 Estados y comunidad | 🤖 Nexus AI |
 | :--- | :--- | :--- |
-| Fotos, videos, documentos, notas de voz y visualización de archivos. | Estados, canales, comunidades y controles de privacidad. | Asistente con Groq y OpenRouter; transcripción de audio con consentimiento. |
+| Fotos, videos, documentos, notas de voz y visualización de archivos. | Estados, canales, comunidades y controles de privacidad. | Asistente con Groq y OpenRouter; creación de imágenes con Pollinations y transcripción de audio con consentimiento. |
 
 > [!NOTE]
 > Es un proyecto en desarrollo. Las funciones dependen de los permisos del navegador, la conexión y las cuotas de los proveedores. El alcance y las diferencias pendientes se describen en [PENDIENTES-WHATSAPP.md](PENDIENTES-WHATSAPP.md).
@@ -82,7 +82,7 @@ La instalación crea `src/public-services.json` desde la plantilla si el archivo
 
 | Archivo | Qué debes configurar | ¿Se sube a Git? |
 | :--- | :--- | :---: |
-| `src/public-services.json` | Claves de Groq, OpenRouter, Metered, GIPHY y KLIPY. | **No** |
+| `src/public-services.json` | Claves de Groq, OpenRouter, Metered, GIPHY, KLIPY y Pollinations. | **No** |
 | `src/public-services.example.json` | Plantilla sin claves para crear la configuración local. | Sí |
 | `firebase-applet-config.json` | Identificadores públicos de tu proyecto Firebase. | Sí |
 | `.firebaserc` · `firebase.json` | Proyecto de destino y sitio de Hosting. | Sí |
@@ -176,7 +176,7 @@ Nexus-Chat/
 
 | Guía | Contenido |
 | :--- | :--- |
-| [Panel de acciones](DASHBOARD.md) | Acceso privado con Google, limpieza mensual y acciones locales sin backend. |
+| [Panel de acciones](DASHBOARD.md) | Google o contraseña de la misma identidad, estadísticas, limpieza mensual y acciones locales sin backend. |
 | [Referencias de GIFs y stickers](GIFS-STICKERS-ESCRITORIO.md) | Revisión de envío, cuadrículas y visor de stickers en computadora. |
 | [GIFs y stickers](GIPHY-Y-KLIPY.md) | GIFs con GIPHY y stickers con KLIPY; configuración y cuotas. |
 | [Móvil y proveedores](SEGUIMIENTO-MOVIL-Y-PROVEEDORES.md) | Envíos consecutivos, teclado, emojis, actualización manual y claves de GIFs. |
@@ -193,7 +193,7 @@ Nexus-Chat/
 | Estabilidad | Comportamiento |
 | --- | --- |
 | Actualizaciones | Descarga manual con bytes medidos, pausa, guardado local y continuación. Aviso persistente en móvil y computadora; también accesible desde Ajustes → Chats. |
-| Limpieza mensual | Plan activable desde el [dashboard](DASHBOARD.md), con revisión previa y aviso de tres días. Requiere el panel abierto; conserva cuentas, perfiles y grupos. No se activa hasta que el propietario lo elija. |
+| Limpieza mensual | Plan activable desde el [dashboard](DASHBOARD.md), con revisión previa y aviso visible únicamente en los tres días anteriores. Requiere el panel abierto; conserva cuentas, perfiles y grupos. No se activa hasta que el propietario lo elija. |
 | Rendimiento | Las ondas de audio se calculan al acercarse a la pantalla; los audios inactivos evitan renders en cada avance de reproducción. |
 | GIF y stickers | Búsquedas con tiempo de espera; favoritos locales con recuperación de registros válidos. |
 
@@ -229,3 +229,7 @@ Estados disponibles en Novedades, sin barra ni gesto de despliegue dentro de Cha
 Audio de una sola escucha: la apertura se registra mediante una transacción en el registro privado del destinatario. Al abrir se consume, incluso si después se interrumpe la reproducción. La interfaz excluye estos audios de reproducción automática, biblioteca, descarga y reenvío. Es un control de la aplicación: no impide grabaciones externas ni extracción de datos por un cliente modificado; no borra automáticamente el archivo del almacenamiento. Los últimos seis stickers enviados se conservan localmente para responder a estados.
 
 Corrección de voz móvil: captura del gesto sobre el pie del chat que permanece montado, candado a la derecha y panel independiente con dos filas. La vista previa se genera como WAV PCM mono a 22,05 kHz para evitar fragmentos de contenedor incompletos al pausar; también se utiliza para enviar cuando hay muestras disponibles. Se comprueban toque nativo, señal de audio decodificable y avance de reproducción, además de las pruebas de interfaz.
+
+## Nexus AI renovado
+
+Interfaz propia con propuestas, conversación, búsqueda, emojis y creación de imágenes mediante órdenes en español. Visor y descarga de imágenes, historial local y acciones de detener o borrar. No se muestran marcas de los servicios de IA en su interfaz ni en el ajuste de transcripciones. La configuración local incorpora `pollinationsKey` y, opcionalmente, `pollinationsModel`; la plantilla publicada está vacía.

@@ -27,3 +27,5 @@ No se recarga durante una llamada, grabación o edición pendiente. Se verifica 
 ## Limpieza mensual
 
 El plan mensual puede activarse desde `/dashboard.html`, limitado a la cuenta de Google autorizada. Se ejecuta en el navegador mientras el panel esté abierto; no existe un proceso de servidor ni una ejecución desde GitHub. Incluye revisión previa, confirmación manual y aviso de tres días. Consulta [DASHBOARD.md](DASHBOARD.md).
+
+Actualización del panel: acceso alternativo por contraseña en la misma cuenta administradora, sesión separada para no interferir con Nexus, estadísticas del contenido conservado y actividad identificada desde la actualización. Los avisos de limpieza se limitan a la ventana de tres días, sin controles permanentes en la interfaz principal.

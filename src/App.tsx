@@ -1,3 +1,4 @@
+import {recordVisit} from './features/visitActivity';
 import PermissionReview from './features/PermissionReview';
 import MaintenanceNotice from './features/MaintenanceNotice';
 import {useDesktopWeb} from './features/useDesktopWeb';
@@ -74,6 +75,7 @@ export default function App() {
   const [showHub,setShowHub] = useState(false);
   useEffect(()=>{if(!currentUser)return;const ping=()=>{if(document.visibilityState==='visible'){void touchGuestActivity(currentUser.uid,!!auth.currentUser?.isAnonymous,currentUser.lastActiveAt||0).catch(()=>{});void flushMediaDeletions().catch(()=>{});}};ping();const timer=setInterval(ping,3600000);document.addEventListener('visibilitychange',ping);return()=>{clearInterval(timer);document.removeEventListener('visibilitychange',ping);};},[currentUser?.uid]);
   usePresence(currentUser);
+  useEffect(()=>{if(currentUser)void recordVisit(currentUser.uid).catch(()=>{});},[currentUser?.uid]);
   // Global lists
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [chats, setChats] = useState<Chat[]>([]);
