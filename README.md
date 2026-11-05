@@ -264,3 +264,10 @@ En **Configuración → Pantalla completa** se puede ocultar la interfaz del nav
 El indicador de mensajes temporales conserva su diseño circular anterior en la lista de chats.
 
 La documentación complementaria está organizada en [docs/INDICE.md](docs/INDICE.md); el README principal describe el estado vigente del proyecto.
+
+### Barras de audio y escritura
+
+| Interfaz | Comportamiento |
+| --- | --- |
+| Reproductor fuera del chat | Pausa o reproducción a la izquierda, foto y nombre del remitente en el centro, cierre a la derecha y progreso real del audio en el borde inferior. Tocar el remitente vuelve a la conversación. |
+| Barra móvil de mensajes | Campo en forma de cápsula con expresiones, adjuntos y cámara; botón de micrófono o envío separado. Conserva el tema de Nexus y los gestos de grabación. |

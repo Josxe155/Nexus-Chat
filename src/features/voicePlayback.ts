@@ -14,7 +14,7 @@ function player(){if(audio)return audio;audio=new Audio();audio.preload='metadat
  audio.onplay=()=>{emit({playing:true,error:''});window.dispatchEvent(new CustomEvent('nexus:audio-start',{detail:'global-voice'}));};
  audio.onpause=()=>{if(audio!.paused){remember();emit({playing:false});}};
  audio.onerror=()=>emit({playing:false,error:'No se pudo reproducir el audio. Vuelve a intentarlo.'});
- audio.onended=()=>{if(state.track)positions.delete(state.track.key);const next=queue.shift();if(next&&next.uid===session&&(!next.expiresAt||next.expiresAt>Date.now()))void playVoice(next,queue);else emit({playing:false,time:0});};
+ audio.onended=()=>{if(state.track)positions.delete(state.track.key);const next=queue.shift();if(next&&next.uid===session&&(!next.expiresAt||next.expiresAt>Date.now()))void playVoice(next,queue);else{queue=[];emit({track:null,playing:false,time:0,duration:0,error:''});}};
  window.addEventListener('nexus:audio-start',event=>{if((event as CustomEvent).detail!=='global-voice')pauseVoice();});
  return audio;
 }
@@ -29,7 +29,7 @@ export async function playVoice(track:VoiceTrack,following:VoiceTrack[]=[]){
  if(state.track?.key!==track.key||state.track.src!==track.src){remember();node.pause();emit({track,playing:false,time:positions.get(track.key)||0,duration:0,error:''});node.src=track.src;}else emit({error:''});
  node.playbackRate=state.speed;try{await node.play();}catch{if(current===revision)emit({playing:false,error:'No se pudo iniciar el audio. Pulsa reproducir para reintentarlo.'});}
 }
-export function reportVoiceDuration(key:string,duration:number){if(state.track?.key===key&&Number.isFinite(duration)&&duration>0&&state.duration!==duration)emit({duration});}
+export function reportVoiceDuration(key:string,duration:number){const nativeDuration=audio&&Number.isFinite(audio.duration)&&audio.duration>0?audio.duration:0,value=nativeDuration||duration;if(state.track?.key===key&&Number.isFinite(value)&&value>0&&state.duration!==value)emit({duration:value});}
 export function seekVoice(time:number){if(audio&&Number.isFinite(time)&&state.duration>0){audio.currentTime=Math.max(0,Math.min(state.duration,time));emit({time:audio.currentTime});remember();}}
 export function speedVoice(){const speed=state.speed===1?1.5:state.speed===1.5?2:1;if(audio)audio.playbackRate=speed;emit({speed});}
 export async function toggleVoice(){if(!state.track)return;if(state.playing)pauseVoice();else await playVoice(state.track,queue);}
