@@ -233,3 +233,15 @@ Corrección de voz móvil: captura del gesto sobre el pie del chat que permanece
 ## Nexus AI renovado
 
 Interfaz propia con propuestas, conversación, búsqueda, emojis y creación de imágenes mediante órdenes en español. Visor y descarga de imágenes, historial local y acciones de detener o borrar. No se muestran marcas de los servicios de IA en su interfaz ni en el ajuste de transcripciones. La configuración local incorpora `pollinationsKey` y, opcionalmente, `pollinationsModel`; la plantilla publicada está vacía.
+
+### Ajustes de conversación y voz
+
+| Apartado | Comportamiento |
+| --- | --- |
+| Menú del chat | Iconos en opciones y submenús móviles; posición ajustada al espacio disponible. |
+| Presencia | Fechas de Firebase, reloj sincronizado y reconexión al recuperar la pestaña. Se respetan los ajustes de privacidad. |
+| Audios | Controles integrados en el color de la conversación, sin un segundo fondo. |
+| Nexus AI | Una barra de información, búsqueda, exportación y vaciado; entrada por voz, sin selector de emojis. |
+| Entrada por voz de IA | Graba con permiso de micrófono, procesa la voz y envía la consulta transcrita. La grabación no se guarda como archivo de chat. |
+| Canales | Categoría retirada de la navegación de escritorio y móvil; no se borran los datos existentes. |
+| Llamadas | Accesos a nueva llamada, programación y creación de enlace. |

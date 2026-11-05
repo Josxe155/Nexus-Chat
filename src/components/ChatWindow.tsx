@@ -1,3 +1,4 @@
+import useServerClock from '../features/useServerClock';
 import MobileChatComposer from '../features/MobileChatComposer';
 import {rememberRecentSticker} from '../features/stickerLibrary';
 import SingleListenAudio from '../features/SingleListenAudio';
@@ -143,10 +144,9 @@ export default function ChatWindow({
   const voiceTrack=(message:Message):VoiceTrack=>({key:currentUser.uid+':'+activeChat.id+':'+message.id,uid:currentUser.uid,chatId:activeChat.id,messageId:message.id,src:manualMedia[message.id]||resolvedMedia[message.id]||realtime?.media[message.transferId||'']||(!isPrivateMedia(message.fileUrl)?message.fileUrl||'':''),label:message.senderId===currentUser.uid?'Tú':users.find(user=>user.uid===message.senderId)?.nombre||'Contacto Nexus',photo:users.find(user=>user.uid===message.senderId)?.foto||(message.senderId===currentUser.uid?currentUser.foto:''),expiresAt:message.expiresAt});
   const followingVoice=(id:string)=>{const after=messages.slice(messages.findIndex(message=>message.id===id)+1),stop=after.findIndex(message=>message.type!=='audio'||!!message.deletedAt||!!message.fileName?.startsWith('nota-unica-'));return (stop<0?after:after.slice(0,stop)).map(voiceTrack).reduce<VoiceTrack[]>((list,track,index,tracks)=>{if(track.src&&tracks.slice(0,index).every(value=>!!value.src))list.push(track);return list;},[]);};
   useEffect(()=>{invalidateVoice(activeChat.id,new Set(messages.filter(message=>!message.deletedAt&&(!message.expiresAt||message.expiresAt>Date.now())).map(message=>message.id)),new Set(incomingMessages.map(message=>message.id)));},[activeChat.id,incomingMessages.map(message=>message.id+':'+message.deletedAt+':'+message.expiresAt).join('|')]);
-  const [showAppearance,setShowAppearance]=useState(false),[presenceNow,setPresenceNow]=useState(Date.now());
+  const [showAppearance,setShowAppearance]=useState(false);const presenceNow=useServerClock();
   const [clipboardMessage,setClipboardMessage]=useState<Message|null>(null);const chatRoot=useRef<HTMLDivElement>(null);
   const [imageViewer,setImageViewer]=useState<string|null>(null);
-  useEffect(()=>{const timer=setInterval(()=>setPresenceNow(Date.now()),1000);return()=>clearInterval(timer);},[]);
   useEffect(()=>{const clear=()=>{if(document.visibilityState!=='visible')setTypingStatus(false);};document.addEventListener('visibilitychange',clear);return()=>{document.removeEventListener('visibilitychange',clear);setTypingStatus(false);};},[activeChat.id]);
   const [showCamera,setShowCamera]=useState(false),[showContacts,setShowContacts]=useState(false),[contactSearch,setContactSearch]=useState(''),[audioOptions,setAudioOptions]=useState(false),[pendingFiles,setPendingFiles]=useState<File[]>([]),[fileBusy,setFileBusy]=useState(false);
   const uploadKind=useRef<'document'|'media'|'audio'>('document');
@@ -445,7 +445,7 @@ export default function ChatWindow({
               {activeChat.kind==='channel'?'Canal':activeChat.participants.length===1?'Envía mensajes a este mismo usuario':activeChat.kind==='group' ? `${activeChat.participants.length} miembros` : otherUser?.online ? (
                 (activeChat.typing?.[otherUser.uid]||0)>presenceNow ? (
                   <span className="text-indigo-400 font-medium animate-pulse">escribiendo...</span>
-                ) : 'En línea'
+                ) : 'en línea'
               ) : otherUser?.lastSeen ? (
                 lastSeenLabel(otherUser.lastSeen,presenceNow,!desktopWeb)
               ) : ''}
@@ -815,5 +815,3 @@ export default function ChatWindow({
     </>
   );
 }
-
-
