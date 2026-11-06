@@ -34,3 +34,5 @@ El [README principal](../README.md) describe las funciones y el modelo de seguri
 | [REVISION REFERENCIAS WHATSAPP](REVISION-REFERENCIAS-WHATSAPP.md) | Guía o revisión del proyecto. |
 | [REVISION](REVISION.md) | Guía o revisión del proyecto. |
 | [SEGUIMIENTO MOVIL Y PROVEEDORES](SEGUIMIENTO-MOVIL-Y-PROVEEDORES.md) | Guía o revisión del proyecto. |
+
+- [Historial de interfaz](HISTORIAL-INTERFAZ.md): revisiones anteriores y notas de implementación.

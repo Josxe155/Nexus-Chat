@@ -12,7 +12,8 @@
     "dev:web": "vite --port=3000 --host=0.0.0.0",
     "build:hosting": "node scripts/build-hosting.cjs",
     "setup": "node scripts/setup-services.cjs",
-    "postinstall": "node scripts/setup-services.cjs"
+    "postinstall": "node scripts/setup-services.cjs",
+    "check:docs": "node scripts/check-docs.cjs"
   },
   "dependencies": {
     "firebase": "^12.13.0",
