@@ -318,3 +318,15 @@ Las interfaces móviles mantienen sus controles propios. En pantallas de TV meno
 | Avisos | Tarjetas apiladas, abrir conversación, cierre, pausa al leer, privacidad de vista previa y prevención de duplicados. Diseño y duración mantenidos en notificationDesign.ts y su hoja de estilos. |
 
 Los avisos nativos requieren autorización del navegador. El sistema actual detecta mensajes mientras la página sigue ejecutándose; no existe un servicio conectado que garantice entrega push con el navegador cerrado. Los sonidos dependen del permiso de reproducción del navegador. No se añade un editor de diseño para usuarios.
+
+### Menús, selección y grabación de escritorio
+
+| Interfaz | Comportamiento |
+| --- | --- |
+| Clic derecho en el fondo del historial | Solo Seleccionar mensajes y Cerrar chat. No se extiende al encabezado ni al resto de la aplicación. |
+| Clic derecho en una burbuja | Opciones del mensaje concreto: información para propios, reporte para recibidos y consulta a Nexus AI para ambos. |
+| Selección | Casillas por mensaje, contador y barra inferior con copiar, conservar en destacados, eliminar, reenviar y descargar medios compatibles. Eliminar mantiene su confirmación. |
+| Escritura | Cápsula única de escritorio con adjuntos, expresiones, texto y micrófono o envío. |
+| Grabación | Cápsula de ancho completo; nivel del micrófono, contador, pausa, preescucha con posición real, reanudación, eliminación y envío. La interfaz móvil se conserva separada. |
+
+Referencia funcional para seleccionar y reenviar varios mensajes: [Centro de ayuda oficial de WhatsApp](https://faq.whatsapp.com/887468535575482/?cms_platform=web). Las pruebas de grabación utilizaron micrófono simulado; la captura real depende del permiso y dispositivo del navegador.

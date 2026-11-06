@@ -71,3 +71,5 @@ import './layout-audit-polish.css';
 import './features/tv-experience.css';
 
 import './features/reaction-notice-polish.css';
+
+import './features/desktop-composer-reference.css';
