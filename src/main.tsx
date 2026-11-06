@@ -75,3 +75,5 @@ import './features/reaction-notice-polish.css';
 import './features/desktop-composer-reference.css';
 
 import './features/mobile-contact-info.css';
+
+import './features/mobile-voice-reference.css';

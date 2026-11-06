@@ -18,12 +18,3 @@ html:root[data-nexus-surface=workspace][data-nexus-mode][data-nexus-palette] .re
 .reference-voice-progress::-moz-range-thumb{width:5px;height:5px;border:0;border-radius:50%;background:#e9edef}
 .reference-voice-bar>small[role=alert]{grid-column:1/-1;grid-row:2;font-size:11px;text-align:center;line-height:1.4;padding:3px 8px 8px;color:#ffc0c5}
 .reference-voice-bar>button:focus-visible{outline:2px solid #e9edef;outline-offset:-2px}
-html:root[data-nexus-surface=workspace][data-nexus-mode][data-nexus-palette][data-nexus-web=messenger] .chat-composer .messenger-compose{align-items:flex-end;gap:7px;width:100%;min-width:0}
-html:root[data-nexus-surface=workspace][data-nexus-mode][data-nexus-palette][data-nexus-web=messenger] .chat-composer .messenger-input-pill{align-items:center;gap:3px;min-height:48px;padding:3px 8px;border-radius:28px!important;background:var(--nx-field,#20282b)!important;border:0!important;box-shadow:none!important}
-.messenger-input-pill>button{flex:none;border-radius:50%;color:var(--nx-muted);background:transparent!important}
-.messenger-input-pill>button>svg{display:block;width:24px;height:24px;stroke-width:1.9}
-.messenger-input-pill>textarea{caret-color:var(--nx-accent);font-family:inherit}
-.messenger-input-pill>textarea::placeholder{color:var(--nx-muted);opacity:1}
-html:root[data-nexus-surface=workspace][data-nexus-mode][data-nexus-palette][data-nexus-web=messenger] .chat-composer .messenger-send{display:grid;place-items:center;align-self:flex-end;width:48px;height:48px;min-width:48px;padding:0;border:0!important;border-radius:50%!important;background:var(--nx-accent)!important;color:var(--nx-accent-ink)!important;box-shadow:none!important}
-.messenger-send>svg{display:block;width:24px;height:24px;stroke-width:2.3}
-.messenger-send:disabled{opacity:.55}

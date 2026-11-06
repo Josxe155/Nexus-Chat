@@ -1,5 +1,5 @@
 import DesktopBackgroundMenu from '../features/DesktopBackgroundMenu';
-import DesktopChatComposer from '../features/DesktopChatComposer';import DesktopSelectionBar from '../features/DesktopSelectionBar';import {CircleX} from 'lucide-react';
+import DesktopChatComposer from '../features/DesktopChatComposer';import DesktopSelectionBar from '../features/DesktopSelectionBar';import {Ban,CircleX} from 'lucide-react';
 import DesktopMessageActions from '../features/DesktopMessageActions';
 import useServerClock from '../features/useServerClock';
 import MobileChatComposer from '../features/MobileChatComposer';
@@ -584,7 +584,7 @@ export default function ChatWindow({
                   className={`flex flex-col group/msg ${isMine ? 'items-end' : 'items-start'}`}
                 >
                   {desktopWeb&&(selectingMessages||selectedIds.length>0)&&<input className="desktop-message-checkbox" type="checkbox" aria-label={'Seleccionar mensaje '+msg.id} checked={selectedIds.includes(msg.id)} onClick={e=>e.stopPropagation()} onChange={()=>toggleSelection(msg.id)}/>}
-                  <div data-kind={msg.type} data-reactions={!!hasReaction} data-mine={isMine} className="message-bubble max-w-[88%] sm:max-w-[80%] xl:max-w-[70%] min-w-0 relative leading-tight">
+                  <div data-kind={msg.type} data-deleted={isDeleted} data-reactions={!!hasReaction} data-mine={isMine} className="message-bubble max-w-[88%] sm:max-w-[80%] xl:max-w-[70%] min-w-0 relative leading-tight">
                     
                     {!desktopWeb&&!isDeleted && (
                       <div className={`hover-reactions absolute top-[-30px] z-20 flex items-center gap-1 bg-white dark:bg-[#233138] border dark:border-gray-700 p-0.5 rounded-full shadow-md opacity-0 group-hover/msg:opacity-100 transition-opacity duration-200 delay-100 ${isMine ? 'right-0' : 'left-0'}`}>
@@ -620,7 +620,7 @@ export default function ChatWindow({
                       <div className="message-text-body text-sm break-words pr-8">{(activeChat.kind==='group'&&msg.senderId!==currentUser.uid)&&<small className="group-sender">{activeChat.aliases?.[msg.senderId]||users.find(u=>u.uid===msg.senderId)?.nombre||'Miembro'}</small>}{msg.forwarded&&<small className="forwarded-label"><Forward size={13}/>{(msg.forwardCount||0)>=5?'Reenviado muchas veces':'Reenviado'}</small>}
                         
                         {msg.type === 'text' && (
-                          <span className={isDeleted ? 'italic text-gray-400 opacity-60' : ''}><RichText text={msg.content}/></span>
+                          isDeleted&&!desktopWeb?<span className="deleted-message-label"><Ban aria-hidden="true"/><i>{isMine?'Eliminaste este mensaje.':'Se eliminó este mensaje.'}</i></span>:<span className={isDeleted ? 'italic text-gray-400 opacity-60' : ''}><RichText text={msg.content}/></span>
                         )}
 
                         

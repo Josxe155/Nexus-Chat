@@ -1,0 +1,89 @@
+/* Mobile/tablet voice controls, kept separate from the desktop recorder. */
+html:root[data-nexus-web=messenger][data-nexus-surface=workspace][data-nexus-mode][data-nexus-palette] .nexus-chat-window{background-image:var(--nexus-wallpaper)!important;background-size:var(--nexus-wallpaper-size);background-repeat:var(--nexus-wallpaper-repeat);background-position:center;background-color:var(--nx-base)!important}
+html:root[data-nexus-web=messenger][data-nexus-surface=workspace][data-nexus-mode][data-nexus-palette] :is(.chat-history,.chat-composer){background:transparent!important;border:0!important;box-shadow:none!important}
+html:root[data-nexus-web=messenger][data-nexus-surface=workspace][data-nexus-mode][data-nexus-palette] .chat-composer{padding:4px 8px max(4px,env(safe-area-inset-bottom))!important}
+html:root[data-nexus-web=messenger][data-nexus-surface=workspace][data-nexus-mode][data-nexus-palette] .messenger-compose{display:flex;align-items:flex-end;gap:7px;min-width:0;width:100%}
+html:root[data-nexus-web=messenger][data-nexus-surface=workspace][data-nexus-mode][data-nexus-palette] .messenger-input-pill{display:flex;align-items:center;flex:1;min-width:0;min-height:46px;padding:3px 9px;gap:4px;border-radius:28px!important;background:#202b30!important;border:0!important;box-shadow:none!important;color:#89979c}
+html:root[data-nexus-web=messenger][data-nexus-surface=workspace][data-nexus-mode][data-nexus-palette] .messenger-input-pill>textarea{flex:1;min-width:0;min-height:30px;max-height:120px;padding:4px 0!important;margin:0;line-height:24px;font-size:18px;resize:none;background:transparent!important;color:var(--nx-text)!important;border:0!important;outline:0;box-shadow:none!important;caret-color:#00c663}
+html[data-nexus-web=messenger] .messenger-input-pill>textarea::placeholder{color:#89979c;opacity:1}
+html[data-nexus-web=messenger] .messenger-input-pill>button{display:grid;place-items:center;width:32px;height:36px;min-width:32px;flex:none;padding:3px;background:transparent!important;border:0;color:#89979c;border-radius:50%}
+html[data-nexus-web=messenger] .messenger-input-pill>button>svg{width:25px;height:25px;stroke-width:2}
+html:root[data-nexus-web=messenger][data-nexus-surface=workspace][data-nexus-mode][data-nexus-palette] .messenger-send{display:grid;place-items:center;flex:none;align-self:flex-end;width:46px;height:46px;min-width:46px;padding:0;border:0!important;border-radius:50%!important;background:#00c663!important;color:#06251c!important;box-shadow:none!important;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+html[data-nexus-web=messenger] .messenger-send>svg{width:26px;height:26px;stroke-width:2.6}
+html[data-nexus-web=messenger] .messenger-send:disabled{opacity:.5}
+html:root[data-nexus-web=messenger][data-nexus-surface=workspace][data-nexus-mode][data-nexus-palette] .mobile-voice-reference{display:block!important;position:relative;width:100%;max-width:100%;box-sizing:border-box;min-height:0;flex:none;padding:15px 11px 16px!important;border:0;border-radius:28px 28px 0 0;background:#11191e!important;color:#f1f4f5;overflow:visible;touch-action:none}
+html[data-nexus-web=messenger] .mobile-voice-reference[data-held=true]{padding:0!important;border-radius:28px;background:transparent!important}
+html[data-nexus-web=messenger] .mobile-held-line{display:flex;align-items:center;gap:8px;height:46px;padding:0 76px 0 18px;background:#202b30;border-radius:28px;color:#89979c;min-width:0;overflow:hidden}
+html[data-nexus-web=messenger] .mobile-held-line>svg{width:15px;height:19px;color:#ff4c72;flex:none;animation:voice-mic-pulse 1s ease-in-out infinite}
+html[data-nexus-web=messenger] .mobile-held-line time{font-size:20px;line-height:28px;font-variant-numeric:tabular-nums;flex:none}
+html[data-nexus-web=messenger] .mobile-held-line>span{display:flex;align-items:center;justify-content:center;gap:4px;flex:1;white-space:nowrap;font-size:12px;transform:translateX(calc(-1 * var(--voice-cancel-drag,0px)));opacity:calc(1 - var(--voice-cancel-drag,0px)/100px)}
+html[data-nexus-web=messenger] .mobile-held-button{position:absolute;right:-8px;bottom:-4px;width:78px;height:78px;border-radius:50%;display:grid;place-items:center;background:#00c663;color:#06251c;pointer-events:none;animation:voice-hold-in .16s ease-out}
+html[data-nexus-web=messenger] .mobile-held-button svg{width:39px;height:39px;stroke-width:2.8}
+html[data-nexus-web=messenger] .mobile-lock-rail{position:absolute;bottom:48px;right:5px;width:51px;height:126px;padding:19px 0 34px;border-radius:32px 32px 0 0;display:flex;flex-direction:column;align-items:center;justify-content:space-between;background:#11191e;color:#e9edef;pointer-events:none;transform:translateY(calc(-.35 * var(--voice-lock-drag,0px)))}
+html[data-nexus-web=messenger] .mobile-lock-rail>svg:first-child{width:21px;height:21px;fill:currentColor}
+html[data-nexus-web=messenger] .mobile-record-top{display:flex;align-items:center;gap:12px;height:48px;margin:0 4px 13px;min-width:0}
+html[data-nexus-web=messenger] .mobile-record-top>time{font-size:21px;font-variant-numeric:tabular-nums;flex:none}
+html[data-nexus-web=messenger] .mobile-record-top>.record-live-wave{display:flex;align-items:center;justify-content:space-between;flex:1;min-width:0;max-width:95px;margin-left:auto;height:32px;gap:2px;overflow:hidden}
+html[data-nexus-web=messenger] .mobile-record-top .record-live-wave i{display:block;flex:1;min-width:0;max-width:3px;background:#869499;border-radius:3px}
+html[data-nexus-web=messenger] .mobile-record-top>.voice-once{position:relative;display:grid;place-items:center;flex:none;width:34px;height:36px;margin-left:13px;background:transparent!important;border:0;color:#f1f4f5;padding:0;border-radius:50%}
+html[data-nexus-web=messenger] .voice-once b{position:absolute;inset:0;display:grid;place-items:center;font-size:18px;font-weight:500}
+html[data-nexus-web=messenger] .voice-once[aria-pressed=true]{color:#00c663}
+html[data-nexus-web=messenger] .mobile-record-bottom{display:grid;grid-template-columns:49px minmax(0,1fr) 49px;align-items:center;gap:8px}
+html[data-nexus-web=messenger] .mobile-record-bottom>button{display:flex;align-items:center;justify-content:center;gap:11px;width:100%;height:49px;padding:0;border:0;border-radius:50%;background:#361525;color:#ff4070}
+html[data-nexus-web=messenger] .mobile-record-bottom>button>svg{width:23px;height:23px;stroke-width:2.5}
+html[data-nexus-web=messenger] .mobile-record-bottom>.mobile-record-pause{border-radius:28px;background:#2a3135;color:#f1f4f5;font-size:17px;font-weight:600}
+html[data-nexus-web=messenger] .mobile-record-pause[data-paused=true]{background:#003b30;color:#c6f8cd}
+html[data-nexus-web=messenger] .mobile-record-bottom>.voice-send{height:49px!important;width:49px!important;border-radius:50%!important;background:#00c663!important;color:#06251c!important}
+html[data-nexus-web=messenger] .mobile-record-bottom>button:disabled{opacity:.45}
+html:root[data-nexus-web=messenger][data-nexus-surface=workspace][data-nexus-mode][data-nexus-palette] .message-bubble[data-kind=audio]{position:relative;width:min(294px,calc(100vw - 48px));max-width:92%!important;min-width:0;padding:0!important;border-radius:14px!important}
+html:root[data-nexus-web=messenger][data-nexus-surface=workspace][data-nexus-mode][data-nexus-palette] .message-bubble[data-kind=audio]>.message-content{padding:6px 10px!important;min-height:0;border-radius:14px!important}
+html[data-nexus-web=messenger] .message-bubble[data-kind=audio] .message-text-body{padding:0!important;min-width:0}
+html[data-nexus-web=messenger] .message-bubble[data-kind=audio] .voice-transcription:empty{display:none}
+html[data-nexus-web=messenger] .message-bubble[data-kind=audio] .message-actions{opacity:0;pointer-events:none}
+html[data-nexus-web=messenger] .message-bubble[data-kind=audio] .message-actions:focus-within{opacity:1;pointer-events:auto}
+html[data-nexus-web=messenger] .message-bubble[data-kind=audio] .message-metadata{position:absolute;right:9px;bottom:5px;min-height:14px;padding:0!important;line-height:14px;gap:3px}
+html[data-nexus-web=messenger] .message-bubble[data-kind=audio] .message-metadata>span{font-size:11px}
+html:root[data-nexus-web=messenger][data-nexus-surface=workspace][data-nexus-mode][data-nexus-palette] .nexus-voice-player{position:relative;display:grid;grid-template-columns:44px 28px minmax(0,1fr)!important;gap:8px;width:274px;max-width:100%;min-width:0;min-height:46px;padding:0!important;background:transparent!important;box-shadow:none!important;align-items:center;color:inherit}
+html[data-nexus-web=messenger] .nexus-voice-player>.voice-avatar{grid-column:1;grid-row:1;width:44px;height:44px;margin:0}
+html[data-nexus-web=messenger] .voice-avatar img{width:44px!important;height:44px!important}
+html[data-nexus-web=messenger] .voice-avatar>svg{right:-2px;bottom:0;width:15px;height:19px;background:transparent;filter:drop-shadow(1px 0 var(--nx-own)) drop-shadow(-1px 0 var(--nx-own))}
+html[data-nexus-web=messenger] .nexus-voice-player>.voice-play{grid-column:2;grid-row:1;display:grid;place-items:center;width:28px;min-width:0;min-height:34px;padding:0;border:0;color:inherit;background:transparent!important}
+html[data-nexus-web=messenger] .voice-play svg{width:25px;height:25px}
+html[data-nexus-web=messenger] .nexus-voice-player>.voice-track{grid-column:3;grid-row:1;position:relative;display:block;align-self:center;min-width:0;padding:0}
+html[data-nexus-web=messenger] .voice-track>.voice-waveform{display:flex;align-items:center;justify-content:space-between;gap:1px;width:100%;height:30px;box-sizing:border-box;padding:0 6px;overflow:hidden}
+html[data-nexus-web=messenger] .voice-waveform i{flex:1;min-width:0;max-width:3px;border-radius:3px}
+html:root[data-nexus-web=messenger][data-nexus-surface=workspace][data-nexus-mode][data-nexus-palette] .voice-track>input[type=range]{position:absolute;inset:0 auto auto 0!important;box-sizing:border-box;width:100%!important;max-width:100%;height:30px!important;margin:0!important;padding:0!important;appearance:none;-webkit-appearance:none;background:transparent!important;opacity:1;direction:ltr;touch-action:pan-x}
+html[data-nexus-web=messenger] .voice-track>input::-webkit-slider-runnable-track{height:2px;background:transparent}
+html[data-nexus-web=messenger] .voice-track>input::-webkit-slider-thumb{appearance:none;width:12px;height:12px;border-radius:50%;margin-top:-5px;background:#00c663;box-shadow:none}
+html[data-nexus-web=messenger] .voice-track>input::-moz-range-track{height:2px;background:transparent}
+html[data-nexus-web=messenger] .voice-track>input::-moz-range-thumb{width:12px;height:12px;border:0;border-radius:50%;background:#00c663}
+html[data-nexus-web=messenger] .voice-track>small{display:block;margin:0;line-height:14px;font-size:11px;font-variant-numeric:tabular-nums}
+html[data-nexus-web=messenger] .nexus-voice-player>.voice-speed{display:none}
+html[data-nexus-web=messenger] .nexus-voice-player[data-active=true]>.voice-avatar{visibility:hidden}
+html[data-nexus-web=messenger] .nexus-voice-player[data-active=true]>.voice-speed{display:grid;grid-column:1;grid-row:1;place-items:center;width:44px;min-width:44px;height:30px;min-height:30px;border-radius:18px;background:#0003;font-size:14px;font-weight:600;color:inherit;padding:0}
+html:root[data-nexus-web=messenger][data-nexus-surface=workspace][data-nexus-mode][data-nexus-palette] .mobile-record-top>.nexus-voice-player{flex:1;width:0;max-width:none;min-height:36px;grid-template-columns:28px minmax(0,1fr)!important;gap:15px}
+html[data-nexus-web=messenger] .mobile-record-top .voice-avatar,html[data-nexus-web=messenger] .mobile-record-top .voice-speed{display:none!important}
+html[data-nexus-web=messenger] .mobile-record-top .voice-play{grid-column:1}
+html[data-nexus-web=messenger] .mobile-record-top .voice-track{grid-column:2;display:grid;grid-template-columns:minmax(0,1fr) 42px;gap:12px;align-items:center}
+html[data-nexus-web=messenger] .mobile-record-top .voice-waveform{grid-column:1;grid-row:1;height:32px}
+html:root[data-nexus-web=messenger][data-nexus-surface=workspace][data-nexus-mode][data-nexus-palette] .mobile-record-top .voice-track>input[type=range]{width:calc(100% - 54px)!important;height:32px!important}
+html[data-nexus-web=messenger] .mobile-record-top .voice-track>small{grid-column:2;grid-row:1;font-size:20px;line-height:32px;text-align:right}
+html[data-nexus-web=messenger] .deleted-message-label{display:inline-flex;align-items:center;gap:6px;color:inherit;opacity:.65;font-size:16px;line-height:22px}
+html[data-nexus-web=messenger] .deleted-message-label>svg{width:20px;height:20px;flex:none}
+html[data-nexus-web=messenger] .message-bubble[data-deleted=true] .message-text-body{padding-right:0!important}
+html:root[data-nexus-web=messenger][data-nexus-surface=workspace][data-nexus-mode][data-nexus-palette] .message-bubble[data-deleted=true]{padding:0!important;min-width:0;border-radius:12px!important}
+html:root[data-nexus-web=messenger][data-nexus-surface=workspace][data-nexus-mode][data-nexus-palette] .message-bubble[data-deleted=true] .message-content{display:flex;align-items:flex-end;gap:10px;padding:7px 10px!important}
+html[data-nexus-web=messenger] .message-bubble[data-deleted=true] .message-metadata{position:static;float:none;padding:0!important;white-space:nowrap;flex:none}
+html[data-nexus-web=messenger] .mobile-voice-reference>p[role=alert]{position:absolute;bottom:calc(100% + 8px);left:0;right:0;background:#202b30;color:#ffc0cd;padding:12px;border-radius:12px;font-size:13px}
+@keyframes voice-hold-in{from{scale:.65}to{scale:1}}
+@keyframes voice-mic-pulse{50%{opacity:.25}}
+html[data-nexus-web=messenger] .mobile-voice-reference[data-state=cancelling]{pointer-events:none}
+html[data-nexus-web=messenger] .mobile-voice-reference[data-state=cancelling] :is(.mobile-held-button,.mobile-lock-rail,.mobile-record-bottom){animation:voice-discard .2s ease-in forwards}
+html[data-nexus-web=messenger] .mobile-voice-reference[data-state=cancelling] .mobile-held-line>span{visibility:hidden}
+html[data-nexus-web=messenger] .mobile-voice-reference .voice-cancel-trash{animation:voice-trash-drop .2s ease-in forwards}
+@keyframes voice-discard{to{scale:.5;opacity:0}}
+@keyframes voice-trash-drop{to{transform:translateY(12px) rotate(-15deg);opacity:0}}
+@media(prefers-reduced-motion:reduce){html[data-nexus-web=messenger] :is(.mobile-held-button,.mobile-held-line>svg){animation:none}}
+@media(prefers-reduced-motion:reduce){html[data-nexus-web=messenger] .mobile-voice-reference[data-state=cancelling] *{animation:none!important}}
+@media(prefers-reduced-motion:no-preference){html[data-nexus-web=messenger] .mobile-record-pause{transition:background .18s,color .18s}html[data-nexus-web=messenger] .mobile-record-top{animation:nexus-mobile-panel .16s ease-out}}
+html[data-nexus-web=messenger][data-nexus-mode=light] .messenger-input-pill{background:#fff!important}

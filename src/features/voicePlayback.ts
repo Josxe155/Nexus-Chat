@@ -19,7 +19,7 @@ function player(){if(audio)return audio;audio=new Audio();audio.preload='metadat
  return audio;
 }
 export function setVoiceSession(uid:string){if(uid!==session){resetVoicePlayback();session=uid;}}
-export function pauseVoice(){audio?.pause();}
+export function pauseVoice(){revision++;audio?.pause();}
 export function resetVoicePlayback(){revision++;queue=[];positions.clear();audio?.pause();if(audio){audio.removeAttribute('src');audio.load();}session='';emit({track:null,playing:false,time:0,duration:0,speed:1,error:''});}
 export function closeVoice(){revision++;remember();queue=[];audio?.pause();if(audio){audio.removeAttribute('src');audio.load();}emit({track:null,playing:false,time:0,duration:0,error:''});}
 export async function playVoice(track:VoiceTrack,following:VoiceTrack[]=[]){
