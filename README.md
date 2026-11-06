@@ -307,3 +307,14 @@ Las comprobaciones emplean datos simulados y varios tamaños de navegador; no su
 Las interfaces móviles mantienen sus controles propios. En pantallas de TV menores de 1024 píxeles se usa la distribución compacta. Cámara, micrófono, compartir archivos y otras capacidades dependen del navegador. No se ha probado un televisor físico.
 
 **Límites de las acciones:** Conservar guarda el mensaje en tus destacados personales; no evita la caducidad ni la limpieza mensual. Guardar como, Compartir y Abrir con aparecen en mensajes multimedia compatibles, sin permitir exportar notas de una sola escucha. Abrir con abre el archivo en una pestaña para que el navegador lo gestione; no puede elegir una aplicación del sistema. Reportar utiliza el informe de la conversación existente.
+
+### Burbujas, reacciones y avisos
+
+| Apartado | Actualización |
+| --- | --- |
+| Mensajes de escritorio | Burbujas ajustadas al texto, hora compacta y reacciones sin ensanchar el mensaje. |
+| Reacciones | Panel anclado con recuentos, filtros y retirada de tu reacción; menús y selectores con animación que respeta el movimiento reducido. |
+| Sonidos | Tono original de envío separado del aviso de recepción. Los mensajes del chat abierto también pueden sonar; se respetan silencios y preferencias existentes. |
+| Avisos | Tarjetas apiladas, abrir conversación, cierre, pausa al leer, privacidad de vista previa y prevención de duplicados. Diseño y duración mantenidos en notificationDesign.ts y su hoja de estilos. |
+
+Los avisos nativos requieren autorización del navegador. El sistema actual detecta mensajes mientras la página sigue ejecutándose; no existe un servicio conectado que garantice entrega push con el navegador cerrado. Los sonidos dependen del permiso de reproducción del navegador. No se añade un editor de diseño para usuarios.

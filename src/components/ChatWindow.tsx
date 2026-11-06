@@ -172,7 +172,7 @@ export default function ChatWindow({
   const [translation,setTranslation]=useState<string|null>(null);
   const [showWriting,setShowWriting]=useState(false);
   const [showFormatting,setShowFormatting]=useState(false);
-  const [reactionTarget,setReactionTarget]=useState<string|null>(null),[reactionInfo,setReactionInfo]=useState<string|null>(null);
+  const [reactionTarget,setReactionTarget]=useState<string|null>(null),[reactionInfo,setReactionInfo]=useState<string|null>(null);const [reactionAt,setReactionAt]=useState({x:0,y:0});
   const [searchKind,setSearchKind]=useState('all'),[searchDate,setSearchDate]=useState(''),[showLocation,setShowLocation]=useState(false);
   const [captions,setCaptions]=useState<Map<File,string>>(()=>new Map());
   useEffect(()=>{setCaptions(previous=>new Map([...previous].filter(([file])=>pendingFiles.includes(file))));},[pendingFiles]);
@@ -580,7 +580,7 @@ export default function ChatWindow({
                   id={`message-${msg.id}`} data-run={index>0&&messageGroups[dateStr][index-1].senderId===msg.senderId?'same':'first'} data-selected={selectedIds.includes(msg.id)} onContextMenu={event=>{event.preventDefault();event.stopPropagation();openMenu(msg,event.clientX,event.clientY);}} onPointerDown={event=>beginGesture(event,msg)} onPointerMove={moveGesture} onPointerUp={event=>endGesture(event,msg)} onPointerCancel={event=>{if(gesture.current)clearTimeout(gesture.current.timer);gesture.current=undefined;event.currentTarget.style.transform='';}} onClick={event=>{if(ignoreMessageClick.current===msg.id){ignoreMessageClick.current=null;event.preventDefault();event.stopPropagation();return;}if((selectedIds.length||selectingMessages)&&!(event.target as HTMLElement).closest('button,a,input,video,audio'))toggleSelection(msg.id);}}
                   className={`flex flex-col group/msg ${isMine ? 'items-end' : 'items-start'}`}
                 >
-                  <div data-mine={isMine} className="message-bubble max-w-[88%] sm:max-w-[80%] xl:max-w-[70%] min-w-0 relative leading-tight">
+                  <div data-kind={msg.type} data-reactions={!!hasReaction} data-mine={isMine} className="message-bubble max-w-[88%] sm:max-w-[80%] xl:max-w-[70%] min-w-0 relative leading-tight">
                     
                     {!desktopWeb&&!isDeleted && (
                       <div className={`hover-reactions absolute top-[-30px] z-20 flex items-center gap-1 bg-white dark:bg-[#233138] border dark:border-gray-700 p-0.5 rounded-full shadow-md opacity-0 group-hover/msg:opacity-100 transition-opacity duration-200 delay-100 ${isMine ? 'right-0' : 'left-0'}`}>
@@ -613,7 +613,7 @@ export default function ChatWindow({
                         </div>
                       )}
 
-                      <div className="text-sm break-words pr-8">{(activeChat.kind==='group'&&msg.senderId!==currentUser.uid)&&<small className="group-sender">{activeChat.aliases?.[msg.senderId]||users.find(u=>u.uid===msg.senderId)?.nombre||'Miembro'}</small>}{msg.forwarded&&<small className="forwarded-label"><Forward size={13}/>{(msg.forwardCount||0)>=5?'Reenviado muchas veces':'Reenviado'}</small>}
+                      <div className="message-text-body text-sm break-words pr-8">{(activeChat.kind==='group'&&msg.senderId!==currentUser.uid)&&<small className="group-sender">{activeChat.aliases?.[msg.senderId]||users.find(u=>u.uid===msg.senderId)?.nombre||'Miembro'}</small>}{msg.forwarded&&<small className="forwarded-label"><Forward size={13}/>{(msg.forwardCount||0)>=5?'Reenviado muchas veces':'Reenviado'}</small>}
                         
                         {msg.type === 'text' && (
                           <span className={isDeleted ? 'italic text-gray-400 opacity-60' : ''}><RichText text={msg.content}/></span>
@@ -631,7 +631,7 @@ export default function ChatWindow({
 
                       </div>
 
-                      <div className="flex items-center justify-end gap-1 select-none pt-1">
+                      <div className="message-metadata flex items-center justify-end gap-1 select-none pt-1">
                         {starred&&<Star size={11} className="starred-indicator"/>}{msg.localState==='failed'&&msg.localError&&<span className="outbox-error-reason" role="alert">{msg.localError}</span>}{msg.localState==='failed'&&<button onClick={()=>retryMessage(msg.id).catch(error=>setUploadError(error.message))} className="retry-message">Reintentar</button>}
                         {msg.edited && (
                           <span className={`text-[9px] uppercase tracking-wider opacity-60 font-semibold pr-1`}>editado</span>
@@ -667,7 +667,7 @@ export default function ChatWindow({
                     </div>
 
                     {desktopWeb&&!isDeleted&&<DesktopMessageActions kept={starred} message={msg} mine={isMine} open={openMessageId===msg.id} at={menuAt} pinned={messagePinned(msg,activeChat)} canPin={(activeChat.kind!=='group'&&activeChat.kind!=='channel')||(activeChat.kind==='group'&&!!activeChat.membersCanEdit)||!!activeChat.admins?.includes(currentUser.uid)} canEdit={isMine&&!msg.sealed&&msg.type==='text'&&!msg.localState&&Date.now()-(msg.serverSentAt?.toMillis?.()||msg.timestamp)<=15*60*1000} media={!!msg.fileUrl&&!msg.fileName?.startsWith('nota-unica-')} onOpen={(x,y)=>openMenu(msg,x,y)} onClose={()=>setOpenMessageId(null)} onReact={emoji=>handleReactionClick(msg.id,emoji)} onAction={action=>{if(action==='reply')setReplyTarget(msg);else if(action==='copy'){if(['image','sticker'].includes(msg.type)&&mediaURL)void copyPicture(mediaURL);else copyText([msg]);}else if(action==='forward')setForwarding([msg]);else if(action==='pin'){if(messagePinned(msg,activeChat))void setMessagePin(activeChat.id,msg.id,0).catch(e=>setUploadError(e.message));else setPinTarget(msg);}else if(action==='info')setInformation(msg);else if(action==='edit'){setEditingTarget(msg);setEditingText(msg.content);}else if(action==='select')setSelectedIds([msg.id]);else if(action==='delete')setDeleting([msg]);else if(action==='report')setReporting(true);else if(action==='ai'){const quote={sender:users.find(person=>person.uid===msg.senderId)?.nombre||(isMine?currentUser.nombre:'Contacto'),content:msg.content||msg.fileName||'Mensaje',chatId:activeChat.id,messageId:msg.id};try{sessionStorage.setItem('nexus-ai-quote:'+currentUser.uid,JSON.stringify(quote));}catch{}window.dispatchEvent(new CustomEvent('nexus:navigate',{detail:'assistant'}));window.dispatchEvent(new CustomEvent('nexus:ai-quote',{detail:quote}));}else if(action==='keep'){void star([msg]).catch(e=>setUploadError(e.message));}else if(action==='save'){if(msg.fileUrl&&!msg.fileName?.startsWith('nota-unica-'))void downloadMedia(msg.fileUrl,msg.fileName||'mensaje',msg.fileSize).catch(e=>setUploadError(e.message));else{const url=URL.createObjectURL(new Blob([msg.content],{type:'text/plain;charset=utf-8'})),a=document.createElement('a');a.href=url;a.download='mensaje-nexus.txt';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}}else if(action==='share'){const data={text:msg.content||msg.fileName||'Mensaje de Nexus'};if(navigator.share)void navigator.share(data).catch(e=>{if(e.name!=='AbortError')setUploadError('No se pudo compartir el mensaje.');});else copyText([msg]);}else if(action==='open'&&mediaURL)window.open(mediaURL,'_blank','noopener,noreferrer');}}/>}
-                    {hasReaction&&<button className="message-reaction-summary" aria-label="Ver reacciones del mensaje" onClick={()=>setReactionInfo(msg.id)}>{[...new Set(Object.values(msg.reactions||{}))].slice(0,3).map(emoji=><span key={emoji}>{emoji}</span>)}{Object.keys(msg.reactions||{}).length>1&&<small>{Object.keys(msg.reactions||{}).length}</small>}</button>}
+                    {hasReaction&&<button className="message-reaction-summary" aria-label="Ver reacciones del mensaje" onClick={event=>{const rect=event.currentTarget.getBoundingClientRect();setReactionAt({x:rect.left,y:rect.bottom+8});setReactionInfo(msg.id);}}>{[...new Set(Object.values(msg.reactions||{}))].slice(0,3).map(emoji=><span key={emoji}>{emoji}</span>)}{Object.keys(msg.reactions||{}).length>1&&<small>{Object.keys(msg.reactions||{}).length}</small>}</button>}
 
                   </div>
                 </div>
@@ -787,7 +787,7 @@ export default function ChatWindow({
         </div>}
       </>}</footer>:<div className="readonly-channel">Solo los administradores pueden publicar en este espacio.</div>}
       {showAppearance&&<div className="feature-backdrop"><section className="feature-dialog" role="dialog" aria-label="Personalizar chat"><button className="dialog-close" aria-label="Cerrar personalización" onClick={()=>setShowAppearance(false)}><X/></button><h2>Estilo de este chat</h2><AppearancePanel uid={currentUser.uid} chatId={activeChat.id}/></section></div>}
-      {reactionInfo&&messages.find(message=>message.id===reactionInfo)&&<ReactionDetails message={messages.find(message=>message.id===reactionInfo)!} user={currentUser} users={users} onRemove={emoji=>handleReactionClick(reactionInfo,emoji)} onClose={()=>setReactionInfo(null)}/>}
+      {reactionInfo&&messages.find(message=>message.id===reactionInfo)&&<ReactionDetails at={reactionAt} message={messages.find(message=>message.id===reactionInfo)!} user={currentUser} users={users} onRemove={emoji=>handleReactionClick(reactionInfo,emoji)} onClose={()=>setReactionInfo(null)}/>}
       {reactionTarget&&<div className="reaction-picker-wrap"><EmojiPicker onClose={()=>setReactionTarget(null)} onSelect={emoji=>{handleReactionClick(reactionTarget,emoji).catch(()=>setUploadError('No se pudo guardar la reacción.'));setReactionTarget(null);}}/></div>}
       {reporting&&<ConversationReport chat={activeChat} user={currentUser} messages={messages} onClose={()=>setReporting(false)}/>}
       {showGroupSettings&&<GroupSettings key={groupSection} initialSection={groupSection} chat={activeChat} messages={messages} user={currentUser} users={users} onClose={()=>setShowGroupSettings(false)}/>}
