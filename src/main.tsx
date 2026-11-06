@@ -73,3 +73,5 @@ import './features/tv-experience.css';
 import './features/reaction-notice-polish.css';
 
 import './features/desktop-composer-reference.css';
+
+import './features/mobile-contact-info.css';

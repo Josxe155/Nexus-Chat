@@ -36,3 +36,4 @@ El [README principal](../README.md) describe las funciones y el modelo de seguri
 | [SEGUIMIENTO MOVIL Y PROVEEDORES](SEGUIMIENTO-MOVIL-Y-PROVEEDORES.md) | Guía o revisión del proyecto. |
 
 - [Historial de interfaz](HISTORIAL-INTERFAZ.md): revisiones anteriores y notas de implementación.
+- [Actualización móvil del 6 de noviembre](ACTUALIZACION-MOVIL-2026-11-06.md): contacto, identidad y avance estimado.

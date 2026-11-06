@@ -1,3 +1,4 @@
+import ChooseUsername,{needsUsernameSelection} from './features/ChooseUsername';
 import {recordVisit} from './features/visitActivity';
 import PermissionReview from './features/PermissionReview';
 import MaintenanceNotice from './features/MaintenanceNotice';
@@ -142,7 +143,7 @@ export default function App() {
         
         if (userDoc.exists()) {
           const privateDoc = await getDoc(doc(db,'users',firebaseUser.uid,'private','profile'));
-          const uData = {...userDoc.data(),...(privateDoc.exists()?privateDoc.data():{})} as UserProfile;
+          const uData = {...userDoc.data(),...(privateDoc.exists()?privateDoc.data():{}),username:userDoc.data().username,usernameChangedAt:userDoc.data().usernameChangedAt} as UserProfile;
           const privacyDoc=await getDoc(doc(db,'users',firebaseUser.uid,'private','privacy'));
           if(!live||revision!==authRevision)return;
           const own={...uData,uid:firebaseUser.uid,privacy:normalizePrivacy(privacyDoc.exists()?privacyDoc.data():uData.privacy)};
@@ -187,7 +188,7 @@ export default function App() {
     return () => unsubscribe();
   }, [currentUser?.uid]);
 
-  useEffect(()=>{if(!currentUser)return;const stops=[onSnapshot(doc(db,'users',currentUser.uid,'private','profile'),snap=>{if(snap.exists())setCurrentUser(previous=>previous?{...previous,...snap.data()}:previous);},()=>{}),onSnapshot(doc(db,'users',currentUser.uid,'private','privacy'),snap=>{if(snap.exists())setCurrentUser(previous=>previous?{...previous,privacy:{...snap.data(),schemaVersion:2}}:previous);},()=>{})];return()=>stops.forEach(stop=>stop());},[currentUser?.uid]);
+  useEffect(()=>{if(!currentUser)return;const stops=[onSnapshot(doc(db,'users',currentUser.uid),snap=>{if(snap.exists())setCurrentUser(previous=>previous?{...previous,username:snap.data().username,usernameChangedAt:snap.data().usernameChangedAt,usernameProvisional:snap.data().usernameProvisional}:previous);},()=>{}),onSnapshot(doc(db,'users',currentUser.uid,'private','profile'),snap=>{if(snap.exists())setCurrentUser(previous=>previous?{...previous,...snap.data(),username:previous.username,usernameChangedAt:previous.usernameChangedAt}:previous);},()=>{}),onSnapshot(doc(db,'users',currentUser.uid,'private','privacy'),snap=>{if(snap.exists())setCurrentUser(previous=>previous?{...previous,privacy:{...snap.data(),schemaVersion:2}}:previous);},()=>{})];return()=>stops.forEach(stop=>stop());},[currentUser?.uid]);
   // 5. Real-time Listeners: Chat rooms where currentUser is participant
   useEffect(() => {
     if (!currentUser) return;

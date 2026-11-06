@@ -48,7 +48,8 @@ export default function AuthScreen({ onAuthSuccess, theme, onToggleTheme }: Auth
       } : {
         uid: firebaseUser.uid,
         nombre: finalName,
-        username: username,
+        username: registration?.username||username,
+        usernameProvisional: !registration&&!firebaseUser.isAnonymous,
         foto: '',
         bio: '',
         estado: 'Disponible',
@@ -61,7 +62,7 @@ export default function AuthScreen({ onAuthSuccess, theme, onToggleTheme }: Auth
       if(!userDoc.exists())Object.assign(userData,{isGuest:firebaseUser.isAnonymous,lastActiveAt:Date.now()});
       if(userDoc.exists()){if(firebaseUser.isAnonymous&&customName)await setDoc(userRef,{nombre:customName},{merge:true});}else{const batch=writeBatch(db);batch.set(userRef,userData);batch.set(doc(db,'users',firebaseUser.uid,'private','profile'),{nombre:finalName,username,foto:finalFoto,bio:'¡Hola! Estoy usando Nexus Chat.'});batch.set(doc(db,'usernames',username),{uid:firebaseUser.uid});try{await batch.commit();}catch(error:any){if(error.code!=='permission-denied')throw error;let legacy=false;try{await getDoc(doc(db,'usernames',username));}catch(check:any){legacy=check.code==='permission-denied';}if(!legacy)throw error;const compatible=writeBatch(db);compatible.set(userRef,userData);compatible.set(doc(db,'users',firebaseUser.uid,'private','profile'),{nombre:finalName,username,foto:finalFoto,bio:'¡Hola! Estoy usando Nexus Chat.'});await compatible.commit();}}
       const privateProfile=await getDoc(doc(db,'users',firebaseUser.uid,'private','profile'));
-      const profile={...userData,...(privateProfile.exists()?privateProfile.data():{})} as any;try{onAuthSuccess(await migrateOwnProfile(profile));}catch(error:any){if(error.code!=='permission-denied')throw error;console.warn('Las nuevas opciones de privacidad requieren publicar las reglas actualizadas.');onAuthSuccess(profile);}
+      const profile={...userData,...(privateProfile.exists()?privateProfile.data():{}),username:userData.username,usernameChangedAt:userDoc.exists()?userDoc.data().usernameChangedAt:undefined} as any;try{onAuthSuccess(await migrateOwnProfile(profile));}catch(error:any){if(error.code!=='permission-denied')throw error;console.warn('Las nuevas opciones de privacidad requieren publicar las reglas actualizadas.');onAuthSuccess(profile);}
     } catch (err: any) {
       console.error("Error writing user to db", err);
       setError(err?.code?authErrorMessage(err):err.message||'No se pudo preparar tu perfil.');

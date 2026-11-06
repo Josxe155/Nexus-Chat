@@ -11,6 +11,8 @@ export interface UserProfile {
   uid: string;
   nombre: string;
   username: string;
+  usernameProvisional?: boolean;
+  usernameChangedAt?: number | {toMillis:()=>number};
   foto: string;
   bio: string;
   estado: string;

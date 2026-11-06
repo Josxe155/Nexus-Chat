@@ -251,3 +251,12 @@ En el fondo del historial, el clic derecho permite seleccionar mensajes o cerrar
 | Comprobaciones | Tipos, compilación y enlaces locales de documentación mediante GitHub. Las pruebas visuales usan datos ficticios y micrófono simulado. |
 
 [Historial de revisiones de interfaz](docs/HISTORIAL-INTERFAZ.md) · [Índice de documentación](docs/INDICE.md)
+
+## Avance estimado por dispositivo
+
+| Versión | Estimación de parecido y funcionamiento | Cambios de esta entrega |
+| --- | --- | --- |
+| Móvil y tablet | **58 %** (antes 55 %) | Información de contacto, identidad, número reactivo y usuario manual con espera de 30 días. |
+| Computadora | **65 %** | Sin rediseño de escritorio en esta entrega; las reglas de identidad son compartidas. |
+
+Las cifras son orientativas y subjetivas; no representan cobertura de pruebas ni una equivalencia certificada con WhatsApp. [Detalle de la actualización móvil](docs/ACTUALIZACION-MOVIL-2026-11-06.md).
