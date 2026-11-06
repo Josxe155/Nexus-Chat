@@ -1,0 +1,7 @@
+@font-face{font-family:NexusEmoji;src:url('/emoji/NotoEmoji.ttf') format('truetype');font-display:swap;font-weight:400}
+html:root .expression-picker .emoji-grid button,html:root .expression-picker .nx-web-emoji-grid button{font-family:'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',NexusEmoji,sans-serif!important;font-weight:400;font-style:normal;letter-spacing:0}
+html:root .expression-picker .emoji-category-icons button{font-family:inherit!important;flex:none;display:grid;place-items:center;min-width:30px;min-height:34px}
+.emoji-category-icons{overflow-x:auto;scrollbar-width:thin;flex-wrap:nowrap!important;min-width:0;max-width:100%}
+.expression-picker .emoji-loading,.expression-picker .emoji-error{padding:14px;line-height:1.5;font-size:13px;color:var(--nx-muted,#aebac1)}
+.expression-picker .emoji-error button{display:block;margin-top:10px;padding:9px 14px;border-radius:18px;border:1px solid var(--nx-border,#ffffff25);color:var(--nx-text,#e9edef);background:var(--nx-field,#202c33)}
+.expression-picker button:focus-visible{outline:2px solid var(--nx-accent,#21c063);outline-offset:-2px}

@@ -1,0 +1,10 @@
+/* Full-height mobile forms cannot be centered inside a padded backdrop. */
+html:root[data-nexus-web=messenger] .feature-backdrop:has(>.poll-create-dialog){padding:0!important}
+html:root[data-nexus-web=messenger][data-nexus-surface=workspace][data-nexus-mode][data-nexus-palette] .poll-create-dialog{margin:0!important;width:100vw!important;max-width:100vw!important;box-sizing:border-box}
+html:root[data-nexus-web=messenger][data-nexus-surface=workspace][data-nexus-mode][data-nexus-palette] .poll-create-dialog>.poll-submit{padding:0!important;display:grid!important;place-items:center;min-height:52px!important;line-height:1}
+.poll-create-dialog>.poll-submit>svg{display:block;width:24px;height:24px;flex:none}
+/* Keep event actions reachable when a desktop window has little vertical space. */
+html:root .nx-web-modal.nx-web-event{min-height:min(580px,calc(100dvh - 36px));max-height:calc(100dvh - 36px);min-width:0;box-sizing:border-box}
+/* Preserve the square photo in portrait, and fit the action row in landscape. */
+html:root .profile-quick-overlay:not(.profile-photo-expanded) .profile-quick-card{max-height:calc(100dvh - 40px);overflow-y:auto}
+html:root .profile-quick-overlay:not(.profile-photo-expanded) .profile-quick-card .profile-quick-photo{max-height:max(60px,calc(100dvh - 124px))}

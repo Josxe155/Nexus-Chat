@@ -7,7 +7,7 @@ import {useMobileBack} from './useMobileBack';
 import {copyText} from './copyText';
 import PhoneField,{internationalPhone} from './PhoneField';import ContactEditor from './ContactEditor';
 import AccessibilitySettings,{useExperience,saveExperience} from './DeviceExperience';import ChatLists from './ChatLists';import StorageData from './StorageData';import {List,Palette,HardDrive,Accessibility,Link as LinkIcon,Users,Phone} from 'lucide-react';
-import React,{useState,useEffect} from 'react';
+import React,{useState,useEffect,useRef} from 'react';
 import {ArrowLeft,ChevronRight,User,Shield,KeyRound,MessageCircle,Video,Bell,HelpCircle,LogOut,Camera,Check,Download,Pencil} from 'lucide-react';
 import {doc,setDoc,getDocs,collection,query,where,runTransaction,writeBatch} from 'firebase/firestore';
 import {signOut,GoogleAuthProvider,EmailAuthProvider,reauthenticateWithPopup,reauthenticateWithCredential} from 'firebase/auth';
@@ -22,7 +22,7 @@ const durations=[[0,'Desactivados'],[86400000,'24 horas'],[604800000,'7 días'],
 export function Toggle({label,description,value,onChange,disabled=false}:{label:string;description?:string;value:boolean;onChange:(value:boolean)=>void;disabled?:boolean}){return <label className="setting-toggle"><span><strong>{label}</strong>{description&&<small>{description}</small>}</span><input type="checkbox" role="switch" checked={value} disabled={disabled} onChange={event=>onChange(event.target.checked)}/></label>;}
 export default function SettingsCenter({user,users,chats,desktop=false,onUserChange,onLogout,onExit,initialSection=''}:{user:UserProfile;users:UserProfile[];chats:Chat[];desktop?:boolean;onUserChange:(user:UserProfile)=>void;onLogout:()=>void;onExit:()=>void;initialSection?:string}){
  const [contactEditor,setContactEditor]=useState(false),[phoneNumber,setPhoneNumber]=useState((user as any).phone||''),[phoneCountry,setPhoneCountry]=useState('OTHER');
- const deviceExperience=useExperience();
+ const actionLock=useRef(false);const deviceExperience=useExperience();
  const [profileEditing,setProfileEditing]=useState<'name'|'username'|'bio'|'photo'|null>(null);
  useMobileBack(profileEditing!==null,()=>setProfileEditing(null),45);
  const [stack,setStack]=useState<string[]>(initialSection?[initialSection==='listCreate'?'lists':initialSection==='security'?'account':initialSection==='statusPrivacy'?'privacy':initialSection,...(initialSection==='security'?['security']:initialSection==='statusPrivacy'?['audience']:[])]:[]),[error,setError]=useState(''),[notice,setNotice]=useState(''),[busy,setBusy]=useState(false);
@@ -31,7 +31,7 @@ export default function SettingsCenter({user,users,chats,desktop=false,onUserCha
  const preferences=usePreferences(user.uid),page=stack.at(-1)||'',urls=useMediaURLs([{id:'profile',fileUrl:photo,fileSize:1,force:true}],user.uid),[preview,setPreview]=useState('');
  useEffect(()=>{if(!photoFile){setPreview('');return;}const url=URL.createObjectURL(photoFile);setPreview(url);return()=>URL.revokeObjectURL(url);},[photoFile]);
  useEffect(()=>{const listener=()=>setPush(pushEnabled(user.uid));window.addEventListener('nexus:push-state',listener);return()=>window.removeEventListener('nexus:push-state',listener);},[user.uid]);
- const perform=async(action:()=>Promise<any>,message='Cambios guardados.')=>{setBusy(true);setError('');setNotice('');try{await action();if(message)setNotice(message);}catch(error){setError(error instanceof Error?error.message:'No se pudo guardar. Inténtalo de nuevo.');}finally{setBusy(false);}};
+ const perform=async(action:()=>Promise<any>,message='Cambios guardados.')=>{if(actionLock.current)return;actionLock.current=true;setBusy(true);setError('');setNotice('');try{await action();if(message)setNotice(message);}catch(error){setError(error instanceof Error?error.message:'No se pudo guardar. Inténtalo de nuevo.');}finally{actionLock.current=false;setBusy(false);}};
  const go=(next:string)=>{window.dispatchEvent(new Event('nexus:stop-preview'));setProfileEditing(null);setStack(previous=>[...previous,next]);setError('');setNotice('');};const back=()=>{setProfileEditing(null);window.dispatchEvent(new Event('nexus:stop-preview'));if(stack.length)setStack(previous=>previous.slice(0,-1));else onExit();setError('');setNotice('');};
  useMobileBack(!desktop&&stack.length>0,back,30);
  const updatePrivacy=(patch:Partial<PrivacyOptions>)=>perform(async()=>{const next={...privacy,...patch};const updated=await savePrivacy(user,next);setPrivacy(next);onUserChange(updated);});

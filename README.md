@@ -283,3 +283,13 @@ La documentación complementaria está organizada en [docs/INDICE.md](docs/INDIC
 | Acciones del dashboard | Protección contra doble clic y ciclos automáticos repetidos; validación de fechas y detención si otra pestaña pausa o reprograma el plan. |
 
 Una sesión que ya ha cargado la versión vigente no muestra una actualización pendiente ficticia. Una sesión antigua detecta la publicación al volver a primer plano o durante la comprobación periódica. La pantalla completa depende de la API del navegador y no instala una aplicación. No se ejecutó ninguna limpieza de producción durante esta revisión.
+
+### Correcciones de recuadros y emojis
+
+- Selectores de emojis: nueve categorías, búsqueda por varias palabras, reintento de carga, historial tolerante a almacenamiento lleno o corrupto y botones que no envían formularios al seleccionar.
+- Encuestas, eventos, perfiles, contactos y adjuntos: límites de altura, desplazamiento y controles adaptados a ventanas pequeñas y orientación horizontal.
+- Llamadas e historial: paneles excluyentes, prevención de acciones duplicadas, errores visibles y copia de enlaces con alternativa compatible.
+- Estados: los medios privados esperan su URL antes de intentar reproducirse.
+- Nexus AI: visor con cierre por Escape o retroceso móvil, foco controlado y referencias de imagen actualizadas.
+
+Las comprobaciones emplean datos simulados y varios tamaños de navegador; no sustituyen una prueba de llamadas entre dispositivos físicos ni garantizan ausencia de todo error en cualquier navegador.
