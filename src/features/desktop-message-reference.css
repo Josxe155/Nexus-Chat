@@ -1,0 +1,20 @@
+html[data-nexus-web=desktop] .message-bubble>.hover-reactions{display:none!important}
+.desktop-message-chevron{position:absolute;right:3px;top:3px;padding:2px;border:0;background:transparent;color:inherit;opacity:0;z-index:3;display:grid;place-items:center;border-radius:4px}
+.desktop-message-react{position:absolute;top:50%;transform:translateY(-50%);right:-36px;width:28px;height:28px;padding:3px;border:0;border-radius:50%;background:var(--nx-field,#242626);color:var(--nx-muted,#a0a4a6);opacity:0;display:grid;place-items:center}
+.message-bubble[data-mine=true]>.desktop-message-react{right:auto;left:-36px}
+.message-bubble:hover>.desktop-message-chevron,.message-bubble:focus-within>.desktop-message-chevron,.message-bubble:hover>.desktop-message-react,.message-bubble:focus-within>.desktop-message-react{opacity:1}
+.desktop-message-scrim{position:fixed;inset:0;z-index:31000;background:transparent;border:0;padding:0}
+.desktop-message-popover{position:fixed;z-index:31001;max-width:calc(100vw - 16px);max-height:calc(100dvh - 16px);overflow:auto;overscroll-behavior:contain;color:var(--nx-text,#e9edef)}
+.desktop-quick-reactions{display:flex;align-items:center;gap:2px;width:max-content;max-width:100%;padding:5px 6px;border:1px solid var(--nx-border,#333);border-radius:28px;background:var(--nx-base,#161717);margin:0 0 6px;box-shadow:0 4px 16px #0003}
+.desktop-quick-reactions>button{width:32px;height:32px;display:grid;place-items:center;border:0;border-radius:50%;background:transparent;color:inherit;font-size:21px;font-family:'Apple Color Emoji','Segoe UI Emoji',NexusEmoji,sans-serif;padding:2px}
+.desktop-quick-reactions>button:hover{background:var(--nx-selected,#333)}
+.desktop-reference-message-menu{width:212px;padding:7px;border:1px solid var(--nx-border,#333);border-radius:17px;background:var(--nx-base,#161717);box-shadow:0 5px 22px #0004}
+.desktop-reference-message-menu>button{display:flex;align-items:center;gap:14px;width:100%;min-height:36px;padding:9px 10px;text-align:left;color:inherit;background:transparent;border:0;border-radius:6px;font-size:13px}
+.desktop-reference-message-menu>button:hover,.desktop-reference-message-menu>button:focus-visible{background:var(--nx-selected,#303232)}
+.desktop-reference-message-menu svg{flex:none}.desktop-reference-message-menu hr{border:0;border-top:1px solid var(--nx-border,#333);margin:5px 3px}
+.desktop-reaction-catalog{width:min(392px,calc(100vw - 16px));height:min(340px,calc(100dvh - 16px))}.desktop-reaction-catalog>.expression-picker{position:relative!important;inset:auto!important;width:100%!important;height:100%!important;max-height:100%!important;box-sizing:border-box}.desktop-reaction-catalog .nx-web-expression-tabs{display:none!important}.desktop-reaction-catalog .nx-web-emoji-grid{grid-template-columns:repeat(8,minmax(0,1fr))!important}
+.desktop-message-popover>p{padding:9px;border-radius:10px;background:var(--nx-field,#242626);font-size:12px}
+
+.desktop-reference-message-menu>button:disabled{opacity:.4;cursor:default}.message-bubble:has(>.desktop-message-chevron) .message-content{padding-right:22px}
+
+[id^="message-"]:hover .desktop-message-react,[id^="message-"]:focus-within .desktop-message-react{opacity:1}

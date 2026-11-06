@@ -1,3 +1,4 @@
+import DesktopMessageActions from '../features/DesktopMessageActions';
 import useServerClock from '../features/useServerClock';
 import MobileChatComposer from '../features/MobileChatComposer';
 import {rememberRecentSticker} from '../features/stickerLibrary';
@@ -581,7 +582,7 @@ export default function ChatWindow({
                 >
                   <div data-mine={isMine} className="message-bubble max-w-[88%] sm:max-w-[80%] xl:max-w-[70%] min-w-0 relative leading-tight">
                     
-                    {!isDeleted && (
+                    {!desktopWeb&&!isDeleted && (
                       <div className={`hover-reactions absolute top-[-30px] z-20 flex items-center gap-1 bg-white dark:bg-[#233138] border dark:border-gray-700 p-0.5 rounded-full shadow-md opacity-0 group-hover/msg:opacity-100 transition-opacity duration-200 delay-100 ${isMine ? 'right-0' : 'left-0'}`}>
                         {['👍', '❤️', '😂', '😮', '😢', '🙏'].map(emoji => (
                           <button 
@@ -646,9 +647,9 @@ export default function ChatWindow({
                       </div>
 
                       {!isDeleted && (
-                        <div className="message-actions absolute right-1 top-1">
+                        <div className="message-actions absolute right-1 top-1" hidden={desktopWeb}>
                           <button aria-label="Opciones del mensaje" title="Opciones del mensaje" aria-expanded={openMessageId === msg.id} onClick={event=>{const rect=event.currentTarget.getBoundingClientRect();if(openMessageId===msg.id)setOpenMessageId(null);else openMenu(msg,rect.right-250,rect.bottom+5);}} className="message-menu-trigger"><MoreVertical size={16} /></button>
-                          {openMessageId === msg.id && <>
+                          {!desktopWeb && openMessageId === msg.id && <>
                             <FloatingMenu at={menuAt} onClose={()=>setOpenMessageId(null)}>
                               <div className="message-menu-emojis">{['👍','❤️','😂','😮','😢','🙏'].map(emoji => <button key={emoji} aria-label={`Reaccionar ${emoji}`} onClick={() => {handleReactionClick(msg.id,emoji);setOpenMessageId(null);}}>{emoji}</button>)}</div>
                               <button onClick={() => {setReplyTarget(msg);setOpenMessageId(null);}}><CornerUpLeft size={17} />Responder</button>
@@ -665,6 +666,7 @@ export default function ChatWindow({
 
                     </div>
 
+                    {desktopWeb&&!isDeleted&&<DesktopMessageActions kept={starred} message={msg} mine={isMine} open={openMessageId===msg.id} at={menuAt} pinned={messagePinned(msg,activeChat)} canPin={(activeChat.kind!=='group'&&activeChat.kind!=='channel')||(activeChat.kind==='group'&&!!activeChat.membersCanEdit)||!!activeChat.admins?.includes(currentUser.uid)} canEdit={isMine&&!msg.sealed&&msg.type==='text'&&!msg.localState&&Date.now()-(msg.serverSentAt?.toMillis?.()||msg.timestamp)<=15*60*1000} media={!!msg.fileUrl&&!msg.fileName?.startsWith('nota-unica-')} onOpen={(x,y)=>openMenu(msg,x,y)} onClose={()=>setOpenMessageId(null)} onReact={emoji=>handleReactionClick(msg.id,emoji)} onAction={action=>{if(action==='reply')setReplyTarget(msg);else if(action==='copy'){if(['image','sticker'].includes(msg.type)&&mediaURL)void copyPicture(mediaURL);else copyText([msg]);}else if(action==='forward')setForwarding([msg]);else if(action==='pin'){if(messagePinned(msg,activeChat))void setMessagePin(activeChat.id,msg.id,0).catch(e=>setUploadError(e.message));else setPinTarget(msg);}else if(action==='info')setInformation(msg);else if(action==='edit'){setEditingTarget(msg);setEditingText(msg.content);}else if(action==='select')setSelectedIds([msg.id]);else if(action==='delete')setDeleting([msg]);else if(action==='report')setReporting(true);else if(action==='ai'){const quote={sender:users.find(person=>person.uid===msg.senderId)?.nombre||(isMine?currentUser.nombre:'Contacto'),content:msg.content||msg.fileName||'Mensaje',chatId:activeChat.id,messageId:msg.id};try{sessionStorage.setItem('nexus-ai-quote:'+currentUser.uid,JSON.stringify(quote));}catch{}window.dispatchEvent(new CustomEvent('nexus:navigate',{detail:'assistant'}));window.dispatchEvent(new CustomEvent('nexus:ai-quote',{detail:quote}));}else if(action==='keep'){void star([msg]).catch(e=>setUploadError(e.message));}else if(action==='save'){if(msg.fileUrl&&!msg.fileName?.startsWith('nota-unica-'))void downloadMedia(msg.fileUrl,msg.fileName||'mensaje',msg.fileSize).catch(e=>setUploadError(e.message));else{const url=URL.createObjectURL(new Blob([msg.content],{type:'text/plain;charset=utf-8'})),a=document.createElement('a');a.href=url;a.download='mensaje-nexus.txt';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}}else if(action==='share'){const data={text:msg.content||msg.fileName||'Mensaje de Nexus'};if(navigator.share)void navigator.share(data).catch(e=>{if(e.name!=='AbortError')setUploadError('No se pudo compartir el mensaje.');});else copyText([msg]);}else if(action==='open'&&mediaURL)window.open(mediaURL,'_blank','noopener,noreferrer');}}/>}
                     {hasReaction&&<button className="message-reaction-summary" aria-label="Ver reacciones del mensaje" onClick={()=>setReactionInfo(msg.id)}>{[...new Set(Object.values(msg.reactions||{}))].slice(0,3).map(emoji=><span key={emoji}>{emoji}</span>)}{Object.keys(msg.reactions||{}).length>1&&<small>{Object.keys(msg.reactions||{}).length}</small>}</button>}
 
                   </div>

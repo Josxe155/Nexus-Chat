@@ -1,6 +1,7 @@
 import React from 'react';
 import {UserProfile,Chat,Message} from '../types';
 import MobileSidebar from './MobileSidebar';
+import {useDesktopWeb} from '../features/useDesktopWeb';
 export interface SidebarProps {
   latestMessages?:Record<string,Message>;
   currentUser: UserProfile;
@@ -19,4 +20,4 @@ export interface SidebarProps {
   onOpenHub?: () => void;
   onUserChange?: (user:UserProfile)=>void;
 }
-export default function Sidebar(props:SidebarProps){const [mobile,setMobile]=React.useState(()=>matchMedia('(max-width:1023px), (hover:none) and (max-width:1366px)').matches);React.useEffect(()=>{const q=matchMedia('(max-width:1023px), (hover:none) and (max-width:1366px)');const update=()=>setMobile(q.matches);q.addEventListener('change',update);return()=>q.removeEventListener('change',update);},[]);return mobile?<MobileSidebar {...props}/>:<MobileSidebar {...props} desktop/>;}
+export default function Sidebar(props:SidebarProps){const desktop=useDesktopWeb();return <MobileSidebar {...props} desktop={desktop}/>;}

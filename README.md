@@ -20,6 +20,7 @@ Una interfaz adaptable a móvil, tablet y computadora.
 [![Nexus AI](https://img.shields.io/badge/NEXUS%20AI-TEXTO%20%2B%20VOZ%20%2B%20IMAGEN-9272FF?style=for-the-badge)](#ajustes-de-conversación-y-voz)
 [![Archivos](https://img.shields.io/badge/ARCHIVOS-FOTOS%20%2B%20VIDEOS%20%2B%20DOCUMENTOS-3B82F6?style=for-the-badge)](#-el-proyecto)
 [![Dispositivos](https://img.shields.io/badge/DISE%C3%91O-M%C3%93VIL%20%2B%20TABLET%20%2B%20PC-06B6D4?style=for-the-badge)](docs/DISENO-RESPONSIVE.md)
+[![Televisión](https://img.shields.io/badge/TELEVISOR-MANDO%20%2B%20TECLADO-22C55E?style=for-the-badge)](#acciones-de-mensajes-y-pantallas-de-televisión)
 [![Actualización](https://img.shields.io/badge/ACTUALIZACI%C3%93N-MANUAL-F59E0B?style=for-the-badge)](#-comandos)
 [![Acceso](https://img.shields.io/badge/ACCESO-GOOGLE%20%2B%20CORREO-EA4335?style=for-the-badge&logo=google&logoColor=white)](#-configuración)
 [![Documentación](https://img.shields.io/badge/DOCUMENTACI%C3%93N-VER%20GU%C3%8DAS-64748B?style=for-the-badge&logo=readthedocs&logoColor=white)](docs/INDICE.md)
@@ -293,3 +294,16 @@ Una sesión que ya ha cargado la versión vigente no muestra una actualización 
 - Nexus AI: visor con cierre por Escape o retroceso móvil, foco controlado y referencias de imagen actualizadas.
 
 Las comprobaciones emplean datos simulados y varios tamaños de navegador; no sustituyen una prueba de llamadas entre dispositivos físicos ni garantizan ausencia de todo error en cualquier navegador.
+
+### Acciones de mensajes y pantallas de televisión
+
+| Apartado | Comportamiento |
+| --- | --- |
+| Mensajes de escritorio | Flecha dentro de la burbuja y reacción fuera: a la derecha en mensajes recibidos y a la izquierda en propios. Menús diferenciados con iconos, divisores, cierre exterior y Escape. |
+| Reacciones | Barra rápida y selector ampliado con categorías, búsqueda e historial reciente. Errores de guardado permiten reintentar. |
+| Consulta a Nexus AI | El mensaje recibido se cita con su remitente encima del campo de escritura. Puedes quitarlo o escribir tu consulta antes de enviarla. |
+| Televisores | Detección de navegadores de TV y opción en Ajustes → Chats → Pantalla de televisión. Controles amplios y navegación por flechas con foco visible. |
+
+Las interfaces móviles mantienen sus controles propios. En pantallas de TV menores de 1024 píxeles se usa la distribución compacta. Cámara, micrófono, compartir archivos y otras capacidades dependen del navegador. No se ha probado un televisor físico.
+
+**Límites de las acciones:** Conservar guarda el mensaje en tus destacados personales; no evita la caducidad ni la limpieza mensual. Guardar como, Compartir y Abrir con aparecen en mensajes multimedia compatibles, sin permitir exportar notas de una sola escucha. Abrir con abre el archivo en una pestaña para que el navegador lo gestione; no puede elegir una aplicación del sistema. Reportar utiliza el informe de la conversación existente.
