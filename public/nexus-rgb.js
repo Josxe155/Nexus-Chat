@@ -37,4 +37,11 @@
     if (event.repeat && (event.key === 'Enter' || event.key === ' ') &&
         event.target instanceof Element && event.target.closest(triggerSelector)) event.preventDefault();
   });
+
+  document.addEventListener('scroll', ({target}) => {
+    if (root.dataset.nexusRgb !== 'on' || !(target instanceof HTMLElement) ||
+        getComputedStyle(target).getPropertyValue('--nexus-rgb-surface') !== '1') return;
+    target.style.setProperty('--nexus-rgb-scroll-x', `${target.scrollLeft}px`);
+    target.style.setProperty('--nexus-rgb-scroll-y', `${target.scrollTop}px`);
+  }, {capture: true, passive: true});
 })();
