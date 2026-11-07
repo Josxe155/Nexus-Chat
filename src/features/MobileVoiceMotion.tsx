@@ -11,6 +11,6 @@ export function VoiceDiscardMotion(){
 export function MobileVoiceDiscardHost(){
  const host=useRef<HTMLSpanElement>(null),sequence=useRef(0),[motion,setMotion]=useState<number|null>(null);
  useEffect(()=>{const footer=host.current?.closest('.chat-composer');if(!footer)return;const discard=()=>{if(!window.matchMedia('(prefers-reduced-motion: reduce)').matches&&document.documentElement.dataset.motion!=='off')setMotion(++sequence.current);};footer.addEventListener('nexus:voice-discard',discard);return()=>footer.removeEventListener('nexus:voice-discard',discard);},[]);
- useEffect(()=>{if(!motion)return;const timer=setTimeout(()=>setMotion(null),900);return()=>clearTimeout(timer);},[motion]);
+ useEffect(()=>{if(!motion)return;const timer=setTimeout(()=>setMotion(null),1150);return()=>clearTimeout(timer);},[motion]);
  return <span ref={host} className="voice-discard-host" data-source={motion?'held':undefined} onAnimationEnd={event=>{if((event.target as Element).classList.contains('voice-discard-mic'))setMotion(null);}}>{motion&&<VoiceDiscardMotion key={motion}/>}</span>;
 }

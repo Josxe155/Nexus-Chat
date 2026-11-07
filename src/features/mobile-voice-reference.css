@@ -27,9 +27,8 @@ html[data-nexus-web=messenger] .voice-lock-shackle{transform-box:view-box;transf
 html[data-nexus-web=messenger] .voice-lock-icon[data-guided=false] .voice-lock-shackle{animation:voice-lock-hint 2.4s ease-in-out infinite}
 html[data-nexus-web=messenger] .mobile-record-top{display:flex;align-items:center;gap:12px;height:54px;margin:0 10px 12px;min-width:0}
 html[data-nexus-web=messenger] .mobile-record-top>time{font-size:21px;font-variant-numeric:tabular-nums;flex:none}
-html[data-nexus-web=messenger] .mobile-record-top>.record-live-wave{display:flex;align-items:center;justify-content:space-between;flex:1;min-width:0;max-width:52px;margin-left:auto;height:32px;gap:2px;overflow:hidden}
-html[data-nexus-web=messenger] .mobile-record-top .record-live-wave i{display:block;flex:1;min-width:0;max-width:3px;background:#869499;border-radius:3px}
-html[data-nexus-web=messenger] .mobile-record-top .record-live-wave i:nth-last-child(n+11){display:none}
+html[data-nexus-web=messenger] .mobile-record-top>.record-live-wave{display:grid;grid-template-rows:1fr;place-items:center;flex:1;min-width:0;max-width:62vw;margin-left:auto;height:32px;overflow:hidden}
+html[data-nexus-web=messenger] .mobile-record-top .record-live-wave i{display:block;grid-row:1;width:min(3px,65%);min-width:0;background:#869499;border-radius:3px}
 html[data-nexus-web=messenger] .mobile-record-top>.voice-once{position:relative;display:grid;place-items:center;flex:none;width:34px;height:36px;margin-left:13px;background:transparent!important;border:0;color:#f1f4f5;padding:0;border-radius:50%}
 html[data-nexus-web=messenger] .voice-once b{position:absolute;inset:0;display:grid;place-items:center;font-size:18px;font-weight:500}
 html[data-nexus-web=messenger] .voice-once[aria-pressed=true]{color:#00c663}
@@ -88,14 +87,22 @@ html[data-nexus-web=messenger] .mobile-voice-reference>p[role=alert]{position:ab
 html[data-nexus-web=messenger] .voice-discard-host{position:absolute;bottom:8px;left:10px;z-index:30;pointer-events:none}
 html[data-nexus-web=messenger] .voice-discard-host .voice-discard-motion{width:56px;height:61px}
 html[data-nexus-web=messenger] .chat-composer:has(.voice-discard-host .voice-discard-motion) .messenger-input-pill>button:first-child{opacity:0;pointer-events:none}
-html[data-nexus-web=messenger] .voice-discard-motion{position:absolute;left:0;bottom:0;pointer-events:none;color:#ff4b65;overflow:visible}
+html[data-nexus-web=messenger] .voice-discard-motion{--voice-discard-duration:1s;position:absolute;left:0;bottom:0;pointer-events:none;color:#ff4b65;overflow:visible}
 html[data-nexus-web=messenger] .voice-discard-motion>svg{display:block;width:100%;height:100%;overflow:visible}
-html[data-nexus-web=messenger] .voice-discard-mic{transform-origin:14px 55px;animation:voice-mic-into-bin .82s cubic-bezier(.3,0,.65,1) forwards}
-html[data-nexus-web=messenger] .voice-discard-bin{transform:translateX(-30px);animation:voice-bin-arrive .82s ease-out forwards}
-html[data-nexus-web=messenger] .voice-discard-lid{transform-origin:67px 85px;animation:voice-bin-lid .82s ease-in-out forwards}
-@keyframes voice-mic-into-bin{0%{transform:translate(0,26px);opacity:1}34%{transform:translate(17px,-29px) rotate(25deg)}65%{transform:translate(8px,28px) rotate(-12deg) scale(.7);opacity:1}80%,100%{transform:translate(8px,45px) scale(.2);opacity:0}}
-@keyframes voice-bin-arrive{0%{opacity:0;translate:0 12px}20%,85%{opacity:1;translate:0 0}100%{opacity:0;translate:0 8px}}
-@keyframes voice-bin-lid{0%{transform:none}25%,65%{transform:translate(-8px,-10px) rotate(30deg)}85%,100%{transform:none}}
+html[data-nexus-web=messenger] .voice-discard-mic{transform-origin:14px 55px;animation:voice-mic-into-bin var(--voice-discard-duration) linear forwards}
+html[data-nexus-web=messenger] .voice-discard-bin{transform:translateX(-30px);animation:voice-bin-arrive var(--voice-discard-duration) ease-out forwards}
+html[data-nexus-web=messenger] .voice-discard-lid{transform-origin:38px 85px;animation:voice-bin-lid var(--voice-discard-duration) ease-in-out forwards}
+@keyframes voice-mic-into-bin{
+ 0%{transform:translate(0,26px);opacity:1}
+ 17%{transform:translate(-6px,-21px) rotate(-15deg)}
+ 36%{transform:translate(18px,-83px) rotate(-27deg)}
+ 52%{transform:translate(55px,-69px) rotate(14deg)}
+ 67%{transform:translate(49px,-26px) rotate(32deg)}
+ 82%{transform:translate(12px,26px) rotate(8deg) scale(.68);opacity:1}
+ 93%,100%{transform:translate(8px,43px) scale(.22);opacity:0}
+}
+@keyframes voice-bin-arrive{0%{opacity:0;translate:0 12px}22%,92%{opacity:1;translate:0 0}100%{opacity:0;translate:0 8px}}
+@keyframes voice-bin-lid{0%{transform:none}27%,78%{transform:translate(-4px,-4px) rotate(-67deg)}94%,100%{transform:none}}
 @media(prefers-reduced-motion:reduce){html[data-nexus-web=messenger] :is(.mobile-held-button,.mobile-held-line>svg,.mobile-held-line>span,.voice-lock-shackle){animation:none!important}}
 html[data-nexus-web=messenger][data-motion=off] :is(.mobile-held-button,.mobile-held-line>svg,.mobile-held-line>span,.voice-lock-shackle){animation:none!important}
 html[data-nexus-web=messenger][data-nexus-mode=light] .messenger-input-pill{background:#fff!important}

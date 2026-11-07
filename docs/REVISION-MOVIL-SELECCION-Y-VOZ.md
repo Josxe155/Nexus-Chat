@@ -8,7 +8,8 @@ Se usan las capturas y el video lento entregados para esta revisión. Sus conver
 | --- | --- |
 | Grabación mantenida | El micrófono ampliado sigue un eje por vez. Se puede cambiar entre izquierda y arriba durante la misma pulsación. El candado se abre y se cierra lentamente en reposo y sigue el recorrido al deslizar hacia arriba. |
 | Toque corto | Conserva la grabación bloqueada, sin enviar un archivo vacío; también se comprueba un inicio lento del micrófono. |
-| Descartar | Durante la pulsación, deslizar a la izquierda anima el micrófono rojo y levanta la tapa del tacho hacia arriba y a la izquierda. El botón rojo de la grabación bloqueada elimina la nota al instante. |
+| Descartar | Durante la pulsación, deslizar a la izquierda lanza el micrófono rojo en un arco hacia el tacho. La tapa gira hacia arriba y a la izquierda. La secuencia dura un segundo. El botón rojo de la grabación bloqueada elimina la nota al instante. |
+| Onda en grabación bloqueada | Cada muestra nueva aparece a la derecha y empuja las anteriores hacia la izquierda. El espacio entre el contador y el control de una sola escucha se llena progresivamente. |
 | Seleccionar | Pulsación mantenida sobre la burbuja, franja verde completa, contador y barra superior. Se retira el menú móvil anterior de acciones dentro del mensaje. |
 | Reacciones | Barra adaptada al ancho del chat, acceso a más emojis y guardado de la reacción. Al seleccionar varios mensajes no se aplica una reacción colectiva accidentalmente. |
 | Mensaje propio | Responder, editar dentro del plazo, eliminar, reenviar, conservar cuando corresponde, Info., copiar y fijar. |
