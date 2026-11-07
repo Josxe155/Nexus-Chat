@@ -6,9 +6,9 @@ Se usan las capturas y el video lento entregados para esta revisión. Sus conver
 
 | Apartado | Resultado de esta revisión |
 | --- | --- |
-| Grabación mantenida | Micrófono ampliado, gesto de un solo eje y candado abierto que se cierra a medida que sube el dedo. |
+| Grabación mantenida | Micrófono ampliado con desplazamiento libre hacia la izquierda y hacia arriba. El candado se abre y se cierra lentamente mientras se mantiene el botón. Al deslizar hacia arriba, el dedo controla el cierre. |
 | Toque corto | Conserva la grabación bloqueada, sin enviar un archivo vacío; también se comprueba un inicio lento del micrófono. |
-| Descartar | Durante la pulsación, deslizar a la izquierda detiene la captura y anima el micrófono y el tacho. Eliminar desde la grabación bloqueada cierra el control al instante. |
+| Descartar | Durante la pulsación, deslizar a la izquierda anima el micrófono rojo y levanta la tapa del tacho hacia arriba y a la izquierda. El botón rojo de la grabación bloqueada elimina la nota al instante. |
 | Seleccionar | Pulsación mantenida sobre la burbuja, franja verde completa, contador y barra superior. Se retira el menú móvil anterior de acciones dentro del mensaje. |
 | Reacciones | Barra adaptada al ancho del chat, acceso a más emojis y guardado de la reacción. Al seleccionar varios mensajes no se aplica una reacción colectiva accidentalmente. |
 | Mensaje propio | Responder, editar dentro del plazo, eliminar, reenviar, conservar cuando corresponde, Info., copiar y fijar. |
@@ -21,6 +21,7 @@ Se usan las capturas y el video lento entregados para esta revisión. Sus conver
 - No se muestra «Verificar código de seguridad»: Nexus no utiliza cifrado de extremo a extremo en mensajes nuevos y no tiene ese código. La información real de seguridad sigue en la ficha de contacto.
 - Las reglas de conservación protegen el límite del historial y el vencimiento original. Rechazan mensajes eliminados, vencidos o de una sola escucha.
 - La conservación del mensaje temporal mantiene el calendario de limpieza mensual.
+- Las notas de voz móviles solicitan captura sin procesamiento de llamadas. El sistema operativo y el navegador determinan el panel de volumen que aparece al usar el micrófono.
 - La transcripción manual pide confirmación antes de procesar el audio. Al reportar, Firestore comprueba el mensaje original y guarda una copia de su texto y los datos del adjunto para revisión privada. El bloqueo se aplica a mensajes directos y llamadas.
 - Se respetan las preferencias de movimiento reducido. Las pruebas de navegador no sustituyen una comprobación en teléfonos físicos ni certifican llamadas entre dos personas reales.
 

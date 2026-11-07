@@ -2,6 +2,7 @@
 html:root[data-nexus-web=messenger][data-nexus-surface=workspace][data-nexus-mode][data-nexus-palette] .nexus-chat-window{background-image:var(--nexus-wallpaper)!important;background-size:var(--nexus-wallpaper-size);background-repeat:var(--nexus-wallpaper-repeat);background-position:center;background-color:var(--nx-base)!important}
 html:root[data-nexus-web=messenger][data-nexus-surface=workspace][data-nexus-mode][data-nexus-palette] :is(.chat-history,.chat-composer){background:transparent!important;border:0!important;box-shadow:none!important}
 html:root[data-nexus-web=messenger][data-nexus-surface=workspace][data-nexus-mode][data-nexus-palette] .chat-composer{padding:4px 8px max(4px,env(safe-area-inset-bottom))!important}
+html:root[data-nexus-web=messenger][data-nexus-surface=workspace][data-nexus-mode][data-nexus-palette] .chat-composer:has(.mobile-voice-reference[data-held=false]){padding-inline:0!important}
 html:root[data-nexus-web=messenger][data-nexus-surface=workspace][data-nexus-mode][data-nexus-palette] .messenger-compose{display:flex;align-items:flex-end;gap:7px;min-width:0;width:100%}
 html:root[data-nexus-web=messenger][data-nexus-surface=workspace][data-nexus-mode][data-nexus-palette] .messenger-input-pill{display:flex;align-items:center;flex:1;min-width:0;min-height:46px;padding:3px 9px;gap:4px;border-radius:28px!important;background:#202b30!important;border:0!important;box-shadow:none!important;color:#89979c}
 html:root[data-nexus-web=messenger][data-nexus-surface=workspace][data-nexus-mode][data-nexus-palette] .messenger-input-pill>textarea{flex:1;min-width:0;min-height:30px;max-height:120px;padding:4px 0!important;margin:0;line-height:24px;font-size:18px;resize:none;background:transparent!important;color:var(--nx-text)!important;border:0!important;outline:0;box-shadow:none!important;caret-color:#00c663}
@@ -11,29 +12,33 @@ html[data-nexus-web=messenger] .messenger-input-pill>button>svg{width:25px;heigh
 html:root[data-nexus-web=messenger][data-nexus-surface=workspace][data-nexus-mode][data-nexus-palette] .messenger-send{display:grid;place-items:center;flex:none;align-self:flex-end;width:46px;height:46px;min-width:46px;padding:0;border:0!important;border-radius:50%!important;background:#00c663!important;color:#06251c!important;box-shadow:none!important;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
 html[data-nexus-web=messenger] .messenger-send>svg{width:26px;height:26px;stroke-width:2.6}
 html[data-nexus-web=messenger] .messenger-send:disabled{opacity:.5}
-html:root[data-nexus-web=messenger][data-nexus-surface=workspace][data-nexus-mode][data-nexus-palette] .mobile-voice-reference{display:block!important;position:relative;width:100%;max-width:100%;box-sizing:border-box;min-height:0;flex:none;padding:15px 11px 16px!important;border:0;border-radius:28px 28px 0 0;background:#11191e!important;color:#f1f4f5;overflow:visible;touch-action:none}
-html[data-nexus-web=messenger] .mobile-voice-reference[data-held=true]{padding:0!important;border-radius:28px;background:transparent!important}
+html:root[data-nexus-web=messenger][data-nexus-surface=workspace][data-nexus-mode][data-nexus-palette] .mobile-voice-reference{--voice-record-panel:#15191d;--voice-record-danger:#ff4b65;display:block!important;position:relative;width:100%;max-width:100%;box-sizing:border-box;min-height:0;flex:none;padding:16px 12px 17px!important;border:0;border-radius:30px 30px 0 0;background:var(--voice-record-panel)!important;color:#f1f4f5;overflow:visible;touch-action:none}
+html:root[data-nexus-web=messenger][data-nexus-surface=workspace][data-nexus-mode][data-nexus-palette] .mobile-voice-reference[data-held=true]{padding:0!important;border-radius:28px;background:transparent!important}
 html[data-nexus-web=messenger] .mobile-held-line{display:flex;align-items:center;gap:8px;height:46px;padding:0 76px 0 18px;background:#202b30;border-radius:28px;color:#89979c;min-width:0;overflow:hidden}
-html[data-nexus-web=messenger] .mobile-held-line>svg{width:15px;height:19px;color:#ff4c72;flex:none;animation:voice-mic-pulse 1s ease-in-out infinite}
+html[data-nexus-web=messenger] .mobile-held-line>svg{width:15px;height:19px;color:var(--voice-record-danger);flex:none;animation:voice-mic-pulse 1s ease-in-out infinite}
 html[data-nexus-web=messenger] .mobile-held-line time{font-size:20px;line-height:28px;font-variant-numeric:tabular-nums;flex:none}
 html[data-nexus-web=messenger] .mobile-held-line>span{display:flex;align-items:center;justify-content:center;gap:4px;flex:1;white-space:nowrap;font-size:12px;transform:translateX(calc(-1 * var(--voice-cancel-drag,0px)));opacity:var(--voice-cancel-opacity,1)}
-html[data-nexus-web=messenger] .mobile-held-button{position:absolute;right:-8px;bottom:-4px;width:78px;height:78px;border-radius:50%;display:grid;place-items:center;background:#00c663;color:#06251c;pointer-events:none;animation:voice-hold-in .22s cubic-bezier(.2,.7,.2,1)}
+html[data-nexus-web=messenger] .mobile-held-line:not([data-dragging=true])>span{animation:voice-cancel-hint 1.9s ease-in-out infinite}
+html[data-nexus-web=messenger] .mobile-held-button{position:absolute;right:-8px;bottom:-6px;width:82px;height:82px;border-radius:50%;display:grid;place-items:center;background:#00c663;color:#06251c;pointer-events:none;animation:voice-hold-in .22s cubic-bezier(.2,.7,.2,1)}
 html[data-nexus-web=messenger] .mobile-held-button svg{width:39px;height:39px;stroke-width:2.8}
-html[data-nexus-web=messenger] .mobile-lock-rail{position:absolute;bottom:84px;right:11px;width:40px;display:flex;flex-direction:column;align-items:center;gap:8px;color:#e9edef;pointer-events:none}
-html[data-nexus-web=messenger] .mobile-lock-rail>svg:first-child{width:14px;height:17px;overflow:visible;color:#dce5e8}
-html[data-nexus-web=messenger] .mobile-record-top{display:flex;align-items:center;gap:12px;height:48px;margin:0 4px 13px;min-width:0}
+html[data-nexus-web=messenger] .mobile-lock-rail{position:absolute;bottom:57px;right:-4px;width:57px;height:126px;padding-top:17px;box-sizing:border-box;border-radius:32px;display:flex;flex-direction:column;align-items:center;gap:19px;background:var(--voice-record-panel);color:#e9edef;pointer-events:none}
+html[data-nexus-web=messenger] .mobile-lock-rail>svg:first-child{width:25px;height:27px;overflow:visible;color:#e9edef}
+html[data-nexus-web=messenger] .voice-lock-shackle{transform-box:view-box;transform-origin:8px 13px}
+html[data-nexus-web=messenger] .voice-lock-icon[data-guided=false] .voice-lock-shackle{animation:voice-lock-hint 2.4s ease-in-out infinite}
+html[data-nexus-web=messenger] .mobile-record-top{display:flex;align-items:center;gap:12px;height:54px;margin:0 10px 12px;min-width:0}
 html[data-nexus-web=messenger] .mobile-record-top>time{font-size:21px;font-variant-numeric:tabular-nums;flex:none}
-html[data-nexus-web=messenger] .mobile-record-top>.record-live-wave{display:flex;align-items:center;justify-content:space-between;flex:1;min-width:0;max-width:95px;margin-left:auto;height:32px;gap:2px;overflow:hidden}
+html[data-nexus-web=messenger] .mobile-record-top>.record-live-wave{display:flex;align-items:center;justify-content:space-between;flex:1;min-width:0;max-width:52px;margin-left:auto;height:32px;gap:2px;overflow:hidden}
 html[data-nexus-web=messenger] .mobile-record-top .record-live-wave i{display:block;flex:1;min-width:0;max-width:3px;background:#869499;border-radius:3px}
+html[data-nexus-web=messenger] .mobile-record-top .record-live-wave i:nth-last-child(n+11){display:none}
 html[data-nexus-web=messenger] .mobile-record-top>.voice-once{position:relative;display:grid;place-items:center;flex:none;width:34px;height:36px;margin-left:13px;background:transparent!important;border:0;color:#f1f4f5;padding:0;border-radius:50%}
 html[data-nexus-web=messenger] .voice-once b{position:absolute;inset:0;display:grid;place-items:center;font-size:18px;font-weight:500}
 html[data-nexus-web=messenger] .voice-once[aria-pressed=true]{color:#00c663}
-html[data-nexus-web=messenger] .mobile-record-bottom{display:grid;grid-template-columns:49px minmax(0,1fr) 49px;align-items:center;gap:8px}
-html[data-nexus-web=messenger] .mobile-record-bottom>button{display:flex;align-items:center;justify-content:center;gap:11px;width:100%;height:49px;padding:0;border:0;border-radius:50%;background:transparent;color:#dce5e8}
+html[data-nexus-web=messenger] .mobile-record-bottom{display:grid;grid-template-columns:52px minmax(0,1fr) 52px;align-items:center;gap:8px}
+html[data-nexus-web=messenger] .mobile-record-bottom>button{display:flex;align-items:center;justify-content:center;gap:11px;width:100%;height:52px;padding:0;border:0;border-radius:50%;background:#321923;color:var(--voice-record-danger)}
 html[data-nexus-web=messenger] .mobile-record-bottom>button>svg{width:23px;height:23px;stroke-width:2.5}
 html[data-nexus-web=messenger] .mobile-record-bottom>.mobile-record-pause{border-radius:28px;background:#2a3135;color:#f1f4f5;font-size:17px;font-weight:600}
 html[data-nexus-web=messenger] .mobile-record-pause[data-paused=true]{background:#003b30;color:#c6f8cd}
-html[data-nexus-web=messenger] .mobile-record-bottom>.voice-send{height:49px!important;width:49px!important;border-radius:50%!important;background:#00c663!important;color:#06251c!important}
+html[data-nexus-web=messenger] .mobile-record-bottom>.voice-send{height:52px!important;width:52px!important;border-radius:50%!important;background:#00c663!important;color:#06251c!important}
 html[data-nexus-web=messenger] .mobile-record-bottom>button:disabled{opacity:.45}
 html:root[data-nexus-web=messenger][data-nexus-surface=workspace][data-nexus-mode][data-nexus-palette] .message-bubble[data-kind=audio]{position:relative;width:min(294px,calc(100vw - 48px));max-width:92%!important;min-width:0;padding:0!important;border-radius:14px!important}
 html[data-nexus-web=messenger] .message-bubble[data-kind=audio]::after,html[data-nexus-web=messenger] .message-bubble[data-kind=audio]::before{display:none!important;content:none!important}
@@ -78,19 +83,21 @@ html[data-nexus-web=messenger] .message-bubble[data-deleted=true] .message-metad
 html[data-nexus-web=messenger] .mobile-voice-reference>p[role=alert]{position:absolute;bottom:calc(100% + 8px);left:0;right:0;background:#202b30;color:#ffc0cd;padding:12px;border-radius:12px;font-size:13px}
 @keyframes voice-hold-in{from{scale:.59}to{scale:1}}
 @keyframes voice-mic-pulse{50%{opacity:.25}}
-html[data-nexus-web=messenger] .mobile-lock-rail:has(.voice-lock-icon){--lock-turn:calc(-32deg * var(--voice-lock-progress,0))}
+@keyframes voice-cancel-hint{50%{translate:-7px 0}}
+@keyframes voice-lock-hint{0%,100%{transform:rotate(-42deg)}45%,55%{transform:rotate(0deg)}}
 html[data-nexus-web=messenger] .voice-discard-host{position:absolute;bottom:8px;left:10px;z-index:30;pointer-events:none}
 html[data-nexus-web=messenger] .voice-discard-host .voice-discard-motion{width:56px;height:61px}
 html[data-nexus-web=messenger] .chat-composer:has(.voice-discard-host .voice-discard-motion) .messenger-input-pill>button:first-child{opacity:0;pointer-events:none}
-html[data-nexus-web=messenger] .voice-discard-motion{position:absolute;left:0;bottom:0;pointer-events:none;color:var(--nx-text,#e9edef);overflow:visible}
+html[data-nexus-web=messenger] .voice-discard-motion{position:absolute;left:0;bottom:0;pointer-events:none;color:#ff4b65;overflow:visible}
 html[data-nexus-web=messenger] .voice-discard-motion>svg{display:block;width:100%;height:100%;overflow:visible}
 html[data-nexus-web=messenger] .voice-discard-mic{transform-origin:14px 55px;animation:voice-mic-into-bin .82s cubic-bezier(.3,0,.65,1) forwards}
 html[data-nexus-web=messenger] .voice-discard-bin{transform:translateX(-30px);animation:voice-bin-arrive .82s ease-out forwards}
-html[data-nexus-web=messenger] .voice-discard-lid{transform-origin:52px 85px;animation:voice-bin-lid .82s ease-in-out forwards}
-@keyframes voice-mic-into-bin{0%{transform:translate(0,26px);opacity:1}35%{transform:translate(17px,-29px) rotate(25deg)}65%{transform:translate(8px,28px) rotate(-12deg) scale(.7);opacity:1}80%,100%{transform:translate(8px,45px) scale(.2);opacity:0}}
+html[data-nexus-web=messenger] .voice-discard-lid{transform-origin:67px 85px;animation:voice-bin-lid .82s ease-in-out forwards}
+@keyframes voice-mic-into-bin{0%{transform:translate(0,26px);opacity:1}34%{transform:translate(17px,-29px) rotate(25deg)}65%{transform:translate(8px,28px) rotate(-12deg) scale(.7);opacity:1}80%,100%{transform:translate(8px,45px) scale(.2);opacity:0}}
 @keyframes voice-bin-arrive{0%{opacity:0;translate:0 12px}20%,85%{opacity:1;translate:0 0}100%{opacity:0;translate:0 8px}}
-@keyframes voice-bin-lid{0%{transform:none}25%,65%{transform:translate(9px,-9px) rotate(30deg)}85%,100%{transform:none}}
-@media(prefers-reduced-motion:reduce){html[data-nexus-web=messenger] :is(.mobile-held-button,.mobile-held-line>svg){animation:none}}
+@keyframes voice-bin-lid{0%{transform:none}25%,65%{transform:translate(-8px,-10px) rotate(30deg)}85%,100%{transform:none}}
+@media(prefers-reduced-motion:reduce){html[data-nexus-web=messenger] :is(.mobile-held-button,.mobile-held-line>svg,.mobile-held-line>span,.voice-lock-shackle){animation:none!important}}
+html[data-nexus-web=messenger][data-motion=off] :is(.mobile-held-button,.mobile-held-line>svg,.mobile-held-line>span,.voice-lock-shackle){animation:none!important}
 html[data-nexus-web=messenger][data-nexus-mode=light] .messenger-input-pill{background:#fff!important}
 
 @media(max-width:340px){html[data-nexus-web=messenger] .mobile-held-line{gap:6px;padding-left:12px;padding-right:72px}html[data-nexus-web=messenger] .mobile-held-line time{font-size:19px}html[data-nexus-web=messenger] .mobile-held-line>span{font-size:11.5px}}
