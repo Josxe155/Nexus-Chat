@@ -163,7 +163,7 @@ export default function AuthScreen({ onAuthSuccess, theme, onToggleTheme }: Auth
         <div><span className="feature-icon"><Image size={21} /></span><span><strong>Comparte tu mundo</strong><small>Fotos, archivos y notas de voz.</small></span></div>
         <div><span className="feature-icon"><Smile size={21} /></span><span><strong>Hazlo tuyo</strong><small>Tu perfil, tu estilo, tu manera.</small></span></div>
       </section>
-      <footer className="auth-footer"><span>© {new Date().getFullYear()} Nexus Chat</span><span>Sin tarjeta SIM. Solo internet.<span className="footer-spark"> ✳</span></span></footer>
+      <footer className="auth-footer"><span>© {new Date().getFullYear()} Nexus Chat</span><a href="/guia.html">Guía de Nexus Chat</a><span>Sin tarjeta SIM. Solo internet.<span className="footer-spark"> ✳</span></span></footer>
     </div>
   );
 }

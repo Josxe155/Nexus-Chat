@@ -32,6 +32,8 @@ Una interfaz adaptable a móvil, tablet y computadora.
 
 [Ver la web](https://nexus-chat-nc.web.app/) · [Instalación](#-inicio-rápido) · [Configuración](#-configuración) · [Documentación](#-documentación)
 
+El código de AdSense se carga en la [guía pública](https://nexus-chat-nc.web.app/guia.html). La portada incluye la metaetiqueta para verificar la propiedad del sitio. El archivo de vendedores autorizados se publica en [ads.txt](https://nexus-chat-nc.web.app/ads.txt).
+
 </div>
 
 ---
