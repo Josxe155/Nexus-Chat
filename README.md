@@ -256,7 +256,7 @@ En el fondo del historial, el clic derecho permite seleccionar mensajes o cerrar
 
 | Versión | Estimación de parecido y funcionamiento | Cambios de esta entrega |
 | --- | --- | --- |
-| Móvil y tablet | **60 %** (antes 58 %) | Escritura y grabación reemplazadas según las referencias, gestos de bloqueo y cancelación, preescucha y burbujas compactas. |
+| Móvil y tablet | **60 %** (antes 58 %) | Escritura y voz móvil: toque para grabar bloqueado, gestos y animaciones de candado/descarte, preescucha y burbujas redondas sin punta. |
 | Computadora | **65 %** | Conserva sus controles propios; verificada la grabación, reproducción y las opciones de chat. |
 
 Las cifras son orientativas y subjetivas; no representan cobertura de pruebas ni una equivalencia certificada con WhatsApp. [Escritura y voz móvil](docs/VOZ-MOVIL-2026-11-06.md) · [Contacto e identidad](docs/ACTUALIZACION-MOVIL-2026-11-06.md).
