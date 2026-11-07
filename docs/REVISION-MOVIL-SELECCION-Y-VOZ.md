@@ -6,7 +6,7 @@ Se usan las capturas y el video lento entregados para esta revisión. Sus conver
 
 | Apartado | Resultado de esta revisión |
 | --- | --- |
-| Grabación mantenida | Micrófono ampliado con desplazamiento libre hacia la izquierda y hacia arriba. El candado se abre y se cierra lentamente mientras se mantiene el botón. Al deslizar hacia arriba, el dedo controla el cierre. |
+| Grabación mantenida | El micrófono ampliado sigue un eje por vez. Se puede cambiar entre izquierda y arriba durante la misma pulsación. El candado se abre y se cierra lentamente en reposo y sigue el recorrido al deslizar hacia arriba. |
 | Toque corto | Conserva la grabación bloqueada, sin enviar un archivo vacío; también se comprueba un inicio lento del micrófono. |
 | Descartar | Durante la pulsación, deslizar a la izquierda anima el micrófono rojo y levanta la tapa del tacho hacia arriba y a la izquierda. El botón rojo de la grabación bloqueada elimina la nota al instante. |
 | Seleccionar | Pulsación mantenida sobre la burbuja, franja verde completa, contador y barra superior. Se retira el menú móvil anterior de acciones dentro del mensaje. |

@@ -10,16 +10,23 @@ export function beginMobileVoice(event:PointerEvent,open:()=>void){
  resetMobileVoice();current={active:true,locked:false};
  const host=(event.target as HTMLElement)?.closest<HTMLElement>('.chat-composer')||event.target as HTMLElement;
  const x=event.clientX,y=event.clientY,id=event.pointerId,pressedAt=performance.now();
+ let direction:'left'|'up'|undefined;
  const clean=()=>{window.removeEventListener('pointermove',move,true);window.removeEventListener('pointerup',up,true);window.removeEventListener('pointercancel',cancel,true);window.removeEventListener('blur',blur);try{if(host.hasPointerCapture?.(id))host.releasePointerCapture(id);}catch{}};
  const finish=(action:Action)=>{clean();dispose=undefined;current={active:false,locked:action==='lock',action};window.dispatchEvent(new CustomEvent('nexus:voice-gesture',{detail:action}));};
  const move=(e:PointerEvent)=>{
   if(e.pointerId!==id)return;
   e.preventDefault();
   const dx=x-e.clientX,dy=y-e.clientY;
-  const left=dx>4?Math.min(discardDistance,dx):0;
-  const up=dy>4?Math.min(voiceLockDistance,dy):0;
+  const leftTravel=dx>4?dx:0,upTravel=dy>4?dy:0;
+  // Keep the current direction near the diagonal, then switch once the other direction leads.
+  if(!leftTravel&&!upTravel)direction=undefined;
+  else if(!direction)direction=upTravel>=leftTravel?'up':'left';
+  else if(upTravel>leftTravel+6)direction='up';
+  else if(leftTravel>upTravel+6)direction='left';
+  const left=direction==='left'?Math.min(discardDistance,leftTravel):0;
+  const up=direction==='up'?Math.min(voiceLockDistance,upTravel):0;
   window.dispatchEvent(new CustomEvent('nexus:voice-drag',{detail:{up,left}}));
-  if(up===voiceLockDistance&&dy/voiceLockDistance>=dx/discardDistance)finish('lock');
+  if(up===voiceLockDistance)finish('lock');
   else if(left===discardDistance)finish('discard');
  };
  const up=(e:PointerEvent)=>{if(e.pointerId===id)finish(performance.now()-pressedAt<300?'lock':'send');};
