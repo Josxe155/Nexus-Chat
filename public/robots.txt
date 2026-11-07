@@ -1,0 +1,5 @@
+User-agent: Google-Display-Ads-Bot
+Allow: /
+
+User-agent: Mediapartners-Google
+Allow: /
