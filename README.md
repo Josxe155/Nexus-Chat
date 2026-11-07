@@ -245,7 +245,7 @@ En el fondo del historial, el clic derecho permite seleccionar mensajes o cerrar
 
 | Capacidad | Condición |
 | --- | --- |
-| Conservar mensajes | Usa destacados personales; no evita la caducidad ni la limpieza mensual. |
+| Conservar mensajes | En móvil, los participantes pueden conservar mensajes temporales vigentes. La limpieza mensual sigue su calendario. |
 | Notificaciones | Con la página ejecutándose. Los avisos nativos requieren permiso; no hay un servicio conectado para entregar push con el navegador cerrado. |
 | Cámara y micrófono | Requieren autorización y un navegador compatible. |
 | Comprobaciones | Tipos, compilación y enlaces locales de documentación mediante GitHub. Las pruebas visuales usan datos ficticios y micrófono simulado. |
@@ -258,9 +258,10 @@ Se retiran los porcentajes globales anteriores: no tenían una medición reprodu
 
 | Apartado | Verificado en navegador | Pendiente |
 | --- | --- | --- |
-| Voz móvil | Toque, mantener, bloquear, cancelar, pausa, preescucha, envío y velocidad; descarte animado sobre la barra real de escritura. | Teléfonos físicos y variaciones de permisos del sistema. |
+| Voz móvil | Toque para grabar con manos libres, deslizar hacia arriba para bloquear o hacia la izquierda para descartar con animación. La grabación bloqueada se elimina al instante. | Teléfonos físicos y variaciones de permisos del sistema. |
 | Selección | Barra superior, franja verde, reacciones, menús propios/recibidos y selección múltiple. | Validación de uso prolongado en dispositivos físicos. |
 | Mensajes nuevos | Lotes de 50, historial anterior, mensajes propios y ventana limitada de historial. | Pruebas de carga con tráfico real sostenido. |
-| Permisos | Conservar un mensaje temporal propio, restaurar su vencimiento y rechazar alteraciones indebidas. | No existe verificación de código E2EE en mensajes nuevos. |
+| Permisos | Los participantes pueden conservar mensajes temporales visibles. El remitente o quien conservó el mensaje pueden restaurar su vencimiento. | La acción depende del tipo de mensaje y del acceso al historial. |
+| Reportes de mensajes | El panel privado muestra el texto y los datos del mensaje seleccionado. El bloqueo del remitente es opcional. | Los reportes guardan el nombre del adjunto cuando existe. |
 
 [Detalle de selección y voz](docs/REVISION-MOVIL-SELECCION-Y-VOZ.md) · [Contacto e identidad](docs/ACTUALIZACION-MOVIL-2026-11-06.md).

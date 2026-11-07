@@ -9,7 +9,7 @@ html[data-nexus-web=messenger] .mobile-selection-header button:focus-visible{out
 html[data-nexus-web=messenger] .chat-history{overflow-x:hidden}
 html[data-nexus-web=messenger] .chat-history [data-selected=true][id^=message-]{position:relative;isolation:isolate;background:transparent!important;border-radius:0!important;box-shadow:none!important}
 html[data-nexus-web=messenger] .chat-history [data-selected=true][id^=message-]::before{content:"";position:absolute;display:block;top:-5px;bottom:-5px;left:-80px;right:-80px;width:auto;height:auto;background:#00ab6a40;z-index:-1;pointer-events:none;border-radius:0!important;box-shadow:none!important}
-html:root[data-nexus-web=messenger][data-nexus-surface=workspace][data-nexus-mode][data-nexus-palette] [data-selected=true]>.message-bubble{background-color:#006f49!important}
+html:root[data-nexus-web=messenger][data-nexus-surface=workspace][data-nexus-mode][data-nexus-palette] [data-selected=true]>.message-bubble[data-mine=true]{background-color:#006f49!important}
 html[data-nexus-web=messenger] .chat-history .message-content{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 html[data-nexus-web=messenger] .mobile-selection-reactions{position:fixed;z-index:700;display:flex;align-items:center;height:56px;padding:4px 10px;border-radius:30px;background:#202b30;box-shadow:0 3px 8px #0002;box-sizing:border-box;animation:mobile-reactions-in .18s cubic-bezier(.2,.8,.2,1);transform-origin:center bottom}
 html[data-nexus-web=messenger] .mobile-selection-reactions>div{display:flex;align-items:center;gap:2px;flex:1;min-width:0;overflow-x:auto;scrollbar-width:none;touch-action:pan-x;padding-right:12px}
@@ -34,3 +34,7 @@ html[data-nexus-web=messenger] .reaction-picker-wrap .emoji-picker{position:rela
 @media(prefers-reduced-motion:reduce){html[data-nexus-web=messenger] :is(.mobile-selection-header,.mobile-selection-reactions,.mobile-selection-overflow){animation:none}html[data-nexus-web=messenger] .mobile-selection-reactions>div>button{transition:none}}
 html[data-nexus-web=messenger][data-motion=off] :is(.mobile-selection-header,.mobile-selection-reactions,.mobile-selection-overflow){animation:none!important}
 @media(max-width:340px){html[data-nexus-web=messenger] .mobile-selection-header>button{flex-basis:37px;width:37px;padding:7px}html[data-nexus-web=messenger] .mobile-selection-header>strong{margin-left:5px;min-width:24px}}
+.message-report .message-report-block{display:flex;flex-direction:row;align-items:flex-start;gap:12px;margin-block:18px}
+.message-report-block input[type=checkbox]{flex:none;width:18px;height:18px;margin:3px 0 0;accent-color:var(--nx-accent,#21c063)}
+.message-report-block span{min-width:0;overflow-wrap:anywhere}
+.message-report-block small{display:block;margin-top:3px}

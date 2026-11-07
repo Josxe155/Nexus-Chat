@@ -1,6 +1,6 @@
 import MobileMessageSelection,{type MobileSelectionAction} from '../features/MobileMessageSelection';
 import {useChatNewMessages,useComposerInset} from '../features/useChatNewMessages';
-import {keepOwnMessage} from '../features/keepMessage';
+import {keepMessage} from '../features/keepMessage';
 import {MobileVoiceDiscardHost} from '../features/MobileVoiceMotion';
 import {ChevronsDown} from 'lucide-react';
 import DesktopBackgroundMenu from '../features/DesktopBackgroundMenu';
@@ -26,7 +26,8 @@ import AppLock from '../features/AppLock';
 import MobileChatOptions from '../features/MobileChatOptions';
 import ChannelDetails from '../features/ChannelDetails';
 import {useInterfacePalette,defaultBubble} from '../features/InterfacePalette';
-import ConversationReport from '../features/ConversationReport';import {clearForMe} from '../features/PersonalState';import {Users,UserPlus,Flag,Shield,LogOut} from 'lucide-react';
+import ConversationReport,{MessageReport} from '../features/ConversationReport';
+import {VoiceTranscriptDialog} from '../features/VoiceTranscript';import {clearForMe} from '../features/PersonalState';import {Users,UserPlus,Flag,Shield,LogOut} from 'lucide-react';
 import LocationComposer from '../features/LocationComposer';import {MapPin} from 'lucide-react';
 import {ConversationTool} from '../features/ConversationTools';import EventComposer from '../features/EventComposer';import {changeConversation} from '../features/PersonalState';import {normalizePrivacy,savePrivacy} from '../features/privacy';import {Calendar,BellOff,ListPlus} from 'lucide-react';
 import {pastedFiles,copyImage} from '../features/clipboard';
@@ -182,6 +183,8 @@ export default function ChatWindow({
   useMobileBack(showGroupSettings,()=>setShowGroupSettings(false),50);
   useEffect(()=>{const info=(event:Event)=>{if((event as CustomEvent).detail===activeChat.id){setContactView('info');setShowContact(true);}};window.addEventListener('nexus:contact-info',info);return()=>window.removeEventListener('nexus:contact-info',info);},[activeChat.id]);
   const [translation,setTranslation]=useState<string|null>(null);
+  const [transcriptSource,setTranscriptSource]=useState('');
+  const [messageReport,setMessageReport]=useState<Message|null>(null);
   const [showWriting,setShowWriting]=useState(false);
   const [showFormatting,setShowFormatting]=useState(false);
   const [reactionTarget,setReactionTarget]=useState<string|null>(null),[reactionInfo,setReactionInfo]=useState<string|null>(null);const [reactionAt,setReactionAt]=useState({x:0,y:0});
@@ -348,27 +351,68 @@ export default function ChatWindow({
   const clearMobileSelection=()=>{setSelectedIds([]);setSelectingMessages(false);setOpenMessageId(null);};
   const canPinSelected=(activeChat.kind!=='group'&&activeChat.kind!=='channel')||(activeChat.kind==='group'&&!!activeChat.membersCanEdit)||!!activeChat.admins?.includes(currentUser.uid);
   const canEditSelected=(message:Message)=>message.senderId===currentUser.uid&&!message.deletedAt&&message.content!=='🚫 Este mensaje fue eliminado'&&!message.sealed&&!message.localState&&['text','poll'].includes(message.type)&&Date.now()-(message.serverSentAt?.toMillis?.()||message.timestamp)<=15*60*1000;
-  const mobileSelectionAction=(action:MobileSelectionAction)=>{const message=selected[0];if(!message)return;
+  const selectedMessage=selected.length===1?selected[0]:undefined;
+  const selectionIsLive=!!selectedMessage&&!selectedMessage.deletedAt&&!selectedMessage.localState&&!selectedMessage.sealed
+   &&selectedMessage.content!=='🚫 Este mensaje fue eliminado'&&(!selectedMessage.expiresAt||selectedMessage.expiresAt>Date.now());
+  const selectionCanExpose=selectionIsLive&&!selectedMessage?.fileName?.startsWith('nota-unica-');
+  const canKeepSelection=selectionCanExpose&&!!selectedMessage&&(selectedMessage.keptBy
+   ?selectedMessage.keptBy===currentUser.uid||selectedMessage.senderId===currentUser.uid
+   :!!selectedMessage.expiresAt);
+  const transcriptUrl=selectionCanExpose&&selectedMessage?.type==='audio'
+   ?safeMediaURL(voiceTrack(selectedMessage).src)||(isPrivateMedia(selectedMessage.fileUrl)?selectedMessage.fileUrl:undefined)
+   :undefined;
+  const shareMessage=async(message:Message)=>{
+   const hasAttachment=!!(message.fileUrl||message.transferId);
+   const src=hasAttachment?safeMediaURL(voiceTrack(message).src):undefined;
+   if(hasAttachment){
+    if(navigator.share&&src){
+     const response=await fetch(src,{signal:AbortSignal.timeout(4000)}).catch(()=>null);
+     if(response?.ok){
+      const blob=await response.blob();
+      const file=new window.File([blob],message.fileName||'Archivo de Nexus Chat',{type:blob.type});
+      if(navigator.canShare?.({files:[file]})){await navigator.share({files:[file]});return;}
+     }
+    }
+    const target=src||message.fileUrl;
+    if(!target)throw Error('Descarga el archivo antes de compartirlo.');
+    await downloadMedia(target,message.fileName||'Archivo de Nexus Chat',message.fileSize);
+   }else if(navigator.share)await navigator.share({text:message.content});
+   else await navigator.clipboard.writeText(message.content);
+  };
+  const mobileSelectionAction=(action:MobileSelectionAction)=>{
+   const message=selected[0];
+   if(!message)return;
    if(action==='reply'){setReplyTarget(message);clearMobileSelection();textareaRef.current?.focus();}
    else if(action==='edit'&&canEditSelected(message)){setEditingTarget(message);setEditingText(message.poll?.question||message.content);clearMobileSelection();}
    else if(action==='delete')setDeleting(selected);
    else if(action==='forward')setForwarding(selected);
-   else if(action==='copy'){const url=manualMedia[message.id]||resolvedMedia[message.id]||realtime?.media[message.transferId||'']||message.fileUrl;if(selected.length===1&&['image','sticker'].includes(message.type)&&url)void copyPicture(url);else void copyText(selected);clearMobileSelection();}
-   else if(action==='star')void star(selected).then(clearMobileSelection).catch(error=>setUploadError(error.message));
-   else if(action==='keep')void keepOwnMessage(activeChat.id,message.id,!message.keptBy).then(clearMobileSelection).catch(error=>setUploadError(error.message));
+   else if(action==='copy'){const url=safeMediaURL(voiceTrack(message).src);if(['image','sticker'].includes(message.type)&&url)void copyPicture(url);else void copyText(selected);clearMobileSelection();}
+   else if(action==='keep')void keepMessage(activeChat.id,message.id,!message.keptBy).then(clearMobileSelection).catch(error=>setUploadError(error.message));
    else if(action==='info'){setInformation(message);clearMobileSelection();}
    else if(action==='pin'){if(messagePinned(message,activeChat))void setMessagePin(activeChat.id,message.id,0).catch(error=>setUploadError(error.message));else setPinTarget(message);clearMobileSelection();}
-   else if(action==='translate'){setTranslation(message.content);clearMobileSelection();}
-   else if(action==='report'){setReporting(true);clearMobileSelection();}
-   else if(action==='ai'){const quote={sender:users.find(person=>person.uid===message.senderId)?.nombre||'Contacto',content:message.content||message.fileName||'Mensaje',chatId:activeChat.id,messageId:message.id};try{sessionStorage.setItem('nexus-ai-quote:'+currentUser.uid,JSON.stringify(quote));}catch{}clearMobileSelection();setRecordMode(null);if(!desktopWeb)onBack();window.dispatchEvent(new CustomEvent('nexus:navigate',{detail:'assistant'}));window.dispatchEvent(new CustomEvent('nexus:ai-quote',{detail:quote}));}
+   else if(action==='transcribe'&&transcriptUrl){setTranscriptSource(transcriptUrl);clearMobileSelection();}
+   else if(action==='share'&&selectionCanExpose){
+    void shareMessage(message).catch(error=>{if(error?.name!=='AbortError')setUploadError(error?.message||'No se pudo compartir el mensaje.');});
+    clearMobileSelection();
+   }
+   else if(action==='report'){setMessageReport(message);clearMobileSelection();}
   };
+
   const restriction=<AppLock uid={currentUser.uid+':chat:'+activeChat.id} eventName={restrictEvent} onLock={setRestricted}/>;
   return (<>
     {restriction}
     <div hidden={restricted} ref={chatRoot} onDragEnter={event=>{if(event.dataTransfer.types.includes('Files')){event.preventDefault();dragDepth.current++;setDragging(true);}}} onDragOver={event=>{if(event.dataTransfer.types.includes('Files'))event.preventDefault();}} onDragLeave={()=>{dragDepth.current=Math.max(0,dragDepth.current-1);if(!dragDepth.current)setDragging(false);}} onDrop={event=>{if(!event.dataTransfer.files.length)return;event.preventDefault();dragDepth.current=0;setDragging(false);if(event.dataTransfer.files.length>10){setUploadError('Selecciona hasta diez archivos.');return;}uploadKind.current='media';setPendingFiles(Array.from(event.dataTransfer.files));}} style={{'--nexus-wallpaper':[appearance.doodles!==false?'url("/chat-doodles.svg")':'',appearance.background?`linear-gradient(#10141e25,#10141e25),url("${appearance.background}")`:''].filter(Boolean).join(',')||'none','--nexus-wallpaper-size':appearance.doodles!==false?'280px 280px,cover,cover':'cover','--nexus-wallpaper-repeat':appearance.doodles!==false?'repeat,no-repeat,no-repeat':'no-repeat','--own-bubble':appearance.bubble||bubbleDefault,'--own-ink':contrastColor(appearance.bubble||bubbleDefault),'--mic-color':appearance.microphoneColor||bubbleDefault,'--mic-ink':contrastColor(appearance.microphoneColor||bubbleDefault)} as React.CSSProperties} data-doodles={appearance.doodles!==false} data-bubble={appearance.bubbleShape||'soft'} data-microphone={appearance.microphone||'round'} className={`nexus-chat-window flex-1 min-w-0 min-h-0 flex flex-col h-full overflow-hidden relative ${theme === 'dark' ? 'bg-[#101218]' : 'bg-[#efeae2]'}`}>
       
       {dragging&&<div className="chat-drop-overlay"><Paperclip size={42}/><strong>Suelta los archivos para enviarlos</strong></div>}
-      {!desktopWeb&&(selectedIds.length>0||selectingMessages)&&<MobileMessageSelection ids={selectedIds} mine={selected.length===1&&selected[0].senderId===currentUser.uid} editable={selected.length===1&&canEditSelected(selected[0])} kept={!!selected[0]?.keptBy} temporary={!!(selected[0]?.expiresAt||selected[0]?.keptBy)&&!selected[0]?.deletedAt&&!selected[0]?.fileName?.startsWith('nota-unica-')} starred={!!(selected[0]&&personal.flags[flagId(activeChat.id,selected[0].id)]?.starred)} pinned={!!(selected[0]&&messagePinned(selected[0],activeChat))} canPin={canPinSelected} canForward={selected.length>0&&!selected.some(message=>!!message.deletedAt||message.content==='🚫 Este mensaje fue eliminado'||!!message.localState||!!message.fileName?.startsWith('nota-unica-'))} canReact={selected.length===1&&!selected[0].deletedAt&&selected[0].content!=='🚫 Este mensaje fue eliminado'&&!selected[0].localState} canTranslate={selected.length===1&&selected[0].type==='text'&&!selected[0].deletedAt&&selected[0].content!=='🚫 Este mensaje fue eliminado'} onClose={clearMobileSelection} onAction={mobileSelectionAction} onReact={emoji=>{void handleReactionClick(selected[0].id,emoji).then(clearMobileSelection).catch(error=>setUploadError(error.message||'No se pudo guardar la reacción.'));}} onMoreReactions={()=>setReactionTarget(selected[0].id)}/>}
+      {!desktopWeb&&(selectedIds.length>0||selectingMessages)&&<MobileMessageSelection
+       ids={selectedIds} mine={selectedMessage?.senderId===currentUser.uid} editable={!!selectedMessage&&canEditSelected(selectedMessage)}
+       kept={!!selectedMessage?.keptBy} canKeep={canKeepSelection}
+       pinned={!!selectedMessage&&messagePinned(selectedMessage,activeChat)} canPin={canPinSelected&&selectionCanExpose}
+       canForward={selected.length>0&&!selected.some(message=>message.deletedAt||message.content==='🚫 Este mensaje fue eliminado'||message.localState||message.sealed||message.fileName?.startsWith('nota-unica-')||message.expiresAt&&message.expiresAt<=Date.now())}
+       canReact={selectionIsLive} canTranscribe={!!transcriptUrl} canShare={selectionCanExpose&&!!(selectedMessage?.content||selectedMessage?.fileUrl||selectedMessage?.transferId)}
+       onClose={clearMobileSelection} onAction={mobileSelectionAction}
+       onReact={emoji=>{void handleReactionClick(selected[0].id,emoji).then(clearMobileSelection).catch(error=>setUploadError(error.message||'No se pudo guardar la reacción.'));}}
+       onMoreReactions={()=>setReactionTarget(selected[0].id)}/>}
       {/* ---------------- HEADER ----------------- */}
       <header hidden={!desktopWeb&&(selectedIds.length>0||selectingMessages)} className={`px-4 h-[60px] flex items-center justify-between shrink-0 select-none z-10 shadow-sm ${theme === 'dark' ? 'bg-[#232732]' : 'bg-[#f0f2f5]'}`}>
         <div className="flex items-center gap-3 min-w-0">
@@ -657,6 +701,8 @@ export default function ChatWindow({
       {reactionInfo&&messages.find(message=>message.id===reactionInfo)&&<ReactionDetails at={reactionAt} message={messages.find(message=>message.id===reactionInfo)!} user={currentUser} users={users} onRemove={emoji=>handleReactionClick(reactionInfo,emoji)} onClose={()=>setReactionInfo(null)}/>}
       {reactionTarget&&<div className="reaction-picker-wrap"><EmojiPicker onClose={()=>setReactionTarget(null)} onSelect={emoji=>{void handleReactionClick(reactionTarget,emoji).then(()=>{setReactionTarget(null);if(!desktopWeb)clearMobileSelection();}).catch(()=>setUploadError('No se pudo guardar la reacción.'));}}/></div>}
       {reporting&&<ConversationReport chat={activeChat} user={currentUser} messages={messages} onClose={()=>setReporting(false)}/>}
+      {messageReport&&<MessageReport chatId={activeChat.id} message={messageReport} user={currentUser} name={users.find(person=>person.uid===messageReport.senderId)?.nombre||'este contacto'} onClose={()=>setMessageReport(null)}/>}
+      {transcriptSource&&<VoiceTranscriptDialog src={transcriptSource} onClose={()=>setTranscriptSource('')}/>}
       {showGroupSettings&&<GroupSettings key={groupSection} initialSection={groupSection} chat={activeChat} messages={messages} user={currentUser} users={users} onClose={()=>setShowGroupSettings(false)}/>}
       {imageViewer&&desktopWeb&&messages.find(message=>message.id===imageViewer)?.type==='sticker'&&(()=>{const item=messages.find(message=>message.id===imageViewer)!;return <DesktopStickerViewer uid={currentUser.uid} item={{...item,sender:item.senderId===currentUser.uid?'Tú':users.find(person=>person.uid===item.senderId)?.nombre||'Contacto',photo:item.senderId===currentUser.uid?currentUser.foto:users.find(person=>person.uid===item.senderId)?.foto,url:manualMedia[item.id]||resolvedMedia[item.id]||realtime?.media[item.transferId||'']}} onClose={()=>setImageViewer(null)} onReply={()=>{setReplyTarget(item);setImageViewer(null);textareaRef.current?.focus();}} onStar={()=>star([item])} onForward={()=>{setForwarding([item]);setImageViewer(null);}} onDelete={()=>{setDeleting([item]);setImageViewer(null);}} onPin={((activeChat.kind!=='group'&&activeChat.kind!=='channel')||activeChat.membersCanEdit||activeChat.admins?.includes(currentUser.uid))?()=>{setImageViewer(null);if(messagePinned(item,activeChat))void setMessagePin(activeChat.id,item.id,0).catch(e=>setUploadError(e.message));else setPinTarget(item);}:undefined}/>;})()}
       {imageViewer&&(!desktopWeb||messages.find(message=>message.id===imageViewer)?.type!=='sticker')&&<MediaViewer uid={currentUser.uid} initialId={imageViewer} items={messages.filter(message=>!message.deletedAt&&(!message.expiresAt||message.expiresAt>Date.now())&&['image','sticker','video','video-note','document'].includes(message.type)).map(message=>({...message,url:manualMedia[message.id]||resolvedMedia[message.id]||realtime?.media[message.transferId||''],sender:message.senderId===currentUser.uid?'Tú':users.find(person=>person.uid===message.senderId)?.nombre||'Contacto'}))} onClose={()=>setImageViewer(null)}/>}
