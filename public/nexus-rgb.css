@@ -1,0 +1,60 @@
+@property --nexus-rgb-hue {
+  syntax: "<angle>";
+  inherits: true;
+  initial-value: 0deg;
+}
+
+@keyframes nexus-rgb-cycle {
+  to { --nexus-rgb-hue: 360deg; }
+}
+
+html[data-nexus-rgb=on] { animation: nexus-rgb-cycle 6s linear infinite; }
+html[data-nexus-rgb=on][data-motion=off] { animation: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-nexus-rgb=on] { animation: none; }
+}
+
+.mobile-header h1 > button.nexus-rgb-trigger {
+  display: inline;
+  width: auto;
+  height: auto;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  text-align: inherit;
+  touch-action: manipulation;
+  user-select: none;
+}
+.nexus-rgb-trigger:focus-visible { outline: 2px solid currentColor; outline-offset: 4px; }
+
+/* Insets follow the existing corners and leave the layout and click targets alone. */
+@layer nexus-rgb {
+  html[data-nexus-rgb=on] :where(
+    [data-nexus-rgb-frame], dialog, [role="dialog"], [role="alertdialog"], [role="menu"], [role="listbox"],
+    .auth-card, .nexus-notice-card, .workspace-sidebar, .workspace-chat, .desktop-rail,
+    .mobile-header, .mobile-bottom-nav, .desktop-detail, .desktop-section-stage, .workspace-empty,
+    .mobile-menu, .inbox-menu, .inbox-reference-menu, .desktop-reference-message-menu, .floating-message-menu,
+    .feature-dialog, .nx-web-modal, .attachment-panel, .expression-picker, .reaction-picker-wrap,
+    .contact-details, .profile-quick-card, .nx-messenger-contact-sheet, .section-panel, .channels-panel, .community-card,
+    .support-panel, .settings-list, .settings-page, .settings-profile, .privacy-review-card,
+    .message-bubble, .poll-card, .shared-contact-card, .chat-document-card, .live-location-card,
+    .messenger-input-pill, .desktop-reference-composer, .nx-ai-composer, .mobile-voice-reference,
+    .mobile-selection-header, .mobile-selection-reactions, .desktop-message-selection,
+    .nx-web-review, .nx-web-camera, .media-library, .media-viewer, .desktop-sticker-viewer, .status-card, .status-stage,
+    .call-confirm, .call-panel, .call-picker, .call-more-sheet, .call-screen-stage, .call-self-preview, .nexus-call-screen,
+    .incoming-call-notice, .release-update-banner, .notification-toast
+  ),
+  html[data-nexus-rgb=on][data-nexus-rgb-page=dashboard] :where(main section, .metric-card, details) {
+    --rgb-phase: var(--nexus-rgb-hue, 0deg);
+    box-shadow:
+      inset 0 1px 0 hsl(var(--rgb-phase) 92% 66%),
+      inset -1px 0 0 hsl(calc(var(--rgb-phase) + 90deg) 92% 66%),
+      inset 0 -1px 0 hsl(calc(var(--rgb-phase) + 180deg) 92% 66%),
+      inset 1px 0 0 hsl(calc(var(--rgb-phase) + 270deg) 92% 66%) !important;
+  }
+}
