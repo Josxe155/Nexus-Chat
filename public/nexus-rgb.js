@@ -2,9 +2,15 @@
   const key = 'nexus-rgb';
   const triggerSelector = '[data-nexus-rgb-trigger]';
   const root = document.documentElement;
+  const notice = document.createElement('div');
+  notice.className = 'nexus-rgb-notice';
+  notice.setAttribute('role', 'status');
+  notice.setAttribute('aria-atomic', 'true');
+  document.body.append(notice);
   let previousTrigger = null;
   let previousTap = 0;
   let taps = 0;
+  let hideNotice;
 
   const apply = (enabled) => {
     if (enabled) root.dataset.nexusRgb = 'on';
@@ -27,6 +33,9 @@
     taps = 0;
     const enabled = root.dataset.nexusRgb !== 'on';
     apply(enabled);
+    notice.textContent = enabled ? 'Modo RGB activado' : 'Modo RGB desactivado';
+    clearTimeout(hideNotice);
+    hideNotice = setTimeout(() => { notice.textContent = ''; }, 2400);
     try {
       if (enabled) localStorage.setItem(key, 'on');
       else localStorage.removeItem(key);

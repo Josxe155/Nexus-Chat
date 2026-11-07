@@ -14,6 +14,8 @@
   to { --nexus-rgb-angle: 360deg; }
 }
 
+:root { --nexus-rgb-spectrum: #ff3864, #ff9c32, #f6ef51, #44ef84, #32dfff, #6877ff, #c755ff, #ff3864; }
+
 html[data-nexus-rgb=on] { --nexus-rgb-animation: nexus-rgb-orbit 4.5s linear infinite; }
 html[data-nexus-rgb=on][data-motion=off] { --nexus-rgb-animation: none; }
 
@@ -37,6 +39,36 @@ html[data-nexus-rgb=on][data-motion=off] { --nexus-rgb-animation: none; }
   user-select: none;
 }
 .nexus-rgb-trigger:focus-visible { outline: 2px solid currentColor; outline-offset: 4px; }
+
+.nexus-rgb-notice {
+  position: fixed;
+  inset-block-start: calc(72px + env(safe-area-inset-top, 0px));
+  left: 50%;
+  translate: -50% 0;
+  z-index: 10020;
+  max-width: calc(100vw - 32px);
+  padding: 9px 16px;
+  border: 2px solid transparent;
+  border-radius: 999px;
+  background: linear-gradient(#171c22, #171c22) padding-box,
+    conic-gradient(from var(--nexus-rgb-angle, 0deg), var(--nexus-rgb-spectrum)) border-box;
+  color: #f3f6f8;
+  box-shadow: 0 5px 18px #0005;
+  font: 600 14px/1.4 system-ui, sans-serif;
+  text-align: center;
+  pointer-events: none;
+}
+.nexus-rgb-notice:empty { clip-path: inset(100%); }
+
+@keyframes nexus-rgb-notice-in {
+  from { opacity: 0; transform: translateY(-5px); }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-motion=off]) .nexus-rgb-notice:not(:empty) {
+    animation: nexus-rgb-notice-in .16s ease-out, nexus-rgb-orbit 4.5s linear infinite;
+  }
+}
 
 /* Decorate standalone surfaces. Their existing positioning, shadows and content stay in their own layers. */
 @supports ((mask-composite: exclude) or (-webkit-mask-composite: xor)) {
@@ -68,10 +100,7 @@ html[data-nexus-rgb=on][data-motion=off] { --nexus-rgb-animation: none; }
         padding: 2px !important;
         pointer-events: none;
         translate: var(--nexus-rgb-scroll-x, 0px) var(--nexus-rgb-scroll-y, 0px);
-        background: conic-gradient(
-          from var(--nexus-rgb-angle, 0deg),
-          #ff3864, #ff9c32, #f6ef51, #44ef84, #32dfff, #6877ff, #c755ff, #ff3864
-        );
+        background: conic-gradient(from var(--nexus-rgb-angle, 0deg), var(--nexus-rgb-spectrum));
         -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
         -webkit-mask-composite: xor;
         mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
