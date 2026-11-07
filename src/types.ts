@@ -63,6 +63,9 @@ export interface Message {
   edited?: boolean;
   deletedAt?: number;
   expiresAt?: number;
+  keptBy?: string;
+  keptAt?: any;
+  originalExpiresAt?: number;
   pinned?: boolean;
   pinExpiresAt?:number;
   pinnedAt?:number;

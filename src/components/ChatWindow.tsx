@@ -1,5 +1,10 @@
+import MobileMessageSelection,{type MobileSelectionAction} from '../features/MobileMessageSelection';
+import {useChatNewMessages,useComposerInset} from '../features/useChatNewMessages';
+import {keepOwnMessage} from '../features/keepMessage';
+import {MobileVoiceDiscardHost} from '../features/MobileVoiceMotion';
+import {ChevronsDown} from 'lucide-react';
 import DesktopBackgroundMenu from '../features/DesktopBackgroundMenu';
-import DesktopChatComposer from '../features/DesktopChatComposer';import DesktopSelectionBar from '../features/DesktopSelectionBar';import {Ban,CircleX} from 'lucide-react';
+import DesktopChatComposer from '../features/DesktopChatComposer';import DesktopSelectionBar from '../features/DesktopSelectionBar';import {Bookmark,Ban,CircleX} from 'lucide-react';
 import DesktopMessageActions from '../features/DesktopMessageActions';
 import useServerClock from '../features/useServerClock';
 import MobileChatComposer from '../features/MobileChatComposer';
@@ -131,17 +136,18 @@ export default function ChatWindow({
   const ignoreMessageClick=useRef<string|null>(null);
   const gesture=useRef<any>(undefined),dragDepth=useRef(0),lastScrollCount=useRef(0),previousHeight=useRef(0);
   const selected=messages.filter(message=>selectedIds.includes(message.id));
-  const openMenu=(message:Message,x:number,y:number)=>{if(message.decryptionFailed){setContactView('security');setShowContact(true);return;}setMenuAt({x,y});setOpenMessageId(message.id);};
-  const toggleSelection=(id:string)=>setSelectedIds(previous=>previous.includes(id)?previous.filter(value=>value!==id):[...previous,id]);
+  useEffect(()=>{if(!selectedIds.length)return;const available=new Set(messages.map(message=>message.id)),next=selectedIds.filter(id=>available.has(id));if(next.length!==selectedIds.length){setSelectedIds(next);if(!next.length)setSelectingMessages(false);}},[messages.map(message=>message.id).join('|'),selectedIds.join('|')]);
+  const openMenu=(message:Message,x:number,y:number)=>{if(message.decryptionFailed){setContactView('security');setShowContact(true);return;}if(!desktopWeb){setSelectedIds([message.id]);setSelectingMessages(true);return;}setMenuAt({x,y});setOpenMessageId(message.id);};
+  const toggleSelection=(id:string)=>{const next=selectedIds.includes(id)?selectedIds.filter(value=>value!==id):[...selectedIds,id];setSelectedIds(next);if(!desktopWeb&&!next.length)setSelectingMessages(false);};
   const copyText=async(list:Message[])=>{try{await navigator.clipboard.writeText(list.map(message=>message.content).join('\n'));}catch{setUploadError('No se pudo copiar. Selecciona el texto para copiarlo.');}};
   const mine=async(list:Message[])=>{deleteUndo.offer(await hideMessages(currentUser.uid,list));excludeVoice(activeChat.id,new Set(list.map(message=>message.id)));for(const message of list)if(message.localState)await discardMessage(message.id);setSelectedIds([]);};
   const everyone=async(list:Message[])=>{for(const message of list)await onDeleteMessage(message.id);setSelectedIds([]);};
   const star=async(list:Message[])=>{const add=list.some(message=>!personal.flags[flagId(message.chatId,message.id)]?.starred);for(const message of list)await setMessageFlag(currentUser.uid,message,{starred:add});};
-  const beginGesture=(event:React.PointerEvent,message:Message)=>{if(event.pointerType==='mouse'||(event.target as HTMLElement).closest('button,a,input,video,audio'))return;ignoreMessageClick.current=null;gesture.current={id:message.id,x:event.clientX,y:event.clientY,moved:false,timer:setTimeout(()=>{ignoreMessageClick.current=message.id;toggleSelection(message.id);gesture.current=undefined;navigator.vibrate?.(20);},500)};};
+  const beginGesture=(event:React.PointerEvent,message:Message)=>{ignoreMessageClick.current=null;if(desktopWeb||event.pointerType==='mouse'||selectedIds.length||!(event.target as HTMLElement).closest('.message-bubble')||(event.target as HTMLElement).closest('button,a,input,textarea,video,audio'))return;ignoreMessageClick.current=null;gesture.current={id:message.id,x:event.clientX,y:event.clientY,moved:false,timer:setTimeout(()=>{ignoreMessageClick.current=message.id;setSelectedIds([message.id]);setSelectingMessages(true);gesture.current=undefined;navigator.vibrate?.(20);},500)};};
   const moveGesture=(event:React.PointerEvent)=>{const value=gesture.current;if(!value)return;const dx=event.clientX-value.x,dy=event.clientY-value.y;if(Math.abs(dx)>12||Math.abs(dy)>12){clearTimeout(value.timer);value.moved=true;}if(Math.abs(dy)<25&&dx>20)(event.currentTarget as HTMLElement).style.transform='translateX('+Math.min(70,dx/2)+'px)';};
   const endGesture=(event:React.PointerEvent,message:Message)=>{const value=gesture.current;(event.currentTarget as HTMLElement).style.transform='';if(value){clearTimeout(value.timer);if(event.clientX-value.x>80&&Math.abs(event.clientY-value.y)<30&&!selectedIds.length){setReplyTarget(message);textareaRef.current?.focus();}}gesture.current=undefined;};
   useEffect(()=>()=>{if(gesture.current)clearTimeout(gesture.current.timer);},[]);
-  useEffect(()=>{const listener=(event:KeyboardEvent)=>{if(event.key==='Escape'){setBackgroundMenu(null);setSelectingMessages(false);setSelectedIds([]);setOpenMessageId(null);setShowContact(false);}if((event.ctrlKey||event.metaKey)&&event.shiftKey&&event.key.toLowerCase()==='f'){event.preventDefault();setIsSearchingMessages(true);}};document.addEventListener('keydown',listener);return()=>document.removeEventListener('keydown',listener);},[]);
+  useEffect(()=>{const listener=(event:KeyboardEvent)=>{if(event.defaultPrevented)return;if(event.key==='Escape'&&(event.target as HTMLElement)?.closest('[role=dialog],.floating-message-menu'))return;if(event.key==='Escape'){setBackgroundMenu(null);setSelectingMessages(false);setSelectedIds([]);setOpenMessageId(null);setShowContact(false);}if((event.ctrlKey||event.metaKey)&&event.shiftKey&&event.key.toLowerCase()==='f'){event.preventDefault();setIsSearchingMessages(true);}};document.addEventListener('keydown',listener);return()=>document.removeEventListener('keydown',listener);},[]);
   const palette=useInterfacePalette();const bubbleDefault=defaultBubble(palette,theme);
   const preferences=usePreferences(currentUser.uid);const [manualMedia,setManualMedia]=useState<Record<string,string>>({});
   const appearance=useAppearance(currentUser.uid,activeChat.id),resolvedMedia=useMediaURLs(messages.filter(message=>!realtime?.media[message.transferId||'']),currentUser.uid);
@@ -150,6 +156,9 @@ export default function ChatWindow({
   useEffect(()=>{invalidateVoice(activeChat.id,new Set(messages.filter(message=>!message.deletedAt&&(!message.expiresAt||message.expiresAt>Date.now())).map(message=>message.id)),new Set(incomingMessages.map(message=>message.id)));},[activeChat.id,incomingMessages.map(message=>message.id+':'+message.deletedAt+':'+message.expiresAt).join('|')]);
   const [showAppearance,setShowAppearance]=useState(false);const presenceNow=useServerClock();
   const [clipboardMessage,setClipboardMessage]=useState<Message|null>(null);const chatRoot=useRef<HTMLDivElement>(null);
+  const newMessages=useChatNewMessages(activeChat.id,currentUser.uid,messages,nearBottom||desktopWeb);useComposerInset(chatRoot);
+  useEffect(()=>{setSelectedIds([]);setSelectingMessages(false);setNearBottom(true);lastScrollCount.current=0;},[activeChat.id]);
+
   const [imageViewer,setImageViewer]=useState<string|null>(null);
   useEffect(()=>{const clear=()=>{if(document.visibilityState!=='visible')setTypingStatus(false);};document.addEventListener('visibilitychange',clear);return()=>{document.removeEventListener('visibilitychange',clear);setTypingStatus(false);};},[activeChat.id]);
   const [showCamera,setShowCamera]=useState(false),[showContacts,setShowContacts]=useState(false),[contactSearch,setContactSearch]=useState(''),[audioOptions,setAudioOptions]=useState(false),[pendingFiles,setPendingFiles]=useState<File[]>([]),[fileBusy,setFileBusy]=useState(false);
@@ -198,23 +207,10 @@ export default function ChatWindow({
   const [editingTarget, setEditingTarget] = useState<Message | null>(null);
   const [editingText, setEditingText] = useState('');
 
-  // Recording State
-  const [isRecording, setIsRecording] = useState(false);
-  const [recordingSeconds, setRecordingSeconds] = useState(0);
-  const recordingTimer = useRef<NodeJS.Timeout | null>(null);
-
   // File states
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [uploadProgress, setUploadProgress] = useState<number | null>(null);
   const [uploadError, setUploadError] = useState('');
-
-  // Audio elements state
-  const [playingAudioId, setPlayingAudioId] = useState<string | null>(null);
-
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const audioChunksRef = useRef<Blob[]>([]);
-  const streamRef = useRef<MediaStream | null>(null);
-  const audioRefs = useRef<{ [key: string]: HTMLAudioElement }>({});
 
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const messageAreaRef = useRef<HTMLDivElement | null>(null);
@@ -226,22 +222,7 @@ export default function ChatWindow({
 
   useEffect(()=>{const element=messageAreaRef.current;if(!element)return;if(previousHeight.current){element.scrollTop+=element.scrollHeight-previousHeight.current;previousHeight.current=0;}else if(nearBottom||lastScrollCount.current===0)messagesEndRef.current?.scrollIntoView({behavior:lastScrollCount.current?'smooth':'instant'});lastScrollCount.current=messages.length;},[messages.length]);
 
-  // Detener audio y grabación al cambiar de chat o desmontar
-  useEffect(() => {
-    
-  return () => {
-      Object.values(audioRefs.current).forEach(audio => {
-        audio.pause();
-        audio.currentTime = 0;
-      });
-      if (mediaRecorderRef.current?.state === 'recording') {
-        mediaRecorderRef.current.onstop = null;
-        mediaRecorderRef.current.stop();
-      }
-      streamRef.current?.getTracks().forEach(track => track.stop());
-      if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
-    };
-  }, [activeChat.id]);
+  useEffect(()=>()=>{if(typingTimeoutRef.current)clearTimeout(typingTimeoutRef.current);},[activeChat.id]);
 
   // Typing state debouncer
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -262,22 +243,6 @@ export default function ChatWindow({
   useEffect(()=>{if(!jumpTarget.current||revealMessage(jumpTarget.current)||loadingOlder)return;if(hasOlder)onLoadOlder?.();else{jumpTarget.current=undefined;setUploadError('El mensaje ya no está disponible en tu historial.');}},[messages.length,hasOlder,loadingOlder]);
   const copyPicture=async(url:string)=>{try{await copyImage(url,currentUser.uid);}catch(error){setUploadError(error instanceof Error?error.message:'No se pudo copiar la imagen.');}};
   useEffect(()=>{const paste=(event:ClipboardEvent)=>{const target=event.target as HTMLElement;if(!canSend||!chatRoot.current?.contains(target)||target.closest('[role=dialog]')||target.closest('input,textarea')&&target!==textareaRef.current)return;const files=pastedFiles(event.clipboardData);if(!files.length)return;event.preventDefault();if(files.length>10){setUploadError('Selecciona hasta diez archivos por envío.');return;}uploadKind.current='media';setPendingFiles(files);setUploadError('');};const copy=(event:KeyboardEvent)=>{if(imageViewer)return;if(!(event.ctrlKey||event.metaKey)||event.key.toLowerCase()!=='c'||event.altKey)return;const target=event.target as HTMLElement;if(target.closest('input,textarea,[contenteditable=true]')||window.getSelection()?.toString())return;const url=(clipboardMessage&&['image','sticker'].includes(clipboardMessage.type)?manualMedia[clipboardMessage.id]||resolvedMedia[clipboardMessage.id]||realtime?.media[clipboardMessage.transferId||'']||clipboardMessage.fileUrl:undefined);if(!url||!imageViewer&&!chatRoot.current?.contains(target))return;event.preventDefault();copyPicture(url);};document.addEventListener('paste',paste);document.addEventListener('keydown',copy);return()=>{document.removeEventListener('paste',paste);document.removeEventListener('keydown',copy);};},[canSend,imageViewer,clipboardMessage,resolvedMedia,manualMedia]);
-  // Recording timer
-  useEffect(() => {
-    if (isRecording) {
-      recordingTimer.current = setInterval(() => {
-        setRecordingSeconds(prev => prev + 1);
-      }, 1000);
-    } else {
-      if (recordingTimer.current) clearInterval(recordingTimer.current);
-      setRecordingSeconds(0);
-    }
-
-    return () => {
-      if (recordingTimer.current) clearInterval(recordingTimer.current);
-    };
-  }, [isRecording]);
-
   const handleSend = async () => {
     if (sendingRef.current) return;
     sendingRef.current = true;
@@ -372,37 +337,6 @@ export default function ChatWindow({
     return d.toLocaleDateString([], { weekday: 'long', day: 'numeric', month: 'long' });
   };
 
-  // Audio Controller
-  const handlePlayAudio = async (msgId: string, url?: string) => {
-    if (!url) return;
-
-    if (playingAudioId === msgId) {
-      const currentAudio = audioRefs.current[msgId];
-      if (currentAudio) {
-        currentAudio.pause();
-        currentAudio.currentTime = 0;
-      }
-      setPlayingAudioId(null);
-      return;
-    }
-
-    Object.values(audioRefs.current).forEach(audio => {
-      audio.pause();
-      audio.currentTime = 0;
-    });
-
-    try {
-      const audio = new Audio(url);
-      audioRefs.current[msgId] = audio;
-      setPlayingAudioId(msgId);
-      await audio.play();
-      audio.onended = () => setPlayingAudioId(null);
-    } catch (err) {
-      console.error('Audio playback error:', err);
-      setPlayingAudioId(null);
-    }
-  };
-
   const searchableMessages=messages.filter(message=>!searchDate||new Date(message.timestamp).toLocaleDateString('en-CA')===new Date(searchDate+'T00:00:00').toLocaleDateString('en-CA'));
   const conversationAction=(action:string)=>{if(action==='restrict'){window.dispatchEvent(new Event(restrictEvent));return;}if(action==='search'){setShowContact(false);setIsSearchingMessages(true);return;}if(action==='mute'||action==='lists'||action==='temporary'){setConversationTool(action);return;}if(action==='appearance'){setShowAppearance(true);return;}if(action==='report'){setReporting(true);return;}const perform=async()=>{if(action==='favorite')await changeConversation(currentUser.uid,activeChat.id,{favorite:!personal.conversations[activeChat.id]?.favorite});if(action==='export')await exportConversation(activeChat,currentUser,users,personal);if(action==='clear'&&confirm('¿Vaciar solo tu historial de esta conversación?'))await onClearChatHistory(activeChat.id);if(action==='delete'&&confirm('¿Eliminar esta conversación solo para ti?')){await clearForMe(currentUser.uid,activeChat,true);onBack();}if(action==='block'&&otherUser?.uid){const privacy=normalizePrivacy(currentUser.privacy),blocked=privacy.blockedIds.includes(otherUser.uid);if(!confirm((blocked?'¿Desbloquear a ':'¿Bloquear a ')+otherUser.nombre+'?'))return;const updated=await savePrivacy(currentUser,{...privacy,blockedIds:blocked?privacy.blockedIds.filter(id=>id!==otherUser.uid):[...privacy.blockedIds,otherUser.uid]});window.dispatchEvent(new CustomEvent('nexus:profile-update',{detail:updated}));}};perform().catch(error=>setUploadError(error.message||'No se pudo completar la operación.'));};
   const messageGroups = groupMessagesByDate(
@@ -411,13 +345,30 @@ export default function ChatWindow({
       : searchableMessages.filter(m=>searchKind==='all'||m.type===searchKind||searchKind==='video'&&m.type==='video-note'||(searchKind==='links'&&/https?:\/\//.test(m.content)))
   );
 
+  const clearMobileSelection=()=>{setSelectedIds([]);setSelectingMessages(false);setOpenMessageId(null);};
+  const canPinSelected=(activeChat.kind!=='group'&&activeChat.kind!=='channel')||(activeChat.kind==='group'&&!!activeChat.membersCanEdit)||!!activeChat.admins?.includes(currentUser.uid);
+  const canEditSelected=(message:Message)=>message.senderId===currentUser.uid&&!message.deletedAt&&message.content!=='🚫 Este mensaje fue eliminado'&&!message.sealed&&!message.localState&&['text','poll'].includes(message.type)&&Date.now()-(message.serverSentAt?.toMillis?.()||message.timestamp)<=15*60*1000;
+  const mobileSelectionAction=(action:MobileSelectionAction)=>{const message=selected[0];if(!message)return;
+   if(action==='reply'){setReplyTarget(message);clearMobileSelection();textareaRef.current?.focus();}
+   else if(action==='edit'&&canEditSelected(message)){setEditingTarget(message);setEditingText(message.poll?.question||message.content);clearMobileSelection();}
+   else if(action==='delete')setDeleting(selected);
+   else if(action==='forward')setForwarding(selected);
+   else if(action==='copy'){const url=manualMedia[message.id]||resolvedMedia[message.id]||realtime?.media[message.transferId||'']||message.fileUrl;if(selected.length===1&&['image','sticker'].includes(message.type)&&url)void copyPicture(url);else void copyText(selected);clearMobileSelection();}
+   else if(action==='star')void star(selected).then(clearMobileSelection).catch(error=>setUploadError(error.message));
+   else if(action==='keep')void keepOwnMessage(activeChat.id,message.id,!message.keptBy).then(clearMobileSelection).catch(error=>setUploadError(error.message));
+   else if(action==='info'){setInformation(message);clearMobileSelection();}
+   else if(action==='pin'){if(messagePinned(message,activeChat))void setMessagePin(activeChat.id,message.id,0).catch(error=>setUploadError(error.message));else setPinTarget(message);clearMobileSelection();}
+   else if(action==='translate'){setTranslation(message.content);clearMobileSelection();}
+   else if(action==='report'){setReporting(true);clearMobileSelection();}
+   else if(action==='ai'){const quote={sender:users.find(person=>person.uid===message.senderId)?.nombre||'Contacto',content:message.content||message.fileName||'Mensaje',chatId:activeChat.id,messageId:message.id};try{sessionStorage.setItem('nexus-ai-quote:'+currentUser.uid,JSON.stringify(quote));}catch{}clearMobileSelection();setRecordMode(null);if(!desktopWeb)onBack();window.dispatchEvent(new CustomEvent('nexus:navigate',{detail:'assistant'}));window.dispatchEvent(new CustomEvent('nexus:ai-quote',{detail:quote}));}
+  };
   const restriction=<AppLock uid={currentUser.uid+':chat:'+activeChat.id} eventName={restrictEvent} onLock={setRestricted}/>;
   return (<>
     {restriction}
     <div hidden={restricted} ref={chatRoot} onDragEnter={event=>{if(event.dataTransfer.types.includes('Files')){event.preventDefault();dragDepth.current++;setDragging(true);}}} onDragOver={event=>{if(event.dataTransfer.types.includes('Files'))event.preventDefault();}} onDragLeave={()=>{dragDepth.current=Math.max(0,dragDepth.current-1);if(!dragDepth.current)setDragging(false);}} onDrop={event=>{if(!event.dataTransfer.files.length)return;event.preventDefault();dragDepth.current=0;setDragging(false);if(event.dataTransfer.files.length>10){setUploadError('Selecciona hasta diez archivos.');return;}uploadKind.current='media';setPendingFiles(Array.from(event.dataTransfer.files));}} style={{'--nexus-wallpaper':[appearance.doodles!==false?'url("/chat-doodles.svg")':'',appearance.background?`linear-gradient(#10141e25,#10141e25),url("${appearance.background}")`:''].filter(Boolean).join(',')||'none','--nexus-wallpaper-size':appearance.doodles!==false?'280px 280px,cover,cover':'cover','--nexus-wallpaper-repeat':appearance.doodles!==false?'repeat,no-repeat,no-repeat':'no-repeat','--own-bubble':appearance.bubble||bubbleDefault,'--own-ink':contrastColor(appearance.bubble||bubbleDefault),'--mic-color':appearance.microphoneColor||bubbleDefault,'--mic-ink':contrastColor(appearance.microphoneColor||bubbleDefault)} as React.CSSProperties} data-doodles={appearance.doodles!==false} data-bubble={appearance.bubbleShape||'soft'} data-microphone={appearance.microphone||'round'} className={`nexus-chat-window flex-1 min-w-0 min-h-0 flex flex-col h-full overflow-hidden relative ${theme === 'dark' ? 'bg-[#101218]' : 'bg-[#efeae2]'}`}>
       
       {dragging&&<div className="chat-drop-overlay"><Paperclip size={42}/><strong>Suelta los archivos para enviarlos</strong></div>}
-      {!desktopWeb&&(selectedIds.length>0||selectingMessages)&&<div className="selection-toolbar"><button aria-label="Cancelar selección" onClick={()=>{setSelectedIds([]);setSelectingMessages(false);}}><X/></button><strong>{selectedIds.length} seleccionados</strong><button title="Copiar seleccionados" disabled={!selectedIds.length} onClick={()=>copyText(selected)}><Copy/></button><button title="Destacar seleccionados" disabled={!selectedIds.length} onClick={()=>star(selected).catch(error=>setUploadError(error.message))}><Star/></button><button title="Reenviar seleccionados" disabled={!selectedIds.length||selected.some(message=>!!message.localState||!!message.fileName?.startsWith('nota-unica-'))} onClick={()=>setForwarding(selected)}><Forward/></button><button title="Eliminar seleccionados" disabled={!selectedIds.length} onClick={()=>setDeleting(selected)}><Trash2/></button></div>}
+      {!desktopWeb&&(selectedIds.length>0||selectingMessages)&&<MobileMessageSelection ids={selectedIds} mine={selected.length===1&&selected[0].senderId===currentUser.uid} editable={selected.length===1&&canEditSelected(selected[0])} kept={!!selected[0]?.keptBy} temporary={!!(selected[0]?.expiresAt||selected[0]?.keptBy)&&!selected[0]?.deletedAt&&!selected[0]?.fileName?.startsWith('nota-unica-')} starred={!!(selected[0]&&personal.flags[flagId(activeChat.id,selected[0].id)]?.starred)} pinned={!!(selected[0]&&messagePinned(selected[0],activeChat))} canPin={canPinSelected} canForward={selected.length>0&&!selected.some(message=>!!message.deletedAt||message.content==='🚫 Este mensaje fue eliminado'||!!message.localState||!!message.fileName?.startsWith('nota-unica-'))} canReact={selected.length===1&&!selected[0].deletedAt&&selected[0].content!=='🚫 Este mensaje fue eliminado'&&!selected[0].localState} canTranslate={selected.length===1&&selected[0].type==='text'&&!selected[0].deletedAt&&selected[0].content!=='🚫 Este mensaje fue eliminado'} onClose={clearMobileSelection} onAction={mobileSelectionAction} onReact={emoji=>{void handleReactionClick(selected[0].id,emoji).then(clearMobileSelection).catch(error=>setUploadError(error.message||'No se pudo guardar la reacción.'));}} onMoreReactions={()=>setReactionTarget(selected[0].id)}/>}
       {/* ---------------- HEADER ----------------- */}
       <header hidden={!desktopWeb&&(selectedIds.length>0||selectingMessages)} className={`px-4 h-[60px] flex items-center justify-between shrink-0 select-none z-10 shadow-sm ${theme === 'dark' ? 'bg-[#232732]' : 'bg-[#f0f2f5]'}`}>
         <div className="flex items-center gap-3 min-w-0">
@@ -580,26 +531,12 @@ export default function ChatWindow({
               return (
                 <div 
                   key={msg.id}
-                  id={`message-${msg.id}`} data-run={index>0&&messageGroups[dateStr][index-1].senderId===msg.senderId?'same':'first'} data-selecting={desktopWeb&&(selectingMessages||selectedIds.length>0)} data-selected={selectedIds.includes(msg.id)} onContextMenu={event=>{if(desktopWeb&&!(event.target as HTMLElement).closest('.message-bubble'))return;event.preventDefault();event.stopPropagation();setBackgroundMenu(null);openMenu(msg,event.clientX,event.clientY);}} onPointerDown={event=>beginGesture(event,msg)} onPointerMove={moveGesture} onPointerUp={event=>endGesture(event,msg)} onPointerCancel={event=>{if(gesture.current)clearTimeout(gesture.current.timer);gesture.current=undefined;event.currentTarget.style.transform='';}} onClick={event=>{if(ignoreMessageClick.current===msg.id){ignoreMessageClick.current=null;event.preventDefault();event.stopPropagation();return;}if((selectedIds.length||selectingMessages)&&!(event.target as HTMLElement).closest('button,a,input,video,audio'))toggleSelection(msg.id);}}
+                  id={`message-${msg.id}`} data-run={index>0&&messageGroups[dateStr][index-1].senderId===msg.senderId?'same':'first'} data-selecting={selectingMessages||selectedIds.length>0} data-selected={selectedIds.includes(msg.id)} onContextMenu={event=>{if(!(event.target as HTMLElement).closest('.message-bubble'))return;event.preventDefault();event.stopPropagation();setBackgroundMenu(null);openMenu(msg,event.clientX,event.clientY);}} onPointerDown={event=>beginGesture(event,msg)} onPointerMove={moveGesture} onPointerUp={event=>endGesture(event,msg)} onPointerCancel={event=>{if(gesture.current)clearTimeout(gesture.current.timer);gesture.current=undefined;event.currentTarget.style.transform='';}} onClick={event=>{if(ignoreMessageClick.current===msg.id){ignoreMessageClick.current=null;event.preventDefault();event.stopPropagation();return;}if((selectedIds.length||selectingMessages)&&!(event.target as HTMLElement).closest('button,a,input,video,audio'))toggleSelection(msg.id);}}
                   className={`flex flex-col group/msg ${isMine ? 'items-end' : 'items-start'}`}
                 >
                   {desktopWeb&&(selectingMessages||selectedIds.length>0)&&<input className="desktop-message-checkbox" type="checkbox" aria-label={'Seleccionar mensaje '+msg.id} checked={selectedIds.includes(msg.id)} onClick={e=>e.stopPropagation()} onChange={()=>toggleSelection(msg.id)}/>}
                   <div data-kind={msg.type} data-deleted={isDeleted} data-reactions={!!hasReaction} data-mine={isMine} className="message-bubble max-w-[88%] sm:max-w-[80%] xl:max-w-[70%] min-w-0 relative leading-tight">
                     
-                    {!desktopWeb&&!isDeleted && (
-                      <div className={`hover-reactions absolute top-[-30px] z-20 flex items-center gap-1 bg-white dark:bg-[#233138] border dark:border-gray-700 p-0.5 rounded-full shadow-md opacity-0 group-hover/msg:opacity-100 transition-opacity duration-200 delay-100 ${isMine ? 'right-0' : 'left-0'}`}>
-                        {['👍', '❤️', '😂', '😮', '😢', '🙏'].map(emoji => (
-                          <button 
-                            key={emoji}
-                            onClick={() => handleReactionClick(msg.id, emoji)}
-                            className="p-1 hover:bg-black/10 dark:hover:bg-white/10 rounded-full transition-transform text-xs hover:scale-130 cursor-pointer"
-                          >
-                            {emoji}
-                          </button>
-                        ))}
-                      </div>
-                    )}
-
                     <div className={`message-content p-2.5 rounded-lg shadow-sm border relative select-text transition-all ${
                       isMine 
                         ? (theme === 'dark' ? 'bg-[#343b62] text-gray-100 border-none' : 'bg-[#e2e6f1] text-gray-950 border-none') 
@@ -636,7 +573,7 @@ export default function ChatWindow({
                       </div>
 
                       <div className="message-metadata flex items-center justify-end gap-1 select-none pt-1">
-                        {starred&&<Star size={11} className="starred-indicator"/>}{msg.localState==='failed'&&msg.localError&&<span className="outbox-error-reason" role="alert">{msg.localError}</span>}{msg.localState==='failed'&&<button onClick={()=>retryMessage(msg.id).catch(error=>setUploadError(error.message))} className="retry-message">Reintentar</button>}
+                        {msg.keptBy&&<Bookmark size={11} className="kept-indicator" aria-label="Mensaje conservado"/>}{starred&&<Star size={11} className="starred-indicator"/>}{msg.localState==='failed'&&msg.localError&&<span className="outbox-error-reason" role="alert">{msg.localError}</span>}{msg.localState==='failed'&&<button onClick={()=>retryMessage(msg.id).catch(error=>setUploadError(error.message))} className="retry-message">Reintentar</button>}
                         {msg.edited && (
                           <span className={`text-[9px] uppercase tracking-wider opacity-60 font-semibold pr-1`}>editado</span>
                         )}
@@ -650,23 +587,7 @@ export default function ChatWindow({
                         )}
                       </div>
 
-                      {!isDeleted && (
-                        <div className="message-actions absolute right-1 top-1" hidden={desktopWeb}>
-                          <button aria-label="Opciones del mensaje" title="Opciones del mensaje" aria-expanded={openMessageId === msg.id} onClick={event=>{const rect=event.currentTarget.getBoundingClientRect();if(openMessageId===msg.id)setOpenMessageId(null);else openMenu(msg,rect.right-250,rect.bottom+5);}} className="message-menu-trigger"><MoreVertical size={16} /></button>
-                          {!desktopWeb && openMessageId === msg.id && <>
-                            <FloatingMenu at={menuAt} onClose={()=>setOpenMessageId(null)}>
-                              <div className="message-menu-emojis">{['👍','❤️','😂','😮','😢','🙏'].map(emoji => <button key={emoji} aria-label={`Reaccionar ${emoji}`} onClick={() => {handleReactionClick(msg.id,emoji);setOpenMessageId(null);}}>{emoji}</button>)}</div>
-                              <button onClick={() => {setReplyTarget(msg);setOpenMessageId(null);}}><CornerUpLeft size={17} />Responder</button>
-                              {isMine && !msg.sealed && !msg.localState && ['text','poll'].includes(msg.type) && Date.now()-(msg.serverSentAt?.toMillis?.()||msg.timestamp)<=15*60*1000 && <button onClick={() => {setEditingTarget(msg);setEditingText(msg.poll?.question||msg.content);setOpenMessageId(null);}}><Edit3 size={17} />{msg.type==='poll'?'Editar pregunta':'Editar mensaje'}</button>}
-<button onClick={()=>{if(['image','sticker'].includes(msg.type)&&mediaURL)copyPicture(mediaURL);else copyText([msg]);setOpenMessageId(null);}}><Copy size={17}/>{['image','sticker'].includes(msg.type)?'Copiar imagen':'Copiar'}</button><button disabled={!!msg.localState||!!msg.fileName?.startsWith('nota-unica-')} onClick={()=>{setForwarding([msg]);setOpenMessageId(null);}}><Forward size={17}/>Reenviar</button>{!msg.fileName?.startsWith('nota-unica-')&&msg.fileUrl&&['audio','image','sticker','video','video-note','document'].includes(msg.type)&&<button onClick={()=>{downloadMedia(msg.fileUrl!,msg.fileName||'nota-de-voz.webm',msg.fileSize).catch(error=>setUploadError(error.message));setOpenMessageId(null);}}><Download size={17}/>{msg.type==='audio'?'Descargar audio':'Guardar archivo'}</button>}<button onClick={()=>{star([msg]).catch(error=>setUploadError(error.message));setOpenMessageId(null);}}><Star size={17}/>{starred?'Quitar de destacados':'Destacar mensaje'}</button><button onClick={()=>{setSelectedIds([msg.id]);setOpenMessageId(null);}}><CheckSquare size={17}/>Seleccionar</button>{isMine&&<button onClick={()=>{setInformation(msg);setOpenMessageId(null);}}><Info size={17}/>Información</button>}
-                              {!mobileOptions&&<button onClick={()=>{localStorage.setItem('nexus-ai-draft:'+currentUser.uid,'Ayúdame a entender este mensaje:\n'+msg.content);setOpenMessageId(null);window.dispatchEvent(new CustomEvent('nexus:navigate',{detail:'assistant'}));}}><Sparkles size={17}/>Pregúntale a Nexus AI</button>}
-                              {((activeChat.kind!=='group'&&activeChat.kind!=='channel')||(activeChat.kind==='group'&&activeChat.membersCanEdit)||activeChat.admins?.includes(currentUser.uid))&&<button onClick={()=>{if(messagePinned(msg,activeChat))setMessagePin(activeChat.id,msg.id,0).catch(e=>setUploadError(e.message));else setPinTarget(msg);setOpenMessageId(null);}}><Pin size={17}/>{messagePinned(msg,activeChat)?'Desfijar mensaje':'Fijar mensaje'}</button>}
-                              
-                              <button className="message-delete" onClick={()=>{setDeleting([msg]);setOpenMessageId(null);}}><Trash2 size={17}/>Eliminar</button>
-                            </FloatingMenu>
-                          </>}
-                        </div>
-                      )}
+                      {!desktopWeb&&!isDeleted&&<div className="message-actions absolute right-1 top-1"><button aria-label="Seleccionar mensaje" title="Seleccionar mensaje" onClick={()=>{setSelectedIds([msg.id]);setSelectingMessages(true);}} className="message-menu-trigger"><MoreVertical size={16}/></button></div>}
 
                     </div>
 
@@ -682,7 +603,7 @@ export default function ChatWindow({
         <div ref={messagesEndRef} />
       </div>
 
-      {!nearBottom&&<button className="scroll-to-latest" aria-label="Ir al último mensaje" onClick={()=>{messagesEndRef.current?.scrollIntoView({behavior:'smooth'});setNearBottom(true);}}><ChevronDown/></button>}
+      {!nearBottom&&<button className="scroll-to-latest" aria-label={!desktopWeb&&newMessages?'Ir a '+newMessages+' mensajes nuevos':'Ir al último mensaje'} onClick={()=>{messagesEndRef.current?.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});setNearBottom(true);}}>{!desktopWeb&&newMessages>0&&<span className="chat-new-message-count" aria-hidden="true">{newMessages}</span>}{desktopWeb?<ChevronDown/>:<ChevronsDown/>}</button>}
       {deleteUndo.notice}
       {forwarding&&<ForwardDialog messages={forwarding} chats={allChats.length?allChats:[activeChat]} user={currentUser} users={users} cached={Object.fromEntries(messages.map(message=>[message.id,manualMedia[message.id]||resolvedMedia[message.id]||realtime?.media[message.transferId||'']||'']))} onClose={()=>{setForwarding(null);setSelectedIds([]);}}/>}
       {deleting&&<DeleteMessagesDialog messages={deleting} uid={currentUser.uid} onMine={()=>mine(deleting)} onEveryone={()=>everyone(deleting)} onClose={()=>setDeleting(null)}/>}
@@ -725,7 +646,7 @@ export default function ChatWindow({
       {/* ----------------- INPUT FOOTER ----------------- */}
       {backgroundMenu&&desktopWeb&&<DesktopBackgroundMenu at={backgroundMenu} onClose={()=>setBackgroundMenu(null)} onSelect={()=>{setSelectedIds([]);setSelectingMessages(true);setBackgroundMenu(null);setShowAttachMenu(false);setShowEmojiPicker(false);}} onExit={()=>{setBackgroundMenu(null);onBack();}}/>}
       {desktopWeb&&(selectingMessages||selectedIds.length>0)&&<DesktopSelectionBar messages={selected} onClose={()=>{setSelectingMessages(false);setSelectedIds([]);}} onCopy={()=>copyText(selected)} onKeep={()=>void star(selected).catch(e=>setUploadError(e.message))} onDelete={()=>setDeleting(selected)} onForward={()=>setForwarding(selected)} onDownload={()=>{void Promise.all(selected.filter(m=>m.fileUrl&&!m.fileName?.startsWith('nota-unica-')).map(m=>downloadMedia(m.fileUrl!,m.fileName||'archivo',m.fileSize))).catch(e=>setUploadError(e.message));}}/>}
-      {canSend&&!(desktopWeb&&(selectingMessages||selectedIds.length>0))?<footer className={`chat-composer px-3 sm:px-4 py-2.5 shrink-0 select-none z-10 flex flex-col relative ${theme === 'dark' ? 'bg-[#232732]' : 'bg-[#f0f2f5]'}`}>{recordMode==='audio'?<Recorder mode="audio" onClose={()=>setRecordMode(null)} onSend={sendMedia}/>:<>
+      {canSend&&!(desktopWeb&&(selectingMessages||selectedIds.length>0))?<footer className={`chat-composer px-3 sm:px-4 py-2.5 shrink-0 select-none z-10 flex flex-col relative ${theme === 'dark' ? 'bg-[#232732]' : 'bg-[#f0f2f5]'}`}>{!desktopWeb&&<MobileVoiceDiscardHost/>}{recordMode==='audio'?<Recorder mode="audio" onClose={()=>setRecordMode(null)} onSend={sendMedia}/>:<>
         {showEmojiPicker&&<EmojiPicker onClose={()=>setShowEmojiPicker(false)} onSelect={emoji=>{const field=textareaRef.current,value=editingTarget?editingText:inputText,start=field?.selectionStart??value.length,end=field?.selectionEnd??value.length,next=value.slice(0,start)+emoji+value.slice(end);if(editingTarget)setEditingText(next);else setInputText(next);requestAnimationFrame(()=>{field?.setSelectionRange(start+emoji.length,start+emoji.length);});}} onAsset={async(url,name,type)=>{const response=await fetch(url);const blob=await response.blob();const file=new window.File([blob],name+(/webp/i.test(blob.type)?'.webp':/png/i.test(blob.type)?'.png':'.gif'),{type:blob.type||'image/gif'});if(desktopWeb&&type==='image'){uploadKind.current='media';setPendingFiles([file]);setShowEmojiPicker(false);}else await sendMedia(file,type);}} onCreateSticker={()=>{setShowEmojiPicker(false);if(desktopWeb)stickerInput.current?.click();else setShowStickers(true);}}/>}
 
         {showAttachMenu&&<div className="attachment-panel attachment-complete" role="menu" aria-label="Adjuntar al chat">{[[File,'Documento',()=>chooseFiles('document')],[ImageIcon,'Fotos y videos',()=>chooseFiles('media')],[Camera,'Cámara',()=>{setShowCamera(true);setShowAttachMenu(false);}],[AudioLines,'Audio',()=>{setAudioOptions(true);setShowAttachMenu(false);}],[UserRound,'Contacto',()=>{setShowContacts(true);setShowAttachMenu(false);}],[MapPin,'Ubicación',()=>{setShowLocation(true);setShowAttachMenu(false);}],[BarChart3,'Encuesta',()=>{setShowPoll(true);setShowAttachMenu(false);}],[Calendar,'Evento',()=>{setShowEvent(true);setShowAttachMenu(false);}],[Smile,'Nuevo sticker',()=>{if(desktopWeb)stickerInput.current?.click();else setShowStickers(true);setShowAttachMenu(false);}]].filter(([,label])=>mobileOptions||label!=='Ubicación').map(([Icon,label,action]:any)=><button role="menuitem" key={label} onClick={action}><Icon size={20}/>{label}</button>)}</div>}
@@ -734,7 +655,7 @@ export default function ChatWindow({
       </>}</footer>:canSend?null:<div className="readonly-channel">Solo los administradores pueden publicar en este espacio.</div>}
       {showAppearance&&<div className="feature-backdrop"><section className="feature-dialog" role="dialog" aria-label="Personalizar chat"><button className="dialog-close" aria-label="Cerrar personalización" onClick={()=>setShowAppearance(false)}><X/></button><h2>Estilo de este chat</h2><AppearancePanel uid={currentUser.uid} chatId={activeChat.id}/></section></div>}
       {reactionInfo&&messages.find(message=>message.id===reactionInfo)&&<ReactionDetails at={reactionAt} message={messages.find(message=>message.id===reactionInfo)!} user={currentUser} users={users} onRemove={emoji=>handleReactionClick(reactionInfo,emoji)} onClose={()=>setReactionInfo(null)}/>}
-      {reactionTarget&&<div className="reaction-picker-wrap"><EmojiPicker onClose={()=>setReactionTarget(null)} onSelect={emoji=>{handleReactionClick(reactionTarget,emoji).catch(()=>setUploadError('No se pudo guardar la reacción.'));setReactionTarget(null);}}/></div>}
+      {reactionTarget&&<div className="reaction-picker-wrap"><EmojiPicker onClose={()=>setReactionTarget(null)} onSelect={emoji=>{void handleReactionClick(reactionTarget,emoji).then(()=>{setReactionTarget(null);if(!desktopWeb)clearMobileSelection();}).catch(()=>setUploadError('No se pudo guardar la reacción.'));}}/></div>}
       {reporting&&<ConversationReport chat={activeChat} user={currentUser} messages={messages} onClose={()=>setReporting(false)}/>}
       {showGroupSettings&&<GroupSettings key={groupSection} initialSection={groupSection} chat={activeChat} messages={messages} user={currentUser} users={users} onClose={()=>setShowGroupSettings(false)}/>}
       {imageViewer&&desktopWeb&&messages.find(message=>message.id===imageViewer)?.type==='sticker'&&(()=>{const item=messages.find(message=>message.id===imageViewer)!;return <DesktopStickerViewer uid={currentUser.uid} item={{...item,sender:item.senderId===currentUser.uid?'Tú':users.find(person=>person.uid===item.senderId)?.nombre||'Contacto',photo:item.senderId===currentUser.uid?currentUser.foto:users.find(person=>person.uid===item.senderId)?.foto,url:manualMedia[item.id]||resolvedMedia[item.id]||realtime?.media[item.transferId||'']}} onClose={()=>setImageViewer(null)} onReply={()=>{setReplyTarget(item);setImageViewer(null);textareaRef.current?.focus();}} onStar={()=>star([item])} onForward={()=>{setForwarding([item]);setImageViewer(null);}} onDelete={()=>{setDeleting([item]);setImageViewer(null);}} onPin={((activeChat.kind!=='group'&&activeChat.kind!=='channel')||activeChat.membersCanEdit||activeChat.admins?.includes(currentUser.uid))?()=>{setImageViewer(null);if(messagePinned(item,activeChat))void setMessagePin(activeChat.id,item.id,0).catch(e=>setUploadError(e.message));else setPinTarget(item);}:undefined}/>;})()}

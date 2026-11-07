@@ -20,6 +20,13 @@ service cloud.firestore {
   function maySend(data){return data.get('sendPolicy','everyone') == 'everyone' || admin(data);}
   function room(chatId){return get(/databases/$(database)/documents/chats/$(chatId)).data;}
   function canPinMessages(d){return d.get('kind','direct')=='direct' || admin(d) || (d.get('kind','direct')=='group' && d.get('membersCanEdit',false));}
+  function keepMessageUpdate(){
+   let old=resource.data;let next=request.resource.data;
+   return old.senderId==request.auth.uid && old.get('deletedAt',0)==0 && !old.get('fileName','').matches('nota-unica-.*')
+    && next.diff(old).affectedKeys().hasOnly(['keptBy','keptAt','originalExpiresAt','expiresAt'])
+    && ((!('keptBy' in old) && old.get('expiresAt',0)>request.time.toMillis() && next.keptBy==request.auth.uid && next.keptAt==request.time && next.originalExpiresAt==old.expiresAt && !('expiresAt' in next))
+     || (old.get('keptBy','')==request.auth.uid && next.expiresAt==old.originalExpiresAt && !('keptBy' in next) && !('keptAt' in next) && !('originalExpiresAt' in next)));
+  }
   function pinnedPairValid(pins,key,chatId){let entry=pins[key];let message=getAfter(/databases/$(database)/documents/chats/$(chatId)/messages/$(key)).data;return entry is map && entry.keys().hasOnly(['expiresAt','by']) && entry.expiresAt is number && entry.by is string && message.pinned==true && message.pinExpiresAt==entry.expiresAt;}
   function pinSlot(pins,keys,index,chatId){return keys.size()<=index || pinnedPairValid(pins,keys[index],chatId);}
   function validMessagePins(pins,chatId){let keys=pins.keys();return pins is map && keys.size()<=3 && pinSlot(pins,keys,0,chatId) && pinSlot(pins,keys,1,chatId) && pinSlot(pins,keys,2,chatId);}
@@ -129,9 +136,9 @@ service cloud.firestore {
     allow read: if member(chatId) && resource.data.timestamp >= room(chatId).get('historyStartsAt',{}).get(request.auth.uid,0);
     allow create: if member(chatId) && maySend(room(chatId)) && notBlocked(room(chatId)) && request.resource.data.id==mid && request.resource.data.chatId==chatId && request.resource.data.senderId==request.auth.uid
      && request.resource.data.content is string && request.resource.data.content.size()<=20000 && request.resource.data.timestamp is number && request.resource.data.timestamp>=request.time.toMillis()-60000 && request.resource.data.timestamp<=request.time.toMillis()+60000
-     && request.resource.data.serverSentAt==request.time && (validMessage(request.resource.data) && !('sealed' in request.resource.data))
+     && request.resource.data.serverSentAt==request.time && (validMessage(request.resource.data) && !('sealed' in request.resource.data) && !request.resource.data.keys().hasAny(['keptBy','keptAt','originalExpiresAt']))
      && request.resource.data.type in ['text','image','video','video-note','audio','document','sticker','poll','contact'] && request.resource.data.status in ['sent','delivered','read'];
-    allow update: if member(chatId) && (messagePinUpdate(chatId,mid) ||
+    allow update: if member(chatId) && (keepMessageUpdate() || messagePinUpdate(chatId,mid) ||
      (resource.data.senderId==request.auth.uid && resource.data.get('deletedAt',0)==0 && !('sealed' in resource.data) && resource.data.type=='poll' && request.time.toMillis()<=(('serverSentAt' in resource.data)?resource.data.serverSentAt.toMillis():resource.data.timestamp)+900000 && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['content','poll','edited']) && request.resource.data.edited==true && request.resource.data.poll.diff(resource.data.poll).affectedKeys().hasOnly(['question']) && request.resource.data.poll.question is string && request.resource.data.poll.question.size()>0 && request.resource.data.poll.question.size()<=255 && request.resource.data.content==request.resource.data.poll.question) || 
      (resource.data.senderId==request.auth.uid && resource.data.get('deletedAt',0)==0 && resource.data.type=='text' && !('sealed' in resource.data) && ((('serverSentAt' in resource.data) && request.time<=resource.data.serverSentAt+duration.value(15,'m')) || (!('serverSentAt' in resource.data) && request.time.toMillis()<=resource.data.timestamp+900000)) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['content','edited']) && request.resource.data.content is string && request.resource.data.content.size()<=20000)
      || (resource.data.senderId==request.auth.uid && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['sealed','content','type','fileUrl','fileName','fileSize','deletedAt']) && !('sealed' in request.resource.data) && request.resource.data.content=='🚫 Este mensaje fue eliminado' && request.resource.data.type=='text' && request.resource.data.get('fileUrl','')=='' && request.resource.data.get('fileName','')=='' && request.resource.data.get('fileSize',0)==0 && request.resource.data.deletedAt is number)

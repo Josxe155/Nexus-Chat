@@ -19,15 +19,8 @@ El número de Nexus es un identificador interno, no una línea celular ni una ve
 - Elección inicial del usuario y recuperación de errores en 360, 820 y 1366 píxeles.
 - Las pruebas no crean ni modifican cuentas de producción.
 
-## Avance estimado
+## Seguimiento
 
-| Dispositivo | Referencia anterior | Estimación después de esta entrega |
-| --- | --- | --- |
-| Celular y tablet | 55 % | 58 % |
-| Computadora | 65 % | 65 % |
-
-Son estimaciones subjetivas de parecido y funcionamiento respecto a WhatsApp, no cobertura de pruebas ni una medición automática. Esta entrega mejora contacto e identidad; no significa que los demás apartados estén terminados.
-
-Siguen pendientes las nuevas capturas de audio, el visor multimedia general, la prueba de notificaciones push con un emisor confiable y la revisión de configuraciones restantes.
+Las estimaciones numéricas anteriores se retiran porque no tenían una medición reproducible. Esta revisión verificó contacto e identidad; no equivale a que los demás apartados estén terminados. Consulta la [revisión móvil actual](REVISION-MOVIL-SELECCION-Y-VOZ.md) para las pruebas y limitaciones vigentes.
 
 Referencias: [privacidad e información de contacto de WhatsApp](https://faq.whatsapp.com/847237289639336/?cms_platform=android), [transacciones y validación conjunta de Firestore](https://firebase.google.com/docs/firestore/manage-data/transactions).

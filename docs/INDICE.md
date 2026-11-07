@@ -38,3 +38,5 @@ El [README principal](../README.md) describe las funciones y el modelo de seguri
 - [Historial de interfaz](HISTORIAL-INTERFAZ.md): revisiones anteriores y notas de implementación.
 - [Actualización móvil del 6 de noviembre](ACTUALIZACION-MOVIL-2026-11-06.md): contacto, identidad y avance estimado.
 - [Escritura y voz móvil](VOZ-MOVIL-2026-11-06.md): nuevas referencias, gestos y controles de reproducción.
+
+- [Revisión móvil: selección y voz](REVISION-MOVIL-SELECCION-Y-VOZ.md): video lento, reacciones, menús y contador de mensajes nuevos.

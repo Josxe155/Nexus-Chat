@@ -77,3 +77,5 @@ import './features/desktop-composer-reference.css';
 import './features/mobile-contact-info.css';
 
 import './features/mobile-voice-reference.css';
+
+import './features/mobile-message-reference.css';

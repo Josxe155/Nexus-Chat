@@ -252,11 +252,15 @@ En el fondo del historial, el clic derecho permite seleccionar mensajes o cerrar
 
 [Historial de revisiones de interfaz](docs/HISTORIAL-INTERFAZ.md) · [Índice de documentación](docs/INDICE.md)
 
-## Avance estimado por dispositivo
+## Estado de la revisión móvil
 
-| Versión | Estimación de parecido y funcionamiento | Cambios de esta entrega |
+Se retiran los porcentajes globales anteriores: no tenían una medición reproducible. El seguimiento distingue pruebas realizadas y límites pendientes.
+
+| Apartado | Verificado en navegador | Pendiente |
 | --- | --- | --- |
-| Móvil y tablet | **60 %** (antes 58 %) | Escritura y voz móvil: toque para grabar bloqueado, gestos y animaciones de candado/descarte, preescucha y burbujas redondas sin punta. |
-| Computadora | **65 %** | Conserva sus controles propios; verificada la grabación, reproducción y las opciones de chat. |
+| Voz móvil | Toque, mantener, bloquear, cancelar, pausa, preescucha, envío y velocidad; descarte animado sobre la barra real de escritura. | Teléfonos físicos y variaciones de permisos del sistema. |
+| Selección | Barra superior, franja verde, reacciones, menús propios/recibidos y selección múltiple. | Validación de uso prolongado en dispositivos físicos. |
+| Mensajes nuevos | Lotes de 50, historial anterior, mensajes propios y ventana limitada de historial. | Pruebas de carga con tráfico real sostenido. |
+| Permisos | Conservar un mensaje temporal propio, restaurar su vencimiento y rechazar alteraciones indebidas. | No existe verificación de código E2EE en mensajes nuevos. |
 
-Las cifras son orientativas y subjetivas; no representan cobertura de pruebas ni una equivalencia certificada con WhatsApp. [Escritura y voz móvil](docs/VOZ-MOVIL-2026-11-06.md) · [Contacto e identidad](docs/ACTUALIZACION-MOVIL-2026-11-06.md).
+[Detalle de selección y voz](docs/REVISION-MOVIL-SELECCION-Y-VOZ.md) · [Contacto e identidad](docs/ACTUALIZACION-MOVIL-2026-11-06.md).

@@ -1,0 +1,36 @@
+html:root[data-nexus-web=messenger][data-nexus-surface=workspace][data-nexus-mode][data-nexus-palette] .nexus-chat-window>header[hidden]{display:none!important}
+html[data-nexus-web=messenger] .mobile-selection-header{display:flex;align-items:center;gap:0;height:56px;min-height:56px;flex:none;padding:4px 6px;background:#11191e;color:#edf2f4;z-index:24;animation:mobile-selection-header-in .14s ease-out}
+html[data-nexus-web=messenger] .mobile-selection-header>button{display:grid;place-items:center;flex:0 0 40px;width:40px;height:44px;padding:8px;border:0;border-radius:50%;color:inherit;background:transparent}
+html[data-nexus-web=messenger] .mobile-selection-header>button>svg{width:24px;height:24px;stroke-width:2.1}
+html[data-nexus-web=messenger] .mobile-selection-header>strong{font-size:22px;font-weight:500;min-width:27px;margin-left:9px;font-variant-numeric:tabular-nums}
+html[data-nexus-web=messenger] .mobile-selection-header>span{flex:1;min-width:0}
+html[data-nexus-web=messenger] .mobile-selection-header button:disabled{opacity:.35}
+html[data-nexus-web=messenger] .mobile-selection-header button:focus-visible{outline:2px solid #00c76b;outline-offset:-3px}
+html[data-nexus-web=messenger] .chat-history{overflow-x:hidden}
+html[data-nexus-web=messenger] .chat-history [data-selected=true][id^=message-]{position:relative;isolation:isolate;background:transparent!important;border-radius:0!important;box-shadow:none!important}
+html[data-nexus-web=messenger] .chat-history [data-selected=true][id^=message-]::before{content:"";position:absolute;display:block;top:-5px;bottom:-5px;left:-80px;right:-80px;width:auto;height:auto;background:#00ab6a40;z-index:-1;pointer-events:none;border-radius:0!important;box-shadow:none!important}
+html:root[data-nexus-web=messenger][data-nexus-surface=workspace][data-nexus-mode][data-nexus-palette] [data-selected=true]>.message-bubble{background-color:#006f49!important}
+html[data-nexus-web=messenger] .chat-history .message-content{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+html[data-nexus-web=messenger] .mobile-selection-reactions{position:fixed;z-index:700;display:flex;align-items:center;height:56px;padding:4px 10px;border-radius:30px;background:#202b30;box-shadow:0 3px 8px #0002;box-sizing:border-box;animation:mobile-reactions-in .18s cubic-bezier(.2,.8,.2,1);transform-origin:center bottom}
+html[data-nexus-web=messenger] .mobile-selection-reactions>div{display:flex;align-items:center;gap:2px;flex:1;min-width:0;overflow-x:auto;scrollbar-width:none;touch-action:pan-x;padding-right:12px}
+html[data-nexus-web=messenger] .mobile-selection-reactions>div::-webkit-scrollbar{display:none}
+html[data-nexus-web=messenger] .mobile-selection-reactions>div>button{flex:0 0 42px;display:grid;place-items:center;width:42px;height:46px;padding:0;background:transparent;border:0;font-size:33px;line-height:1;font-family:system-ui,'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',NexusEmoji,sans-serif!important;transition:transform .12s}
+html[data-nexus-web=messenger] .message-bubble .message-actions{opacity:0!important;pointer-events:none}
+html[data-nexus-web=messenger] .message-bubble .message-actions:focus-within{opacity:1!important;pointer-events:auto}
+html[data-nexus-web=messenger] .mobile-selection-reactions>div>button:active{transform:scale(1.2)}
+html[data-nexus-web=messenger] .mobile-selection-reactions>.mobile-reaction-more{position:relative;display:grid;place-items:center;flex:none;width:34px;height:34px;min-width:34px;padding:5px;border:0;border-radius:50%;background:#6b7980;color:#11191e;box-shadow:-8px 0 12px 4px #202b30}
+html[data-nexus-web=messenger] .mobile-reaction-more svg{width:24px;height:24px;stroke-width:2.4}
+html:root[data-nexus-web=messenger][data-nexus-surface=workspace][data-nexus-mode][data-nexus-palette] .mobile-selection-overflow{width:260px!important;min-width:0!important;max-width:calc(100vw - 16px)!important;padding:8px 0!important;border:0!important;border-radius:16px!important;background:#11191e!important;color:#f1f4f5!important;box-shadow:0 4px 24px #0004;animation:mobile-overflow-in .16s ease-out;transform-origin:top right}
+html[data-nexus-web=messenger] .mobile-selection-overflow>button{display:block;width:100%;min-height:47px;height:auto;padding:11px 16px!important;font-size:17px;font-weight:400;line-height:25px;text-align:left;white-space:normal;overflow-wrap:anywhere;background:transparent;border:0;border-radius:0;color:inherit}
+html[data-nexus-web=messenger] .mobile-selection-overflow>button:focus-visible,html[data-nexus-web=messenger] .mobile-selection-overflow>button:hover{background:#ffffff0c;outline:0}
+html[data-nexus-web=messenger] .nexus-chat-window .scroll-to-latest{right:12px;bottom:calc(var(--chat-composer-height,56px) + 15px);width:32px;height:32px;padding:6px;display:grid;place-items:center;border:0;border-radius:50%;background:#26373f;color:#9dabb1;box-shadow:0 2px 7px #0004;overflow:visible;z-index:21}
+html[data-nexus-web=messenger] .scroll-to-latest>svg{width:20px;height:20px;stroke-width:2.5}
+.chat-new-message-count{position:absolute;top:-10px;left:auto;right:22px;min-width:20px;height:20px;box-sizing:border-box;display:grid;place-items:center;padding:0 4px;border-radius:12px;background:#00c965;color:#062b1c;font:600 12px/20px Arial,sans-serif;font-variant-numeric:tabular-nums;box-shadow:0 1px 2px #0002}
+html[data-nexus-web=messenger] .reaction-picker-wrap{position:absolute;z-index:750;bottom:calc(var(--chat-composer-height,56px) + 8px);left:8px;right:8px;max-height:calc(100% - 128px)}
+html[data-nexus-web=messenger] .reaction-picker-wrap .emoji-picker{position:relative!important;inset:auto!important;width:100%!important;max-height:calc(100dvh - 170px);box-sizing:border-box}
+@keyframes mobile-selection-header-in{from{opacity:.5}to{opacity:1}}
+@keyframes mobile-reactions-in{from{opacity:0;transform:translateY(7px) scale(.93)}to{opacity:1;transform:none}}
+@keyframes mobile-overflow-in{from{opacity:0;transform:scale(.94)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){html[data-nexus-web=messenger] :is(.mobile-selection-header,.mobile-selection-reactions,.mobile-selection-overflow){animation:none}html[data-nexus-web=messenger] .mobile-selection-reactions>div>button{transition:none}}
+html[data-nexus-web=messenger][data-motion=off] :is(.mobile-selection-header,.mobile-selection-reactions,.mobile-selection-overflow){animation:none!important}
+@media(max-width:340px){html[data-nexus-web=messenger] .mobile-selection-header>button{flex-basis:37px;width:37px;padding:7px}html[data-nexus-web=messenger] .mobile-selection-header>strong{margin-left:5px;min-width:24px}}

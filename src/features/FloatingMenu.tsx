@@ -1,7 +1,7 @@
 import {useMobileBack} from './useMobileBack';
 import React,{useLayoutEffect,useRef,useState,useEffect} from 'react';
 import {createPortal} from 'react-dom';
-export default function FloatingMenu({at,onClose,children,label='Acciones del mensaje'}:{at:{x:number;y:number};onClose:()=>void;children:React.ReactNode;label?:string}){
+export default function FloatingMenu({at,onClose,children,label='Acciones del mensaje',className=''}:{at:{x:number;y:number};onClose:()=>void;children:React.ReactNode;label?:string;className?:string}){
  useMobileBack(true,onClose,100);
  const ref=useRef<HTMLDivElement>(null),opener=useRef(document.activeElement as HTMLElement|null),[position,setPosition]=useState(at);
  useLayoutEffect(()=>{
@@ -13,7 +13,7 @@ export default function FloatingMenu({at,onClose,children,label='Acciones del me
  },[at.x,at.y]);
  useEffect(()=>{const element=ref.current,prior=opener.current;return()=>{queueMicrotask(()=>{const focused=document.activeElement;if(prior?.isConnected&&(!focused||focused===document.body||focused===document.documentElement||element?.contains(focused)))prior.focus({preventScroll:true});});};},[]);
  useEffect(()=>{const close=(event:KeyboardEvent)=>{if(event.key==='Escape'){event.preventDefault();event.stopPropagation();onClose();}};document.addEventListener('keydown',close);return()=>document.removeEventListener('keydown',close);},[onClose]);
- return createPortal(<><button className="floating-menu-scrim" aria-label="Cerrar opciones del mensaje" onClick={onClose}/><div ref={ref} tabIndex={-1} className="message-menu floating-message-menu" role="menu" aria-label={label} style={{left:position.x,top:position.y}} onKeyDown={event=>{
+ return createPortal(<><button className="floating-menu-scrim" aria-label="Cerrar opciones del mensaje" onClick={onClose}/><div ref={ref} tabIndex={-1} className={'message-menu floating-message-menu '+className} role="menu" aria-label={label} style={{left:position.x,top:position.y}} onKeyDown={event=>{
   // A submenu rendered through a portal has its own keyboard navigation.
   if(!event.currentTarget.contains(event.target as Node)||!['ArrowDown','ArrowUp','Home','End'].includes(event.key))return;
   event.preventDefault();const items=Array.from(event.currentTarget.querySelectorAll<HTMLButtonElement>('button:not(:disabled)'));if(!items.length)return;
