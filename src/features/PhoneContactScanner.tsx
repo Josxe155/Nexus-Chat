@@ -7,6 +7,8 @@ type TorchCapabilities = MediaTrackCapabilities & {torch?: boolean};
 export default function PhoneContactScanner({paused, onCode}: {paused: boolean; onCode: (token: string) => void}) {
   const video = useRef<HTMLVideoElement>(null);
   const camera = useRef<MediaStreamTrack | undefined>(undefined);
+  const readingFile = useRef(false);
+  const lastCameraCode = useRef('');
   const mounted = useRef(false);
   useEffect(()=>{mounted.current=true;return()=>{mounted.current=false;};},[]);
   const callback = useRef(onCode);
@@ -16,9 +18,16 @@ export default function PhoneContactScanner({paused, onCode}: {paused: boolean; 
   const [ready, setReady] = useState(false);
   const [torch, setTorch] = useState(false);
   const [hasTorch, setHasTorch] = useState(false);
+  const [visible, setVisible] = useState(()=>document.visibilityState==='visible');
+
+  useEffect(()=>{
+    const update=()=>setVisible(document.visibilityState==='visible');
+    document.addEventListener('visibilitychange',update);
+    return()=>document.removeEventListener('visibilitychange',update);
+  },[]);
 
   useEffect(() => {
-    if (paused) return;
+    if (paused||!visible) return;
     const player = video.current;
     if (!player) return;
     let alive = true, stream: MediaStream | undefined, timer: ReturnType<typeof setInterval> | undefined;
@@ -45,13 +54,18 @@ export default function PhoneContactScanner({paused, onCode}: {paused: boolean; 
       const ctx = canvas.getContext('2d', {willReadFrequently: true});
       if (!ctx) throw Error('No se pudo iniciar el escáner.');
       timer = setInterval(() => {
-        if (player!.readyState < 2 || !player!.videoWidth) return;
-        canvas.width = Math.min(560, player!.videoWidth);
-        canvas.height = Math.round(canvas.width * player!.videoHeight / player!.videoWidth);
+        if (readingFile.current||player!.readyState < 2 || !player!.videoWidth) return;
+        const width=Math.min(560,player!.videoWidth);
+        const height=Math.max(1,Math.round(width*player!.videoHeight/player!.videoWidth));
+        if(canvas.width!==width||canvas.height!==height){
+          canvas.width=width;canvas.height=height;
+        }
         ctx.drawImage(player!, 0, 0, canvas.width, canvas.height);
         const frame = ctx.getImageData(0, 0, canvas.width, canvas.height);
         const code = decode(frame.data, canvas.width, canvas.height, {inversionAttempts: 'dontInvert'});
-        if (!code) return;
+        if (!code) {lastCameraCode.current='';return;}
+        if(code.data===lastCameraCode.current)return;
+        lastCameraCode.current=code.data;
         const token = parseContactCode(code.data);
         if (!token) {
           setError('Escanea un código de contacto de Nexus Chat.');
@@ -63,7 +77,7 @@ export default function PhoneContactScanner({paused, onCode}: {paused: boolean; 
     }
     void start().catch(() => {
       stream?.getTracks().forEach(track => track.stop());
-      if (alive) setError('No se pudo abrir la cámara. Revisa el permiso o elige una imagen.');
+      if (alive) {setReady(false);setError('No se pudo abrir la cámara. Revisa el permiso o elige una imagen.');}
     });
     return () => {
       alive = false;
@@ -72,9 +86,11 @@ export default function PhoneContactScanner({paused, onCode}: {paused: boolean; 
       stream?.getTracks().forEach(track => track.stop());
       player.srcObject = null;
     };
-  }, [paused, retry]);
+  }, [paused, retry, visible]);
 
   async function scanImage(file: File) {
+    if(paused||readingFile.current)return;
+    readingFile.current=true;
     setError('');
     try {
       if (file.size > 12 * 1024 ** 2) throw Error('Elige una imagen de hasta 12 MB.');
@@ -97,7 +113,9 @@ export default function PhoneContactScanner({paused, onCode}: {paused: boolean; 
       if (!token) throw Error('No se encontró un código de contacto de Nexus Chat en esta imagen.');
       if(mounted.current)callback.current(token);
     } catch (error) {
-      setError(error instanceof Error ? error.message : 'No se pudo leer la imagen.');
+      if(mounted.current)setError(error instanceof Error ? error.message : 'No se pudo leer la imagen.');
+    } finally {
+      readingFile.current=false;
     }
   }
 
@@ -110,7 +128,7 @@ export default function PhoneContactScanner({paused, onCode}: {paused: boolean; 
       <label><Images size={22}/><span className="sr-only">Escanear desde la galería</span><input type="file" accept="image/*" aria-label="Escanear desde la galería" onChange={event=>{
         const file=event.target.files?.[0];event.target.value='';if(file)void scanImage(file);
       }}/></label>
-      <button type="button" aria-label={torch?'Apagar linterna':'Encender linterna'} disabled={!hasTorch} onClick={async()=>{
+      <button type="button" aria-label={torch?'Apagar linterna':'Encender linterna'} disabled={!hasTorch||paused||!visible} onClick={async()=>{
         try {
           await camera.current?.applyConstraints({advanced:[{torch:!torch} as MediaTrackConstraintSet]});
           setTorch(!torch);

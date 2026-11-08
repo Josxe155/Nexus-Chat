@@ -1,4 +1,4 @@
-import {doc, getDocFromServer, runTransaction} from 'firebase/firestore';
+import {doc, getDocFromServer, onSnapshot, runTransaction} from 'firebase/firestore';
 import {db} from '../firebase';
 
 export const validContactCode = (token: unknown): token is string =>
@@ -34,6 +34,13 @@ export function updateContactCode(uid: string, reset = false) {
     transaction.set(doc(db, 'contactCodes', token), {uid});
     return token;
   });
+}
+
+export function watchContactCode(uid: string, onCode: (token: string) => void, onError: () => void) {
+  return onSnapshot(doc(db, 'users', uid, 'private', 'contactQr'), snapshot => {
+    const token = snapshot.data()?.token;
+    onCode(validContactCode(token) ? token : '');
+  }, onError);
 }
 
 export async function resolveContactCode(token: string) {

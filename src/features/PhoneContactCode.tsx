@@ -1,7 +1,7 @@
 import {useEffect, useRef, useState} from 'react';
 import {ArrowLeft, MoreVertical, Share2} from 'lucide-react';
 import type {UserProfile} from '../types';
-import {contactCodeURL, resolveContactCode, updateContactCode, validContactCode} from './contactCode';
+import {contactCodeURL, resolveContactCode, updateContactCode, validContactCode, watchContactCode} from './contactCode';
 import PhoneContactScanner from './PhoneContactScanner';
 import {SettingsDialog} from './MobileSettingsControls';
 import {useMobileBack} from './useMobileBack';
@@ -87,8 +87,9 @@ export default function PhoneContactCode({user, photo, onBack, onContact}: {
   user: UserProfile; photo: string; onBack: () => void; onContact: (uid: string) => Promise<void>;
 }) {
   const [token, setToken] = useState('');
-  const [qr, setQR] = useState('');
-  const [shareCard, setShareCard] = useState('');
+  const [rendered, setRendered] = useState<{token:string;qr:string;card?:string}>();
+  const qr = rendered?.token===token ? rendered?.qr : undefined;
+  const shareCard = rendered?.token===token ? rendered?.card : undefined;
   const [sharing, setSharing] = useState(false);
   const [scan, setScan] = useState(false);
   const [menu, setMenu] = useState(false);
@@ -97,34 +98,38 @@ export default function PhoneContactCode({user, photo, onBack, onContact}: {
   const [target, setTarget] = useState('');
   const [message, setMessage] = useState('');
   const menuRef = useRef<HTMLDivElement>(null);
+  const pending = useRef(false);
 
   async function load(rotate = false) {
+    if(pending.current)return;
+    pending.current=true;
     setBusy(true);
     setMessage('');
     try {
-      const next = await updateContactCode(user.uid, rotate);
-      if(rotate){setQR('');setShareCard('');}
-      setToken(next);
+      await updateContactCode(user.uid, rotate);
       setReset(false);
     } catch {
       setMessage(rotate ? 'No se pudo restablecer el código QR.' : 'No se pudo preparar tu código QR.');
     } finally {
+      pending.current=false;
       setBusy(false);
     }
   }
   useEffect(() => {void load();}, [user.uid]);
+  useEffect(() => watchContactCode(user.uid,setToken,()=>{
+    setToken('');
+    setMessage('No se pudo actualizar el código QR.');
+  }), [user.uid]);
   useEffect(() => {
     if (!token) return;
     let active = true;
-    setQR('');
-    setShareCard('');
     import('qrcode').then(module => (module.default || module).toDataURL(contactCodeURL(token), {
       width:480, margin:3, errorCorrectionLevel:'M',
     })).then(async image => {
       if(!active)return;
-      setQR(image);
+      setRendered({token,qr:image});
       const card=await makeShareCard(image,user.nombre).catch(()=>image);
-      if(active)setShareCard(card);
+      if(active)setRendered({token,qr:image,card});
     }).catch(()=>{
       if(active)setMessage('No se pudo dibujar el código QR.');
     });
@@ -166,7 +171,7 @@ export default function PhoneContactCode({user, photo, onBack, onContact}: {
       <button type="button" aria-label="Volver a configuración" onClick={onBack}><ArrowLeft/></button>
       <h2>Código QR</h2>
       {!scan&&<div className="phone-settings-actions" ref={menuRef}>
-        <button type="button" aria-label="Compartir código QR" disabled={!shareCard||sharing} onClick={()=>void share()}><Share2 size={21}/></button>
+        <button type="button" aria-label="Compartir código QR" disabled={!shareCard||sharing||busy} onClick={()=>void share()}><Share2 size={21}/></button>
         <button type="button" aria-label="Más opciones del código QR" aria-expanded={menu} onClick={()=>setMenu(!menu)}><MoreVertical size={22}/></button>
         {menu&&<div className="phone-qr-menu">
           <button type="button" disabled={busy||!token} onClick={()=>{setMenu(false);setReset(true);}}>Restablecer código QR</button>

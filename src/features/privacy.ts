@@ -1,5 +1,5 @@
 import {useEffect,useState,useRef} from 'react';import {doc,onSnapshot,writeBatch,getDoc,getDocs,collection,query,where} from 'firebase/firestore';import {db} from '../firebase';import type {UserProfile,Chat} from '../types';
-import {arrayRemove,arrayUnion,setDoc} from 'firebase/firestore';
+import {arrayRemove,arrayUnion,runTransaction,setDoc} from 'firebase/firestore';
 export type Audience='everyone'|'contacts'|'except'|'nobody';
 export type PrivacyOptions={lastSeenAudience:Audience;onlineAudience:'everyone'|'lastSeen';photoAudience:Audience;infoAudience:Audience;statusAudience:'contacts'|'except'|'only';contactIds:string[];lastSeenExcluded:string[];photoExcluded:string[];infoExcluded:string[];statusExcluded:string[];statusIncluded:string[];blockedIds:string[];groupAudience:Audience;groupExcluded:string[];silenceUnknown:boolean;readReceipts:boolean;relayCalls:boolean;disableLinkPreviews:boolean};
 export const PRIVACY_DEFAULTS:PrivacyOptions={lastSeenAudience:'everyone',onlineAudience:'everyone',photoAudience:'everyone',infoAudience:'everyone',statusAudience:'contacts',contactIds:[],lastSeenExcluded:[],photoExcluded:[],infoExcluded:[],statusExcluded:[],statusIncluded:[],blockedIds:[],groupAudience:'everyone',groupExcluded:[],silenceUnknown:false,readReceipts:true,relayCalls:false,disableLinkPreviews:true};
@@ -8,6 +8,43 @@ export function audienceContains(mode:Audience|'only',owner:string,viewer:string
 export function presencePolicy(value:any){const p=normalizePrivacy(value);return {lastSeenAudience:p.lastSeenAudience,onlineAudience:p.onlineAudience,contacts:Object.fromEntries(p.contactIds.map(uid=>[uid,true])),blocked:Object.fromEntries(p.blockedIds.map(uid=>[uid,true])),lastSeenExcluded:Object.fromEntries(p.lastSeenExcluded.map(uid=>[uid,true])),hideOnline:p.onlineAudience==='lastSeen'&&p.lastSeenAudience==='nobody',hideLastSeen:p.lastSeenAudience==='nobody'};}
 export async function savePrivacy(user:UserProfile,options:PrivacyOptions){const batch=writeBatch(db),updatedAt=Date.now();batch.set(doc(db,'users',user.uid,'private','profile'),{nombre:user.nombre,username:user.username,foto:user.foto,bio:user.bio,bioExpiresAt:user.bioExpiresAt||0},{merge:true});batch.set(doc(db,'users',user.uid,'private','privacy'),options,{merge:true});batch.set(doc(db,'users',user.uid,'details','photo'),{foto:user.foto});batch.set(doc(db,'users',user.uid,'details','info'),{bio:user.bio,expiresAt:user.bioExpiresAt||0});batch.update(doc(db,'users',user.uid),{foto:'',bio:'',online:false,lastSeen:0,privacy:{schemaVersion:2,hideOnline:false,hideLastSeen:false,hidePhoto:false,hideBio:false,readReceipts:options.readReceipts,silenceUnknown:options.silenceUnknown,updatedAt}});await batch.commit();if(user.privacy?.schemaVersion!==2||JSON.stringify(statusAudience(normalizePrivacy(user.privacy)).sort())!==JSON.stringify(statusAudience(options).sort())){const statuses=await getDocs(query(collection(db,'statuses'),where('owner','==',user.uid)));for(let offset=0;offset<statuses.docs.length;offset+=400){const next=writeBatch(db);statuses.docs.slice(offset,offset+400).filter(status=>status.data().expiresAt>Date.now()).forEach(status=>next.update(status.ref,{audienceIds:statusAudience(options)}));await next.commit();}}return {...user,privacy:{...options,schemaVersion:2,updatedAt}};}
 export async function migrateOwnProfile(user:UserProfile,alreadyMigrated=false){if(alreadyMigrated)return user;const ref=doc(db,'users',user.uid,'private','privacy'),snapshot=await getDoc(ref);const options=normalizePrivacy(snapshot.exists()?snapshot.data():user.privacy);if(user.privacy?.schemaVersion===2&&snapshot.exists())return {...user,privacy:{...options,schemaVersion:2}};return savePrivacy(user,options);}
+
+export async function savePrivacySettings(
+ user:UserProfile,
+ patch:Partial<PrivacyOptions>,
+ info?:{bio:string;bioExpiresAt:number},
+){
+ const profile=doc(db,'users',user.uid);
+ const settings=doc(db,'users',user.uid,'private','privacy');
+ const result=await runTransaction(db,async transaction=>{
+  const snapshot=await transaction.get(settings);
+  const previous=normalizePrivacy(snapshot.exists()?snapshot.data():user.privacy);
+  const options={...previous,...patch};
+  const updatedAt=Date.now();
+  if(!snapshot.exists()||Object.keys(patch).length)transaction.set(settings,snapshot.exists()?patch:options,{merge:true});
+  transaction.update(profile,{
+   'privacy.readReceipts':options.readReceipts,
+   'privacy.silenceUnknown':options.silenceUnknown,
+   'privacy.updatedAt':updatedAt,
+  });
+  if(info){
+   transaction.set(doc(db,'users',user.uid,'private','profile'),info,{merge:true});
+   transaction.set(doc(db,'users',user.uid,'details','info'),{bio:info.bio,expiresAt:info.bioExpiresAt});
+  }
+  return {previous,options,updatedAt};
+ });
+ const audience=statusAudience(result.options);
+ if(JSON.stringify(statusAudience(result.previous).sort())!==JSON.stringify([...audience].sort())){
+  const statuses=await getDocs(query(collection(db,'statuses'),where('owner','==',user.uid)));
+  const active=statuses.docs.filter(status=>status.data().expiresAt>Date.now());
+  for(let offset=0;offset<active.length;offset+=400){
+   const batch=writeBatch(db);
+   active.slice(offset,offset+400).forEach(status=>batch.update(status.ref,{audienceIds:audience}));
+   await batch.commit();
+  }
+ }
+ return {...user,...info,privacy:{...user.privacy,...result.options,updatedAt:result.updatedAt}};
+}
 export async function blockContact(uid:string,contactId:string){
  await setDoc(doc(db,'users',uid,'private','privacy'),{blockedIds:arrayUnion(contactId)},{merge:true});
  const statuses=await getDocs(query(collection(db,'statuses'),where('owner','==',uid)));

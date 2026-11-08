@@ -2,6 +2,17 @@ import {useEffect,useRef,useState,type ComponentType,type ReactNode} from 'react
 import {createPortal} from 'react-dom';
 import {useMobileBack} from './useMobileBack';
 
+function dialogControls(dialog: HTMLElement) {
+ const controls=Array.from(dialog.querySelectorAll<HTMLElement>(
+  'button,input,select,textarea,a[href],[tabindex="0"]',
+ )).filter(control=>!control.matches(':disabled,[tabindex="-1"]')&&control.getClientRects().length);
+ return controls.filter(control=>{
+  if(!(control instanceof HTMLInputElement)||control.type!=='radio'||!control.name)return true;
+  const group=controls.filter(item=>item instanceof HTMLInputElement&&item.type==='radio'&&item.name===control.name);
+  return control===(group.find(item=>(item as HTMLInputElement).checked)||group[0]);
+ });
+}
+
 export function SettingsRow({label,detail,icon:Icon,end,onClick}:{label:string;detail?:string;icon?:ComponentType<{size?:number}>;end?:ReactNode;onClick:()=>void}){
  return <button type="button" className="phone-setting-row" onClick={onClick}>{Icon&&<Icon size={23}/>}<span><strong>{label}</strong>{detail&&<small>{detail}</small>}</span>{end}</button>;
 }
@@ -13,15 +24,19 @@ export function SettingsDialog({title,children,onClose,actions}:{title:string;ch
  useMobileBack(true,onClose,75);
  useEffect(()=>{
   const before=document.activeElement as HTMLElement|null;
-  (box.current?.querySelector<HTMLElement>('input:checked,input:not([type=radio]),button')||box.current)?.focus({preventScroll:true});
-  return()=>before?.focus({preventScroll:true});
+  const dialog=box.current;
+  if(dialog)(dialogControls(dialog)[0]||dialog).focus({preventScroll:true});
+  return()=>{if(before?.isConnected)before.focus({preventScroll:true});};
  },[]);
  return createPortal(<div className="phone-settings-mask" onClick={event=>{if(event.target===event.currentTarget)onClose();}}><div ref={box} className="phone-settings-dialog" role="dialog" aria-modal="true" aria-label={title} tabIndex={-1} onKeyDown={event=>{
   if(event.key==='Escape'){event.stopPropagation();onClose();}
   if(event.key==='Tab'){
-   const controls=Array.from(event.currentTarget.querySelectorAll<HTMLElement>('button:not(:disabled),input:not(:disabled):not([type=radio]),input[type=radio]:checked,select,textarea'));
-   if(event.shiftKey&&document.activeElement===controls[0]){event.preventDefault();controls.at(-1)?.focus();}
-   else if(!event.shiftKey&&document.activeElement===controls.at(-1)){event.preventDefault();controls[0]?.focus();}
+   const dialog=event.currentTarget,controls=dialogControls(dialog);
+   const active=document.activeElement;
+   if(!controls.includes(active as HTMLElement)||active===(event.shiftKey?controls[0]:controls.at(-1))){
+    event.preventDefault();
+    ((event.shiftKey?controls.at(-1):controls[0])||dialog).focus();
+   }
   }
  }}><h3>{title}</h3>{children}<footer>{actions}</footer></div></div>,document.body);
 }
