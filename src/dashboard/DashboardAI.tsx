@@ -1,5 +1,5 @@
 import {useEffect,useRef,useState} from 'react';
-import {KeyRound,Send,Sparkles} from 'lucide-react';
+import {Send,Sparkles} from 'lucide-react';
 import type {Firestore,QueryDocumentSnapshot} from 'firebase/firestore';
 import type {User} from 'firebase/auth';
 import {findChats,findPeople,readChat,readSection,sources,type ChatChoice,type Person,type Source} from './aiContext';
@@ -11,15 +11,18 @@ export default function DashboardAI({db,user,snapshot}:{db:Firestore;user:User;s
  const [source,setSource]=useState<Source>('Vista general'),[question,setQuestion]=useState('');
  const [search,setSearch]=useState(''),[people,setPeople]=useState<Person[]>([]),[chats,setChats]=useState<ChatChoice[]>([]);
  const [person,setPerson]=useState<Person>(),[chat,setChat]=useState<ChatChoice>(),[cursor,setCursor]=useState<QueryDocumentSnapshot>();
- const [payload,setPayload]=useState(''),[answer,setAnswer]=useState(''),[error,setError]=useState(''),[notice,setNotice]=useState('');
+ const [payload,setPayload]=useState(''),[error,setError]=useState(''),[notice,setNotice]=useState('');
+ const [turns,setTurns]=useState<{question:string;answer:string}[]>([]);
+ const answer=turns.at(-1)?.answer||'';
  const [phase,setPhase]=useState<'idle'|'reading'|'sending'>('idle');
- const token=useRef('');
- const [connected,setConnected]=useState(false);
  const request=useRef<AbortController|null>(null);
  const busy=phase!=='idle';
- useEffect(()=>()=>{request.current?.abort();request.current=null;token.current='';},[]);
+ const canSubmit=!!question.trim()&&!busy&&(source!=='Chats'||!!chat);
+ const submit=()=>{if(canSubmit){if(payload)void ask();else prepare();}};
+ function editQuestion(value:string){setQuestion(value);if(payload)setPayload('');}
+ useEffect(()=>()=>{request.current?.abort();request.current=null;},[]);
 
- function resetPayload(){setPayload('');setCursor(undefined);setAnswer('');setNotice('');setError('');}
+ function resetPayload(){setPayload('');setCursor(undefined);setNotice('');setError('');}
  async function read(action:()=>Promise<void>){
   setPhase('reading');setError('');
   try{
@@ -31,7 +34,7 @@ export default function DashboardAI({db,user,snapshot}:{db:Firestore;user:User;s
  const loadChat=(next?:QueryDocumentSnapshot)=>void read(async()=>{
   if(!chat||!person)return;
   const context=await readChat(db,chat,person,next);
-  setCursor(context.next);setPayload(JSON.stringify(context.payload,null,2));setAnswer('');setNotice('');
+  setCursor(context.next);setPayload(JSON.stringify(context.payload,null,2));setNotice('');
  });
  function prepare(){
   const requestedPerson=/^(?:revisa|analiza)\s+(?:el\s+)?(?:chat|conversación)\s+de\s+(.+?)[.!?]?$/i.exec(question.trim())?.[1];
@@ -42,21 +45,21 @@ export default function DashboardAI({db,user,snapshot}:{db:Firestore;user:User;s
   if(source==='Chats'){loadChat();return;}
   const section=(source==='Actividad'||source==='Vista general')&&/\bajustes\b/i.test(question)?'Ajustes':source;
   if(section!==source)setSource(section);
-  void read(async()=>{setPayload(JSON.stringify(await readSection(db,section,snapshot,user.uid),null,2));setAnswer('');setNotice('');});
+  void read(async()=>{setPayload(JSON.stringify(await readSection(db,section,snapshot,user.uid),null,2));setNotice('');});
  }
  async function ask(){
   if(request.current||!payload||!question.trim())return;
-  if(!token.current){setError('Conecta Hugging Face antes de enviar la consulta.');return;}
+  const prompt=question.trim();
   const controller=new AbortController();request.current=controller;
   const timer=setTimeout(()=>controller.abort('timeout'),45000);
-  setPhase('sending');setError('');setAnswer('');setNotice('');
+  setPhase('sending');setError('');setNotice('');
   try{
    if(!await verifyDashboardAccess(user,db))throw Error('Tu acceso de administración ya no está disponible.');
    controller.signal.throwIfAborted();
    const {askDashboardAI}=await import('./askDashboardAI');
    controller.signal.throwIfAborted();
-   const result=await askDashboardAI(token.current,question.trim(),payload,controller.signal);
-   if(!controller.signal.aborted){setAnswer(result.text);if(result.truncated)setNotice('La respuesta se cortó. Haz una pregunta más concreta sobre esta muestra.');}
+   const result=await askDashboardAI(prompt,payload,controller.signal);
+   if(!controller.signal.aborted){setTurns(previous=>[...previous,{question:prompt,answer:result.text}].slice(-8));setQuestion('');setPayload('');if(result.truncated)setNotice('La respuesta se cortó. Haz una pregunta más concreta sobre esta muestra.');}
   }catch(error){
    if(request.current===controller)setError(controller.signal.reason==='timeout'?'Se agotó el tiempo de respuesta.':controller.signal.aborted?'Consulta cancelada.':error instanceof Error?error.message:'No se pudo completar la consulta.');
   }finally{
@@ -65,24 +68,8 @@ export default function DashboardAI({db,user,snapshot}:{db:Firestore;user:User;s
   }
  }
  return <section className="panel-card dashboard-ai">
-  <header className="dashboard-ai-header"><div><span className="badge"><Sparkles size={15}/> ASISTENTE DEL PANEL</span><h2>Modo IA</h2></div><span className="dashboard-ai-connection" data-connected={connected}>{connected?'Token cargado':'Sin conexión de inferencia'}</span></header>
-  <p>Consulta secciones de Nexus con tu sesión administradora. La pregunta y los datos preparados se comparten con Hugging Face al enviarlos. El dictado y la lectura pueden usar los servicios de voz del navegador.</p>
-  <details className="dashboard-ai-token" open={!connected?true:undefined}>
-   <summary><KeyRound size={16}/> Conectar Hugging Face</summary>
-   {connected?<button type="button" className="secondary" disabled={busy} onClick={()=>{token.current='';setConnected(false);setError('');}}>Quitar token de esta sesión</button>:
-    <form onSubmit={event=>{
-     event.preventDefault();
-     const form=event.currentTarget,value=String(new FormData(form).get('hf-token')||'').trim();
-     if(!/^hf_[A-Za-z0-9]+$/.test(value)){setError('Introduce un token válido de Hugging Face.');return;}
-     token.current=value;form.reset();setConnected(true);setError('');
-    }}>
-     <label>Token de Hugging Face<input type="password" name="hf-token" autoComplete="off" spellCheck={false} required disabled={busy}/></label>
-     <button type="submit" className="secondary" disabled={busy}>Conectar para esta sesión</button>
-    </form>}
-   <small>Usa un token con permiso de Inference Providers. Se conserva en memoria mientras este panel esté abierto.</small>
-  </details>
-  <label>Pregunta<textarea rows={3} maxLength={1500} value={question} disabled={busy} onChange={e=>setQuestion(e.target.value)} placeholder="Por ejemplo, revisa el chat de una persona o revisa los ajustes."/></label>
-  <DictateQuestion disabled={busy} onText={text=>setQuestion(previous=>[previous.trim(),text].filter(Boolean).join(' ').slice(0,1500))}/>
+  <header className="dashboard-ai-header"><div><span className="badge"><Sparkles size={15}/> ASISTENTE DEL PANEL</span><h2>Modo IA</h2></div></header>
+  <p>Consulta secciones de Nexus con tu sesión administradora. La información de la vista previa se comparte con el proveedor al pulsar Enviar.</p>
   <label>Sección<select disabled={busy} value={source} onChange={e=>{setSource(e.target.value as Source);resetPayload();}}>{sources.map(value=><option key={value}>{value}</option>)}</select></label>
   {source==='Chats'&&<div className="dashboard-ai-chats">
    <label>Nombre o usuario<input value={search} disabled={busy} onChange={e=>{setSearch(e.target.value);setPeople([]);setPerson(undefined);setChats([]);setChat(undefined);resetPayload();}}/></label>
@@ -106,12 +93,23 @@ export default function DashboardAI({db,user,snapshot}:{db:Firestore;user:User;s
    <h3>Información que se enviará</h3>
    <p>Revisa el texto antes de enviarlo y evita compartir datos sensibles. Esta consulta es de solo lectura.</p>
    <pre tabIndex={0}>{JSON.stringify({pregunta:question.trim(),contexto:JSON.parse(payload)},null,2)}</pre>
-   <button type="button" className="icon-action" disabled={busy||!connected||!question.trim()} onClick={()=>void ask()}><Send size={16}/> Enviar a Hugging Face</button>
   </div>}
   {phase==='reading'&&<p role="status">Consultando Nexus…</p>}
   {phase==='sending'&&<div className="actions"><span role="status">Preparando respuesta…</span><button type="button" className="secondary" onClick={()=>request.current?.abort()}>Cancelar</button></div>}
   {notice&&<p role="status">{notice}</p>}
   {error&&<p className="feedback error" role="alert">{error}</p>}
-  {answer&&<article className="report-preview" aria-label="Respuesta del Modo IA"><h3>Respuesta del Modo IA</h3><p>{answer}</p><SpeakAnswer key={answer} text={answer}/></article>}
+  {turns.length>0&&<div className="dashboard-ai-transcript" aria-label="Conversación de Modo IA">
+   {turns.map((turn,index)=><article key={index} className="dashboard-ai-turn"><p className="dashboard-ai-user-message">{turn.question}</p>
+    <div className="report-preview" aria-label="Respuesta del Modo IA"><strong>Modo IA</strong><p>{turn.answer}</p></div></article>)}
+  </div>}
+  <form className="dashboard-ai-composer" aria-label="Escribir una consulta" onSubmit={event=>{event.preventDefault();submit();}}>
+   <SpeakAnswer key={answer} text={answer} compact/>
+   <textarea aria-label="Escribe un mensaje" rows={1} maxLength={1500} value={question} disabled={busy} onChange={event=>editQuestion(event.target.value)} placeholder="Escribe un mensaje"
+    onKeyDown={event=>{if(event.key==='Enter'&&!event.shiftKey&&!event.nativeEvent.isComposing){event.preventDefault();submit();}}}/>
+   <DictateQuestion compact disabled={busy} onText={text=>{
+    setQuestion(previous=>[previous.trim(),text].filter(Boolean).join(' ').slice(0,1500));setPayload('');
+   }}/>
+   <button type="submit" className="dashboard-ai-composer-icon" disabled={!canSubmit} title={payload?'Enviar consulta':'Preparar consulta'} aria-label={payload?'Enviar consulta':'Preparar consulta'}><Send size={18}/></button>
+  </form>
  </section>;
 }

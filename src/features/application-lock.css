@@ -1,0 +1,13 @@
+.application-lock-setting{padding:4px 0}
+.application-lock-gate .feature-dialog{max-width:min(410px,calc(100vw - 28px));max-height:90dvh;overflow:auto}
+.application-lock-gate .feature-dialog form{display:grid;gap:10px}
+.application-lock-mark{display:grid;place-items:center;width:48px;height:48px;border-radius:16px;background:var(--nx-field,#223033);color:var(--nx-accent,#21c063);margin-bottom:10px}
+.application-lock-gate button svg{vertical-align:middle}
+.application-lock-gate .application-lock-secondary{background:transparent;color:var(--nx-accent,#21c063)}
+body:has(.application-lock-gate) .incoming-call-notice{z-index:10000!important}
+body:has(.application-lock-gate) .nexus-call-screen{z-index:10001!important}
+
+.application-lock-setting input[role=switch]{appearance:none;flex:none;position:relative;width:46px;height:26px;margin:0;border:1px solid var(--nx-muted,#819097);border-radius:99px;background:var(--nx-field,#283035);cursor:pointer}
+.application-lock-setting input[role=switch]::before{content:"";position:absolute;inset:3px auto auto 3px;width:18px;height:18px;border-radius:50%;background:var(--nx-muted,#96a2a8)}
+.application-lock-setting input[role=switch]:checked{background:var(--nx-accent,#21c063);border-color:var(--nx-accent,#21c063)}
+.application-lock-setting input[role=switch]:checked::before{inset-inline-start:auto;inset-inline-end:3px;background:#142421}

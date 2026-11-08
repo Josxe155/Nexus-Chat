@@ -12,7 +12,7 @@ type Recognition={
 type SpeechWindow=Window & {SpeechRecognition?:new()=>Recognition;webkitSpeechRecognition?:new()=>Recognition};
 const recognitionConstructor=()=> (window as SpeechWindow).SpeechRecognition||(window as SpeechWindow).webkitSpeechRecognition;
 
-export function DictateQuestion({disabled,onText}:{disabled:boolean;onText:(text:string)=>void}){
+export function DictateQuestion({disabled,onText,compact=false}:{disabled:boolean;onText:(text:string)=>void;compact?:boolean}){
  const active=useRef<Recognition|null>(null);
  const [listening,setListening]=useState(false),[interim,setInterim]=useState(''),[error,setError]=useState('');
  function stop(){
@@ -54,8 +54,8 @@ export function DictateQuestion({disabled,onText}:{disabled:boolean;onText:(text
   catch{active.current=null;setError('No se pudo iniciar el micrófono.');}
  }
  return <div className="dashboard-voice-control">
-  <button type="button" className="secondary icon-action" disabled={disabled} aria-pressed={listening} onClick={toggle}>
-   {listening?<Square size={15}/>:<Mic size={16}/>} {listening?'Detener dictado':'Dictar pregunta'}
+  <button type="button" className={compact?'dashboard-ai-composer-icon':'secondary icon-action'} disabled={disabled} aria-label={listening?'Detener dictado':'Dictar pregunta'} title={listening?'Detener dictado':'Dictar pregunta'} aria-pressed={listening} onClick={toggle}>
+   {listening?<Square size={15}/>:<Mic size={16}/>} {!compact&&(listening?'Detener dictado':'Dictar pregunta')}
   </button>
   {listening&&<span role="status">{interim||'Escuchando…'}</span>}
   {error&&<span role="alert">{error}</span>}
@@ -67,7 +67,7 @@ function voiceSegments(text:string){
  return clean.match(/.{1,180}(?:[.!?](?=\s|$)|\s|$)|.{1,180}/g)?.map(part=>part.trim()).filter(Boolean)||[];
 }
 
-export function SpeakAnswer({text}:{text:string}){
+export function SpeakAnswer({text,compact=false}:{text:string;compact?:boolean}){
  const [voices,setVoices]=useState<SpeechSynthesisVoice[]>([]),[playing,setPlaying]=useState(false),[error,setError]=useState('');
  const speech=useRef<SpeechSynthesisUtterance|null>(null);
  const generation=useRef(0);
@@ -109,10 +109,10 @@ export function SpeakAnswer({text}:{text:string}){
  }
  const hasGoogle=voices.some(voice=>/^es(?:-|$)/i.test(voice.lang)&&/google/i.test(voice.name+' '+voice.voiceURI));
  return <div className="dashboard-voice-control">
-  <button type="button" className="secondary icon-action" onClick={toggle}>
-   {playing?<Square size={15}/>:<Volume2 size={17}/>} {playing?'Detener lectura':'Escuchar con Google'}
+  <button type="button" className={compact?'dashboard-ai-composer-icon dashboard-ai-speaker':'secondary icon-action'} aria-label={playing?'Detener lectura':'Escuchar con Google'} title={playing?'Detener lectura':'Escuchar con Google'} disabled={!text} onClick={toggle}>
+   {playing?<Square size={15}/>:<Volume2 size={17}/>} {!compact&&(playing?'Detener lectura':'Escuchar con Google')}
   </button>
-  {!playing&&!error&&voices.length>0&&!hasGoogle&&<small>Requiere una voz de Google en español.</small>}
+  {text&&!playing&&!error&&voices.length>0&&!hasGoogle&&<small>Requiere una voz de Google en español.</small>}
   {error&&<span role="alert">{error}</span>}
  </div>;
 }

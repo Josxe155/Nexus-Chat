@@ -1,7 +1,10 @@
-const model='Qwen/Qwen3-4B-Instruct-2507';
+import config from '../public-services.json';
 
-export async function askDashboardAI(token:string,question:string,context:string,signal:AbortSignal){
- if(!/^hf_[A-Za-z0-9]+$/.test(token))throw Error('Conecta un token de Hugging Face con permiso de Inference Providers.');
+const model='meta-llama/Llama-3.1-8B-Instruct';
+
+export async function askDashboardAI(question:string,context:string,signal:AbortSignal){
+ const token=config.huggingFaceKey;
+ if(!/^hf_[A-Za-z0-9]+$/.test(token))throw Error('El servicio de IA del dashboard no está configurado.');
  const response=await fetch('https://router.huggingface.co/v1/chat/completions',{
   method:'POST',
   headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},
