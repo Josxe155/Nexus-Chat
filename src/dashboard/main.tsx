@@ -1,10 +1,11 @@
 import {useEffect,useMemo,useRef,useState} from 'react';
 import {createRoot} from 'react-dom/client';
-import {ArrowUpRight,Bell,CalendarClock,FileText,Flag,LayoutDashboard,LogOut,ShieldCheck,Wifi,WifiOff} from 'lucide-react';
+import {ArrowUpRight,Bell,CalendarClock,FileText,Flag,LayoutDashboard,LogOut,ShieldCheck,Sparkles,Wifi,WifiOff} from 'lucide-react';
 import {deleteField,getDoc,onSnapshot,runTransaction,type Firestore} from 'firebase/firestore';
 import type {Database} from 'firebase/database';
 import type {User} from 'firebase/auth';
 import {version} from '../webVersion.json';
+import DashboardAI from './DashboardAI';
 import DashboardReport from './DashboardReport';
 import MessageReports from './MessageReports';
 import OfficialNotices from './OfficialNotices';
@@ -20,6 +21,7 @@ const navigation=[
  ['avisos','Avisos oficiales',Bell],
  ['mantenimiento','Mantenimiento',CalendarClock],
  ['informes','Informes',FileText],
+ ['modo-ia','Modo IA',Sparkles],
 ] as const;
 type Page=typeof navigation[number][0];
 type Plan={enabled?:boolean;nextDueAt?:number;lastCompletedAt?:number;status?:string;leaseUntil?:number;execution?:string};
@@ -137,6 +139,7 @@ function Workspace({user,db,rtdb,onLogout}:{user:User;db:Firestore;rtdb:Database
    <div hidden={page!=='resumen'}><Overview db={db} rtdb={rtdb} onData={setSnapshot}/></div>
    {page==='reportes'&&<MessageReports db={db}/>}
    {page==='avisos'&&<OfficialNotices db={db}/>}
+   {page==='modo-ia'&&<DashboardAI db={db} user={user} snapshot={snapshot}/>}
    {page==='informes'&&<DashboardReport snapshot={snapshot} plan={ready?{enabled:!!plan.enabled,dueAt:hasDate?plan.nextDueAt:undefined}:undefined}/>}
    {page==='mantenimiento'&&<div className="grid">
     <section className="cleanup panel-card"><span className="badge">CONTENIDO Y ESPACIO</span><h2>Limpieza mensual</h2>
