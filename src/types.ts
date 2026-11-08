@@ -15,6 +15,7 @@ export interface UserProfile {
   usernameChangedAt?: number | {toMillis:()=>number};
   foto: string;
   bio: string;
+  bioExpiresAt?: number;
   estado: string;
   online: boolean;
   lastSeen: number;

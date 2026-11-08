@@ -33,6 +33,17 @@ service cloud.firestore {
   }
   match /dashboardVisits/{uid}{allow read: if operator() || (signedIn() && request.auth.uid==uid);allow create,update: if signedIn() && request.auth.uid==uid && request.resource.data.keys().hasOnly(['uid','firstVisitAt','lastVisitAt']) && request.resource.data.uid==uid && request.resource.data.lastVisitAt==request.time && (resource==null ? request.resource.data.firstVisitAt==request.time : request.resource.data.firstVisitAt==resource.data.firstVisitAt);allow delete: if false;}
   match /dashboardAdmins/{uid}{allow get: if signedIn() && request.auth.uid==uid;allow list,write: if false;}
+  match /contactCodes/{token} {
+   allow get: if signedIn() && resource.data.uid is string
+    && exists(/databases/$(database)/documents/users/$(resource.data.uid))
+    && get(/databases/$(database)/documents/users/$(resource.data.uid)/private/contactQr).data.token==token
+    && audienceAllowed(resource.data.uid,'contactCodeAudience','contactCodeExcluded');
+   allow create: if signedIn() && token.matches('[a-f0-9]{32}')
+    && request.resource.data.keys().hasOnly(['uid']) && request.resource.data.uid==request.auth.uid
+    && getAfter(/databases/$(database)/documents/users/$(request.auth.uid)/private/contactQr).data.token==token;
+   allow delete: if signedIn() && (resource==null || resource.data.uid==request.auth.uid);
+   allow list,update: if false;
+  }
   function privacy(uid){return exists(/databases/$(database)/documents/users/$(uid)/private/privacy)?get(/databases/$(database)/documents/users/$(uid)/private/privacy).data:{};}
   function audienceAllowed(uid,field,excluded){let p=privacy(uid);let mode=p.get(field,'everyone');let viewer=request.auth.uid;return viewer==uid || (!(viewer in p.get('blockedIds',[])) && !(uid in privacy(viewer).get('blockedIds',[])) && (mode=='everyone' || (mode in ['contacts','except'] && viewer in p.get('contactIds',[]) && (mode!='except' || !(viewer in p.get(excluded,[]))))));}
   function receiptsAllowed(chatId,sender){return room(chatId).get('kind','direct') in ['group','channel'] || (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('privacy',{}).get('readReceipts',true) && get(/databases/$(database)/documents/users/$(sender)).data.get('privacy',{}).get('readReceipts',true));}
@@ -125,7 +136,7 @@ service cloud.firestore {
    allow update: if signedIn() && request.auth.uid == uid && request.resource.data.uid == resource.data.uid && validUsernameChange() && (request.resource.data.username==resource.data.username || getAfter(/databases/$(database)/documents/usernames/$(request.resource.data.username)).data.uid==uid) && validPublicProfile(request.resource.data);
    allow delete: if signedIn() && request.auth.uid==uid;
    match /details/{id}{
-    allow read: if signedIn() && (request.auth.uid==uid || (id=='photo' && audienceAllowed(uid,'photoAudience','photoExcluded')) || (id=='info' && audienceAllowed(uid,'infoAudience','infoExcluded')));
+    allow read: if signedIn() && (request.auth.uid==uid || (id=='photo' && audienceAllowed(uid,'photoAudience','photoExcluded')) || (id=='info' && audienceAllowed(uid,'infoAudience','infoExcluded') && (resource==null || resource.data.get('expiresAt',0)==0 || resource.data.expiresAt>request.time.toMillis())));
     allow write: if signedIn() && request.auth.uid==uid && id in ['photo','info'];
    }
    match /conversations/{chatId}{

@@ -191,6 +191,8 @@ El sitio publicado es **[nexus-chat-nc.web.app](https://nexus-chat-nc.web.app/)*
 
 La numeración de 2026 empieza en `26.1`. Se contaron 73 versiones distintas publicadas en el canal público de Nexus Chat hasta el 8 de noviembre de 2026, antes de esta entrega `26.74`. Sube el segundo número con cada nueva implementación pública. Usa un tercer número para una corrección de la versión en curso, como `26.74.1`. Los despliegues de prueba quedan fuera.
 
+La versión **26.75** renueva la portada móvil de Ajustes, añade búsqueda y organiza el perfil, la foto y la sección Info. Desde el botón QR se puede compartir un contacto de Nexus, escanearlo con la cámara o galería y sustituir el código anterior. Las funciones de QR de contacto requieren sesión y conexión. Los enlaces de Nexus abren una confirmación antes de iniciar un chat.
+
 Consulta el procedimiento completo en [INSTRUCCIONES-FIREBASE-HOSTING.md](docs/INSTRUCCIONES-FIREBASE-HOSTING.md).
 
 ## 🔐 Privacidad y alcance
