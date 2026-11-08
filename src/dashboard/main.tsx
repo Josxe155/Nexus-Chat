@@ -1,15 +1,201 @@
+import {useEffect,useMemo,useRef,useState} from 'react';
+import {createRoot} from 'react-dom/client';
+import {ArrowUpRight,Bell,CalendarClock,FileText,Flag,LayoutDashboard,LogOut,ShieldCheck,Wifi,WifiOff} from 'lucide-react';
+import {getDoc,onSnapshot,runTransaction,setDoc,type Firestore} from 'firebase/firestore';
+import type {Database} from 'firebase/database';
+import type {User} from 'firebase/auth';
+import {version} from '../webVersion.json';
+import DashboardReport from './DashboardReport';
 import MessageReports from './MessageReports';
 import OfficialNotices from './OfficialNotices';
-import Overview from './Overview';
-import React,{useEffect,useState,useMemo,useRef} from 'react';import {createRoot} from 'react-dom/client';
+import Overview,{type OverviewSnapshot} from './Overview';
 import {useDashboardSession,loginGoogle,loginPassword,logoutDashboard} from './session';
-import {doc,getDoc,onSnapshot,setDoc} from 'firebase/firestore';import {createActions} from './actions';import './style.css';
-function Dashboard(){const {user,allowed,checking,db,rtdb,sessionAuth}=useDashboardSession();const {inspect,executeDue,nextMonth,planRef}=useMemo(()=>createActions({db,rtdb}),[db,rtdb]);const [password,setPassword]=useState(''),[adminEmail,setAdminEmail]=useState('');const [plan,setPlan]=useState<any>({}),[busy,setBusy]=useState(false),[report,setReport]=useState<any>(),[message,setMessage]=useState(''),[error,setError]=useState(''),[confirmation,setConfirmation]=useState(''),[auto,setAuto]=useState(false),[release,setRelease]=useState(''),[now,setNow]=useState(Date.now());const actionLock=useRef(false),autoAttempt=useRef<number|null>(null);
- useEffect(()=>{const timer=setInterval(()=>setNow(Date.now()),30000);return()=>clearInterval(timer);},[]);
- useEffect(()=>{if(!allowed)return;return onSnapshot(planRef,s=>setPlan(s.data()||{}),()=>setError('No se pudo leer el plan de limpieza.'));},[allowed,planRef]);
- const action=async(fn:()=>Promise<void>)=>{if(actionLock.current)return;actionLock.current=true;setBusy(true);setError('');setMessage('');try{await fn();}catch(e){setAuto(false);setError(e instanceof Error?e.message:'No se pudo completar la acción.');}finally{actionLock.current=false;setBusy(false);}};
- const run=()=>action(async()=>{setReport(undefined);const result=await executeDue(setMessage);setReport(result);setConfirmation('');let latest;try{latest=(await getDoc(planRef)).data();}catch{setAuto(false);setMessage('Limpieza completada. No se pudo comprobar la próxima fecha; vuelve a cargar el plan antes de continuar.');return;}if(Number.isFinite(latest?.nextDueAt)&&latest!.nextDueAt<=Date.now()){setAuto(false);setMessage('Limpieza completada. Hay otra fecha vencida: revisa el plan antes de ejecutar otro ciclo.');}else setMessage('Limpieza completada. Se conserva la estructura de cuentas y grupos.');});
- useEffect(()=>{if(!allowed||!auto||busy||!plan.enabled||!Number.isFinite(plan.nextDueAt)||plan.nextDueAt<=0)return;const tick=()=>{if(plan.nextDueAt<=Date.now()&&autoAttempt.current!==plan.nextDueAt){autoAttempt.current=plan.nextDueAt;void run();}};tick();const timer=setInterval(tick,60000);return()=>clearInterval(timer);},[allowed,auto,busy,plan.nextDueAt,plan.enabled]);
- const validPlanDate=Number.isFinite(plan.nextDueAt)&&plan.nextDueAt>0,leased=plan.status==='running'&&plan.leaseUntil>now;const due=validPlanDate&&(plan.enabled||plan.nextDueAt>now)?plan.nextDueAt:nextMonth(now),date=new Date(due).toLocaleString('es',{timeZone:'America/Guayaquil',dateStyle:'long',timeStyle:'short'});
- return <><header><a href="/"><img src="/nexus-icon.svg" width="40" height="40" alt=""/><span>Nexus Chat<small>Centro de acciones</small></span></a><a href="/">Abrir Nexus ↗</a></header><main>{checking?<section><h1>Comprobando acceso…</h1></section>:!allowed?<section className="access"><span className="eyebrow">ACCESO PRIVADO</span><h1>Tu espacio de control</h1><p>Usa Google o el correo de tu cuenta y la contraseña alternativa para administrar Nexus Chat.</p>{user&&<p>Sesión actual: {user.email||user.uid}. Usa un acceso autorizado para continuar.</p>}<button disabled={busy} onClick={()=>void action(async()=>{await loginGoogle();})}>Continuar con Google</button><form className="password-access" onSubmit={e=>{e.preventDefault();const value=password;setPassword('');void action(()=>loginPassword(adminEmail,value));}}><label>Correo de tu cuenta administradora<input type="email" aria-label="Correo de administración" autoComplete="username" value={adminEmail} onChange={e=>setAdminEmail(e.target.value)} required/></label><label>Contraseña alternativa<input type="password" aria-label="Contraseña del panel" autoComplete="current-password" value={password} onChange={e=>setPassword(e.target.value)} required/></label><button className="secondary" disabled={busy||!password||!adminEmail.trim()}>Entrar al panel</button><small>Sesión administrativa independiente, válida hasta cerrar esta pestaña.</small></form>{user&&<button className="secondary" disabled={busy} onClick={()=>void action(()=>logoutDashboard(sessionAuth))}>Cerrar sesión</button>}</section>:<><div className="heading dashboard-hero"><div><span className="eyebrow">NEXUS · ADMINISTRACIÓN</span><h1>Todo en su lugar.</h1><p>Tu comunidad, sus conversaciones y las herramientas para cuidarla.</p></div><div className="hero-art" aria-hidden="true"><img src="/nexus-icon.svg" width="120" height="120"/><span className="hero-orbit"/></div><button className="secondary" disabled={busy} onClick={()=>void action(()=>logoutDashboard(sessionAuth))}>Salir del panel</button></div><Overview db={db} rtdb={rtdb}/><OfficialNotices db={db}/><MessageReports db={db}/><div className="stats"><section><small>Cuenta autorizada</small><strong>{user?.email}</strong></section><section><small>Modalidad</small><strong>Panel web privado</strong></section><section><small>Limpieza mensual</small><strong>{plan.enabled?'Plan activo':'Sin activar'}</strong></section></div><div className="grid"><section className="cleanup"><span className="badge">CONTENIDO Y ESPACIO</span><h2>Limpieza mensual</h2><p>Mensajes, notas de voz, archivos de chats y estados. Conserva usuarios, descripciones, contactos, grupos, comunidades, ajustes y sus imágenes.</p>{plan.enabled&&!validPlanDate&&<p className="notice" role="alert">El plan no tiene una fecha válida. Páusalo y vuelve a activarlo para programar una fecha nueva.</p>}{leased&&<p className="notice" role="status">Hay una limpieza en curso. El panel evita iniciar otra mientras esté activa.</p>}<div className="schedule"><small>{plan.enabled?'Próxima fecha · Ecuador':'Fecha propuesta · Ecuador'}</small><strong>{date}</strong></div><p className="notice">Este HTML no trabaja con el navegador cerrado. Para ejecutar al llegar la fecha, mantén este panel abierto, la sesión iniciada y la ejecución automática activada. Si no está abierto, la limpieza queda pendiente hasta que vuelvas. El aviso a los usuarios se destaca tres días antes.</p><div className="actions"><button disabled={busy||plan.enabled||leased} onClick={()=>void action(async()=>{if(!confirm('¿Activar la limpieza mensual para la fecha mostrada? Los usuarios recibirán el aviso tres días antes.'))return;await setDoc(planRef,{enabled:true,execution:'browser',firstDueAt:new Date(due).toISOString(),nextDueAt:due,warningDays:3,status:'scheduled',leaseUntil:0},{merge:true});setMessage('Plan mensual guardado.');})}>{plan.enabled?'Plan mensual activo':'Activar plan mensual'}</button><button className="secondary" disabled={busy||!plan.enabled} onClick={()=>void action(async()=>{await setDoc(planRef,{enabled:false},{merge:true});setAuto(false);})}>Pausar plan</button></div><label className="toggle"><input type="checkbox" checked={auto} disabled={busy||!plan.enabled} onChange={e=>{autoAttempt.current=null;setAuto(e.target.checked);}}/>Ejecutar al llegar la fecha mientras este panel esté abierto</label><button className="secondary" disabled={busy} onClick={()=>void action(async()=>{setReport(await inspect(due,false,setMessage));setMessage('Revisión terminada. No se borraron datos.');})}>Revisar qué se eliminaría</button>{report&&<div className="result"><h3>Resultado de la revisión</h3><p>{report.messages} mensajes · {report.statuses} estados · {report.files} archivos · {(report.bytes/1048576).toFixed(2)} MB</p><small>{report.protectedFiles} archivos de perfil, portada u otros alcances protegidos.</small></div>}<div className="danger"><h3>Ejecución manual</h3><p>Disponible cuando llegue la fecha del plan. El borrado es irreversible. Guarda lo importante antes de continuar.</p><input aria-label="Confirmación de limpieza" placeholder="Escribe BORRAR CONTENIDO" value={confirmation} onChange={e=>setConfirmation(e.target.value)}/><button disabled={busy||!plan.enabled||!validPlanDate||leased||due>now||confirmation!=='BORRAR CONTENIDO'} onClick={()=>void run()}>Ejecutar limpieza pendiente</button></div></section><div className="side"><section><span className="badge">PUBLICACIÓN</span><h2>Versión de Nexus</h2><p>Comprueba el identificador de la versión publicada de Nexus Chat.</p><strong>{release||'Sin comprobar'}</strong><button className="secondary" disabled={busy} onClick={()=>void action(async()=>{const r=await fetch('/release.json',{cache:'no-store'});if(!r.ok)throw Error('No se pudo comprobar la versión.');const data=await r.json();setRelease(data.id);})}>Comprobar versión</button></section><section><span className="badge">ESTE NAVEGADOR</span><h2>Caché de actualizaciones</h2><p>Libera descargas de versiones guardadas en este equipo. No elimina conversaciones ni archivos de usuarios.</p><button className="secondary" disabled={busy} onClick={()=>void action(async()=>{if(!confirm('¿Eliminar solo la caché de actualizaciones de este navegador?'))return;if(!('caches'in window))throw Error('Este navegador no permite administrar la caché de actualizaciones.');const keys=(await caches.keys()).filter(k=>k.startsWith('nexus-update-'));await Promise.all(keys.map(k=>caches.delete(k)));setMessage('Caché de actualizaciones liberada.');})}>Liberar caché local</button></section><section><span className="badge">INFORME</span><h2>Guardar resumen</h2><p>Descarga el plan y el último recuento, sin mensajes ni datos personales.</p><button className="secondary" onClick={()=>{const blob=new Blob([JSON.stringify({nextDueAt:plan.nextDueAt,enabled:plan.enabled,counts:report},null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='nexus-resumen.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}}>Descargar resumen</button></section></div></div></>}{busy&&<p className="feedback" role="status">{message||'Procesando… Mantén esta pestaña abierta.'}</p>}{!busy&&message&&<p className="feedback" role="status">{message}</p>}{error&&<p className="feedback error" role="alert">{error}</p>}</main><footer>Nexus Chat · Panel de acciones privado · Acceso privado y acciones verificadas.</footer></>;
-}createRoot(document.getElementById('root')!).render(<Dashboard/>);
+import {createActions} from './actions';
+import './style.css';
+
+const navigation=[
+ ['resumen','Resumen',LayoutDashboard],
+ ['reportes','Reportes',Flag],
+ ['avisos','Avisos oficiales',Bell],
+ ['mantenimiento','Mantenimiento',CalendarClock],
+ ['informes','Informes',FileText],
+] as const;
+type Page=typeof navigation[number][0];
+type Plan={enabled?:boolean;nextDueAt?:number;lastCompletedAt?:number;status?:string;leaseUntil?:number;execution?:string};
+const currentPage=():Page=>navigation.find(([id])=>'#'+id===location.hash)?.[0]||'resumen';
+const dateLabel=(value:number)=>new Date(value).toLocaleString('es-EC',{timeZone:'America/Guayaquil',dateStyle:'medium',timeStyle:'short'});
+const validDate=(value:unknown):value is number=>typeof value==='number'&&Number.isFinite(value)&&value>0&&value<=8.64e15;
+
+function useAction(){
+ const lock=useRef(false);
+ const [busy,setBusy]=useState(false),[message,setMessage]=useState(''),[error,setError]=useState('');
+ async function run(action:()=>Promise<void>){
+  if(lock.current)return;
+  lock.current=true;
+  setBusy(true);setMessage('');setError('');
+  try{await action();}
+  catch(error){setError(error instanceof Error?error.message:'No se pudo completar la acción.');}
+  finally{lock.current=false;setBusy(false);}
+ }
+ return {busy,message,error,setMessage,run};
+}
+function Feedback({busy,message,error}:{busy:boolean;message:string;error:string}){
+ return <>{(busy||message)&&<p className="feedback" role="status">{message||'Procesando…'}</p>}{error&&<p className="feedback error" role="alert">{error}</p>}</>;
+}
+
+function Access({user,onLogout}:{user:User|null;onLogout:()=>Promise<void>}){
+ const [password,setPassword]=useState(''),[email,setEmail]=useState('');
+ const action=useAction();
+ return <section className="access panel-card"><span className="eyebrow">ACCESO PRIVADO</span><h1>Accede al dashboard</h1>
+  <p>Usa una cuenta administradora autorizada de Nexus Chat.</p>
+  {user&&<p>Sesión actual: {user.email||'Cuenta de Nexus'}.</p>}
+  <button disabled={action.busy} onClick={()=>void action.run(loginGoogle)}>Continuar con Google</button>
+  <form className="password-access" onSubmit={event=>{
+   event.preventDefault();const value=password;setPassword('');void action.run(()=>loginPassword(email,value));
+  }}>
+   <label>Correo de tu cuenta administradora<input type="email" aria-label="Correo de administración" autoComplete="username" value={email} onChange={e=>setEmail(e.target.value)} required/></label>
+   <label>Contraseña alternativa<input type="password" aria-label="Contraseña del panel" autoComplete="current-password" value={password} onChange={e=>setPassword(e.target.value)} required/></label>
+   <button type="submit" className="secondary" disabled={action.busy||!password||!email.trim()}>Entrar al panel</button>
+   <small>El acceso con contraseña se conserva hasta que cierres la pestaña.</small>
+  </form>
+  {user&&<button className="secondary" disabled={action.busy} onClick={()=>void action.run(onLogout)}>Cerrar sesión</button>}
+  <Feedback {...action}/>
+ </section>;
+}
+
+function Workspace({user,db,rtdb,onLogout}:{user:User;db:Firestore;rtdb:Database;onLogout:()=>Promise<void>}){
+ const engine=useMemo(()=>createActions({db,rtdb}),[db,rtdb]);
+ const {planRef}=engine;
+ const action=useAction();
+ const [page,setPage]=useState(currentPage),[snapshot,setSnapshot]=useState<OverviewSnapshot>();
+ const [plan,setPlan]=useState<Plan>(),[planError,setPlanError]=useState(''),[retry,setRetry]=useState(0);
+ const [preview,setPreview]=useState<Awaited<ReturnType<typeof engine.inspect>>>();
+ const [confirmation,setConfirmation]=useState(''),[auto,setAuto]=useState(false),[now,setNow]=useState(Date.now());
+ const [online,setOnline]=useState(()=>navigator.onLine),[published,setPublished]=useState('');
+ const attempted=useRef<number | undefined>(undefined);
+
+ useEffect(()=>{
+  const syncPage=()=>setPage(currentPage());
+  const syncConnection=()=>setOnline(navigator.onLine);
+  const timer=setInterval(()=>setNow(Date.now()),30000);
+  window.addEventListener('hashchange',syncPage);window.addEventListener('online',syncConnection);window.addEventListener('offline',syncConnection);
+  return()=>{clearInterval(timer);window.removeEventListener('hashchange',syncPage);window.removeEventListener('online',syncConnection);window.removeEventListener('offline',syncConnection);};
+ },[]);
+ useEffect(()=>{
+  setPlanError('');
+  return onSnapshot(planRef,s=>setPlan(s.data()||{}),()=>{setPlan(undefined);setAuto(false);setPlanError('No se pudo consultar el plan.');});
+ },[planRef,retry]);
+ const hasDate=validDate(plan?.nextDueAt);
+ const due=hasDate&&(plan?.enabled||plan!.nextDueAt!>now)?plan!.nextDueAt!:engine.nextMonth(now);
+ const leased=plan?.status==='running'&&(plan.leaseUntil??0)>now;
+ const ready=!!plan&&!planError;
+ const run=()=>action.run(async()=>{
+  setPreview(undefined);
+  try{
+   const result=await engine.executeDue(action.setMessage);
+   setPreview(result);setConfirmation('');
+  }catch(error){setAuto(false);throw error;}
+  const latest=await getDoc(planRef).then(s=>s.data()).catch(()=>undefined);
+  if(!latest||validDate(latest.nextDueAt)&&latest.nextDueAt<=Date.now()){
+   setAuto(false);action.setMessage('Limpieza completada. Revisa la próxima fecha antes de continuar.');
+  }else action.setMessage('Limpieza completada.');
+ });
+ useEffect(()=>{
+  if(!auto||action.busy||!plan?.enabled||leased||!hasDate)return;
+  const dueAt=plan.nextDueAt!;
+  if(dueAt<=Date.now()&&attempted.current!==dueAt){attempted.current=dueAt;void run();}
+ },[auto,action.busy,plan?.enabled,plan?.nextDueAt,leased,hasDate,now]);
+ async function activate(){
+  if(!confirm('¿Activar la limpieza mensual para la fecha mostrada?'))return;
+  await runTransaction(db,async transaction=>{
+   const current=(await transaction.get(planRef)).data();
+   if(current?.enabled||Number(current?.leaseUntil)>Date.now())throw Error('El plan ya está activo o en ejecución.');
+   transaction.set(planRef,{enabled:true,execution:'browser',firstDueAt:new Date(due).toISOString(),nextDueAt:due,warningDays:3,status:'scheduled',leaseUntil:0},{merge:true});
+  });
+  action.setMessage('Plan mensual guardado.');
+ }
+
+ return <>
+  <div className="heading dashboard-hero">
+   <div><span className="eyebrow"><ShieldCheck size={16}/> ADMINISTRACIÓN DE NEXUS</span><h1>Dashboard</h1><p>Actividad, moderación y mantenimiento de Nexus Chat.</p></div>
+   <div className="hero-art" aria-hidden="true"><img src="/nexus-icon.svg" width="112" height="112" alt=""/><span className="hero-orbit"/></div>
+   <button className="secondary icon-action" disabled={action.busy} onClick={()=>void action.run(onLogout)}><LogOut size={17}/> Salir del panel</button>
+  </div>
+  <div className="dashboard-highlights">
+   <section><small><ShieldCheck size={15}/> Cuenta autorizada</small><strong>{user.email||'Cuenta de Nexus'}</strong></section>
+   <section><small><CalendarClock size={15}/> Limpieza mensual</small><strong>{!ready?'Sin comprobar':plan.enabled?'Plan activo':'Sin activar'}</strong>
+    {ready&&plan.enabled&&hasDate&&<small>{dateLabel(plan.nextDueAt!)} · Ecuador</small>}</section>
+   <section><small><LayoutDashboard size={15}/> Versión de Nexus</small><strong>V{version}</strong></section>
+   <section><small>{online?<Wifi size={15}/>:<WifiOff size={15}/>} Navegador</small><strong>{online?'En línea':'Sin conexión'}</strong></section>
+  </div>
+  <nav className="dashboard-nav" aria-label="Secciones del dashboard">
+   {navigation.map(([id,label,Icon])=><a key={id} href={'#'+id} aria-current={page===id?'page':undefined}><Icon size={18}/>{label}</a>)}
+  </nav>
+  <div className="dashboard-panels">
+   <div hidden={page!=='resumen'}><Overview db={db} rtdb={rtdb} onData={setSnapshot}/></div>
+   {page==='reportes'&&<MessageReports db={db}/>}
+   {page==='avisos'&&<OfficialNotices db={db}/>}
+   {page==='informes'&&<DashboardReport snapshot={snapshot} plan={ready?{enabled:!!plan.enabled,dueAt:hasDate?plan.nextDueAt:undefined}:undefined}/>}
+   {page==='mantenimiento'&&<div className="grid">
+    <section className="cleanup panel-card"><span className="badge">CONTENIDO Y ESPACIO</span><h2>Limpieza mensual</h2>
+     <p>Revisa y programa la limpieza de mensajes, archivos de chats y estados. Se conservan las cuentas, contactos, grupos y perfiles.</p>
+     {!ready&&<p role={planError?'alert':'status'}>{planError||'Comprobando el plan…'} {planError&&<button className="secondary" onClick={()=>setRetry(n=>n+1)}>Reintentar</button>}</p>}
+     {ready&&plan.enabled&&!hasDate&&<p className="notice" role="alert">La fecha del plan no es válida. Páusalo y actívalo con una nueva fecha.</p>}
+     {leased&&<p className="notice" role="status">Hay una limpieza en curso.</p>}
+     {ready&&<div className="schedule"><small>{plan.enabled&&hasDate?'Próxima fecha':'Fecha propuesta'} · Ecuador</small><strong>{dateLabel(due)}</strong>
+      {validDate(plan.lastCompletedAt)&&<small>Última ejecución · {dateLabel(plan.lastCompletedAt)}</small>}</div>}
+     <div className="actions">
+      <button disabled={action.busy||!ready||plan?.enabled||leased} onClick={()=>void action.run(activate)}>Activar plan mensual</button>
+      <button className="secondary" disabled={action.busy||!ready||!plan?.enabled} onClick={()=>void action.run(async()=>{
+       await setDoc(planRef,{enabled:false},{merge:true});setAuto(false);action.setMessage('Plan pausado.');
+      })}>Pausar plan</button>
+     </div>
+     <label className="toggle"><input type="checkbox" checked={auto} disabled={action.busy||!ready||!plan?.enabled||!hasDate} onChange={e=>{attempted.current=undefined;setAuto(e.target.checked);}}/>Ejecutar al llegar la fecha mientras este panel esté abierto</label>
+     <p className="notice">La ejecución automática requiere mantener el panel abierto y la sesión iniciada. El aviso a los usuarios se muestra tres días antes.</p>
+     <button className="secondary" disabled={action.busy||!ready} onClick={()=>void action.run(async()=>{setPreview(await engine.inspect(due,false,action.setMessage));action.setMessage('Revisión terminada. No se borraron datos.');})}>Revisar qué se eliminaría</button>
+     {preview&&<div className="result"><h3>Resultado</h3><p>{preview.messages} mensajes · {preview.statuses} estados · {preview.files} archivos · {(preview.bytes/1048576).toFixed(2)} MB</p><small>{preview.protectedFiles} archivos protegidos.</small></div>}
+     <div className="danger"><h3>Ejecución manual</h3><p>El borrado es irreversible y está disponible cuando llegue la fecha del plan.</p>
+      <label htmlFor="cleanup-confirmation">Escribe BORRAR CONTENIDO</label><input id="cleanup-confirmation" aria-label="Confirmación de limpieza" value={confirmation} onChange={e=>setConfirmation(e.target.value)} autoComplete="off"/>
+      <button disabled={action.busy||!ready||!plan?.enabled||!hasDate||leased||due>now||confirmation!=='BORRAR CONTENIDO'} onClick={()=>void run()}>Ejecutar limpieza pendiente</button>
+     </div>
+    </section>
+    <div className="side">
+     <section className="panel-card"><span className="badge">PUBLICACIÓN</span><h2>Versión de Nexus</h2><strong className="version-value">V{version}</strong>
+      {published&&<p role="status">La web pública sirve {published}.</p>}
+      <button className="secondary" disabled={action.busy} onClick={()=>void action.run(async()=>{
+       const response=await fetch('/release.json',{cache:'no-store',signal:AbortSignal.timeout(12000)});
+       if(!response.ok)throw Error('No se pudo comprobar la versión.');
+       const data=await response.json();
+       if(typeof data.version!=='string'||!/^\d+\.\d+(?:\.\d+)?$/.test(data.version))throw Error('La publicación no indica una versión válida.');
+       setPublished('V'+data.version);
+      })}>Comprobar versión</button>
+     </section>
+     <section className="panel-card"><span className="badge">ESTE NAVEGADOR</span><h2>Caché de actualizaciones</h2>
+      <p>Libera las descargas de versiones guardadas en este equipo.</p>
+      <button className="secondary" disabled={action.busy} onClick={()=>void action.run(async()=>{
+       if(!confirm('¿Eliminar solo la caché de actualizaciones de este navegador?'))return;
+       if(!('caches' in window))throw Error('Este navegador no permite administrar la caché.');
+       const keys=(await caches.keys()).filter(key=>key.startsWith('nexus-update-'));
+       await Promise.all(keys.map(key=>caches.delete(key)));
+       action.setMessage(keys.length?'Caché de actualizaciones liberada.':'No hay descargas de versiones guardadas.');
+      })}>Liberar caché local</button>
+     </section>
+    </div>
+   </div>}
+  </div>
+  <Feedback {...action}/>
+ </>;
+}
+function Dashboard(){
+ const {user,allowed,checking,db,rtdb,sessionAuth}=useDashboardSession();
+ const logout=()=>logoutDashboard(sessionAuth);
+ return <>
+  <header className="dashboard-header"><a href="/dashboard.html" className="dashboard-brand"><img src="/nexus-icon.svg" width="42" height="42" alt=""/><span>Dashboard · Nexus Chat<small>Panel privado</small></span></a>
+   <a className="dashboard-open" href="/">Abrir Nexus <ArrowUpRight size={16}/></a></header>
+  <main>{checking?<section className="panel-card"><h1>Comprobando acceso…</h1></section>:allowed&&user
+   ?<Workspace key={user.uid+sessionAuth.app?.name} user={user} db={db} rtdb={rtdb} onLogout={logout}/>
+   :<Access user={user} onLogout={logout}/>}</main>
+  <footer>Dashboard · Nexus Chat <span>V{version}</span></footer>
+ </>;
+}
+createRoot(document.getElementById('root')!).render(<Dashboard/>);

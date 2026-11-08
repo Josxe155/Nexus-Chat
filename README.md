@@ -96,6 +96,8 @@ En celulares, **Nexus Chat Oficial** aparece en la lista de conversaciones con u
 
 El panel privado [`/dashboard.html`](https://nexus-chat-nc.web.app/dashboard.html) permite publicar y retirar novedades, avisos del servicio y recomendaciones de seguridad. Firestore comprueba que quien publica o retira tenga autorización de administración. Los avisos llegan dentro de Nexus y aparecen en tiempo real mientras la página está abierta.
 
+El **Dashboard · Nexus Chat** organiza el panel en Resumen, Reportes, Avisos, Mantenimiento e Informes. Permite consultar recuentos de actividad y almacenamiento, revisar reportes de mensajes y descargar un informe en Markdown. Para redactarlo, Nexus AI recibe cifras agregadas, fechas y el estado del plan mensual. El informe también se puede preparar directamente a partir de esas cifras.
+
 ## 🧩 Tecnología
 
 | Capa | Tecnología | Función |
