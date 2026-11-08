@@ -4,7 +4,14 @@
 .nexus-maintenance-icon{display:grid;place-items:center;width:64px;height:64px;border:1px solid #376c5e;border-radius:22px;margin:30px 0 16px;background:#244b41;color:#9bf3cf}
 .nexus-maintenance-icon svg{width:29px;height:29px}
 .nexus-maintenance small{color:#9bf3cf;letter-spacing:.13em;font-size:.7rem;font-weight:700}
-.nexus-maintenance h1{font-size:clamp(1.85rem,6vw,3rem);line-height:1.08;letter-spacing:-.035em;margin:10px 0}
+.nexus-maintenance h1{font-size:clamp(1.85rem,6vw,3.1rem);font-weight:800;line-height:1.08;letter-spacing:-.04em;margin:10px 0;text-wrap:balance}
+.nexus-maintenance h1 span{display:block;color:#a2f1cf}
 .nexus-maintenance p{color:#bdcdc9;margin:16px 0 23px}
 .nexus-maintenance button{display:inline-flex;align-items:center;gap:9px;min-height:44px;padding:10px 15px;border-radius:12px;background:#a2f1cf;color:#09231b;font-weight:650;text-align:left}
 .nexus-maintenance button:focus-visible{outline:2px solid white;outline-offset:3px}
+
+.nexus-maintenance button svg{flex:none}
+@media(prefers-reduced-motion:no-preference){
+ .nexus-maintenance-refreshing{animation:nexus-maintenance-spin .65s cubic-bezier(.22,.65,.35,1) both}
+ @keyframes nexus-maintenance-spin{to{transform:rotate(360deg)}}
+}

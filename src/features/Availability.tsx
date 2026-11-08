@@ -31,9 +31,9 @@ export default function Availability({children}:{children:React.ReactNode}){
    <span className="nexus-maintenance-brand"><img src="/nexus-icon.svg" alt="" width="32" height="32"/> Nexus Chat</span>
    <div className="nexus-maintenance-icon"><Wrench aria-hidden="true"/></div>
    <small>PAUSA PROGRAMADA</small>
-   <h1 id="nexus-maintenance-title">Nexus Chat está en mantenimiento</h1>
+   <h1 id="nexus-maintenance-title">Nexus Chat está <span>en mantenimiento</span></h1>
    <p>Estamos preparando mejoras. Vuelve en unos minutos. Esta pantalla se quitará cuando Nexus vuelva a estar disponible.</p>
-   <button type="button" onClick={()=>setAttempt(n=>n+1)}><RefreshCw size={17}/> Comprobar disponibilidad</button>
+   <button type="button" onClick={()=>setAttempt(n=>n+1)}><RefreshCw key={attempt} className={attempt>0?'nexus-maintenance-refreshing':undefined} size={17} aria-hidden="true"/> Comprobar disponibilidad</button>
   </section>
  </main>;
  if(!ready)return <div className="nexus-maintenance nexus-availability-loading" role="status"><img src="/nexus-icon.svg" width="44" height="44" alt="Nexus Chat"/></div>;
