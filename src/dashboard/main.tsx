@@ -70,7 +70,7 @@ function Workspace({user,db,rtdb,onLogout}:{user:User;db:Firestore;rtdb:Database
  const action=useAction();
  const [page,setPage]=useState(currentPage),[snapshot,setSnapshot]=useState<OverviewSnapshot>();
  const [plan,setPlan]=useState<Plan>(),[planError,setPlanError]=useState(''),[retry,setRetry]=useState(0);
- const [preview,setPreview]=useState<Awaited<ReturnType<typeof engine.inspect>>>();
+ const [preview,setPreview]=useState<{counts:Awaited<ReturnType<typeof engine.inspect>>} & ({kind:'estimate';cutoff:number}|{kind:'deleted'})>();
  const [confirmation,setConfirmation]=useState(''),[manualConfirmation,setManualConfirmation]=useState(''),[auto,setAuto]=useState(false),[now,setNow]=useState(Date.now());
  const [online,setOnline]=useState(()=>navigator.onLine),[published,setPublished]=useState('');
  const attempted=useRef<number | undefined>(undefined);
@@ -94,7 +94,7 @@ function Workspace({user,db,rtdb,onLogout}:{user:User;db:Firestore;rtdb:Database
   setPreview(undefined);
   try{
    const result=await engine.executeDue(action.setMessage,manual);
-   setPreview(result);setConfirmation('');setManualConfirmation('');
+   setPreview({kind:'deleted',counts:result});setConfirmation('');setManualConfirmation('');
   }catch(error){setAuto(false);throw error;}
   if(manual){action.setMessage('Limpieza inmediata completada.');return;}
   const latest=await getDoc(planRef).then(s=>s.data()).catch(()=>undefined);
@@ -158,8 +158,8 @@ function Workspace({user,db,rtdb,onLogout}:{user:User;db:Firestore;rtdb:Database
      </div>
      <label className="toggle"><input type="checkbox" checked={auto} disabled={action.busy||!ready||!plan?.enabled||!hasDate} onChange={e=>{attempted.current=undefined;setAuto(e.target.checked);}}/>Ejecutar al llegar la fecha mientras este panel esté abierto</label>
      <p className="notice">La ejecución automática requiere mantener el panel abierto y la sesión iniciada. El aviso a los usuarios se muestra tres días antes.</p>
-     <button className="secondary" disabled={action.busy||!ready} onClick={()=>void action.run(async()=>{setPreview(await engine.inspect(due,false,action.setMessage));action.setMessage('Revisión terminada. No se borraron datos.');})}>Revisar qué se eliminaría</button>
-     {preview&&<div className="result"><h3>Resultado</h3><p>{preview.messages} mensajes · {preview.statuses} estados · {preview.files} archivos · {(preview.bytes/1048576).toFixed(2)} MB</p><small>{preview.protectedFiles} archivos protegidos.</small></div>}
+     <button className="secondary" disabled={action.busy||!ready} onClick={()=>void action.run(async()=>{setPreview(undefined);const counts=await engine.inspect(due,false,action.setMessage);setPreview({kind:'estimate',counts,cutoff:due});action.setMessage('');})}>Revisar qué se eliminaría</button>
+     {preview&&<div className="result" role="status"><h3>{preview.kind==='estimate'?'Vista previa de la limpieza':'Contenido eliminado'}</h3>{preview.kind==='estimate'&&<small>Estimación hasta {dateLabel(preview.cutoff)} · Ecuador</small>}<p>{preview.counts.messages} mensajes · {preview.counts.statuses} estados · {preview.counts.files} archivos · {(preview.counts.bytes/1048576).toFixed(2)} MB</p><small>{preview.counts.protectedFiles} archivos protegidos.</small></div>}
      <div className="danger"><h3>Ejecución manual</h3><p>El borrado es irreversible y está disponible cuando llegue la fecha del plan.</p>
       <label htmlFor="cleanup-confirmation">Escribe BORRAR CONTENIDO</label><input id="cleanup-confirmation" aria-label="Confirmación de limpieza" value={confirmation} onChange={e=>setConfirmation(e.target.value)} autoComplete="off"/>
       <button disabled={action.busy||!ready||!plan?.enabled||!hasDate||leased||due>now||confirmation!=='BORRAR CONTENIDO'} onClick={()=>void run()}>Ejecutar limpieza pendiente</button>

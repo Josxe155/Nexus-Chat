@@ -1,5 +1,16 @@
-.nexus-startup{position:fixed;inset:0;min-height:100dvh;background:#111b21;color:#e9edef;font-family:Inter,Segoe UI,Arial,sans-serif;display:grid;place-items:center;z-index:1000;text-align:center;padding:24px;box-sizing:border-box}.nexus-startup-content{width:min(100%,340px);margin-top:-25px}.nexus-startup-logo{display:block;margin:0 auto 24px;opacity:.9}.nexus-startup h1{font-size:25px;font-weight:500;letter-spacing:-.7px;margin:0 0 34px}.nexus-startup-track{height:3px;width:240px;max-width:100%;background:#26343d;border-radius:6px;overflow:hidden;margin:auto}.nexus-startup-track span{display:block;width:42%;height:100%;background:#a9b8c5;border-radius:6px;animation:nexus-startup-slide 1.6s ease-in-out infinite}.nexus-startup p{font-size:14px;color:#aebac1;margin:22px 0;line-height:1.5}.nexus-startup footer{position:absolute;bottom:max(32px,env(safe-area-inset-bottom));font-size:12px;color:#8696a0}.nexus-startup-recovery{display:grid;gap:18px;justify-items:center;line-height:1.5;color:#aebac1}.nexus-startup-recovery button{border:1px solid #53646f;color:#e9edef;background:transparent;border-radius:22px;padding:10px 20px;font:inherit;cursor:pointer}.nexus-startup-recovery button:focus-visible{outline:2px solid #b8c9d4;outline-offset:4px}@keyframes nexus-startup-slide{0%{transform:translateX(-110%)}50%{transform:translateX(70%)}100%{transform:translateX(250%)}}@media(prefers-reduced-motion:reduce){.nexus-startup-track span{animation:none;width:100%;opacity:.65}}
-
-.nexus-startup-logo{opacity:1;filter:drop-shadow(0 12px 24px #0003)}.nexus-startup h1{font-weight:600;letter-spacing:-.8px}.nexus-startup-track[data-determinate=true] span{animation:none;transform:none;transition:width .16s ease;width:0}.startup-percent{display:block;font-size:13px;letter-spacing:.4px;color:#d8e2e8;margin-top:12px;font-variant-numeric:tabular-nums}.startup-count{display:block;color:#92a4b0;font-size:12px;margin-top:-12px}.nexus-startup-recovery{margin-top:24px}@media(prefers-reduced-motion:reduce){.nexus-startup-track[data-determinate=true] span{transition:none}}
-
-.nexus-startup h1,.nexus-startup p,.nexus-startup small,.nexus-startup strong{font-family:inherit}
+.nexus-startup{position:fixed;inset:0;min-height:100dvh;z-index:1000;display:grid;place-items:center;overflow:auto;padding:24px;box-sizing:border-box;text-align:center;color:#eef3fc;background:radial-gradient(ellipse at 50% 36%,#1d2942 0,#131b2a 42%,#0d131e 78%);font-family:Inter,Segoe UI,Arial,sans-serif}
+.nexus-startup-content{width:min(100%,340px);padding:12px 0 22px}
+.nexus-startup-mark{display:grid;place-items:center;width:92px;height:92px;margin:0 auto 20px;border:1px solid #62779b66;border-radius:28px;background:linear-gradient(145deg,#293a56,#182337);box-shadow:0 12px 32px #070c1577}
+.nexus-startup-logo{display:block;max-width:100%;filter:drop-shadow(0 6px 12px #050b17a0)}
+.nexus-startup h1{margin:0;color:inherit;font:750 clamp(1.75rem,6vw,2.2rem)/1.12 Inter,Segoe UI,Arial,sans-serif;letter-spacing:-.045em}
+.nexus-startup .nexus-startup-caption{margin:10px 0 24px;color:#c3cfe4;font-size:.9rem;line-height:1.55}
+.nexus-startup-track{height:4px;width:min(225px,100%);margin:auto;border-radius:12px;background:#35425b;overflow:hidden}
+.nexus-startup-track span{display:block;width:42%;height:100%;border-radius:inherit;background:linear-gradient(90deg,#7c94db,#b9c8ff);animation:nexus-startup-slide 1.6s ease-in-out infinite}
+.nexus-startup-track[data-determinate=true] span{animation:none;transform:none;transition:width .16s ease}
+.startup-percent{display:block;margin-top:10px;color:#e1e9fc;font-size:.85rem;font-variant-numeric:tabular-nums}
+.startup-count{display:block;margin-top:5px;color:#adbbd4;font-size:.75rem}
+.nexus-startup-recovery{display:grid;gap:12px;justify-items:center;margin-top:22px;color:#c3cfe4;line-height:1.5}
+.nexus-startup-recovery button{min-height:44px;padding:8px 16px;border:1px solid #647699;border-radius:14px;background:#24324b;color:#eef3fc;font:inherit;cursor:pointer}
+.nexus-startup-recovery button:focus-visible{outline:2px solid #c0cdff;outline-offset:4px}
+@keyframes nexus-startup-slide{0%{transform:translateX(-110%)}100%{transform:translateX(250%)}}
+@media(prefers-reduced-motion:reduce){.nexus-startup-track span{animation:none;width:100%;opacity:.75}.nexus-startup-track[data-determinate=true] span{transition:none}}

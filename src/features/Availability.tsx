@@ -2,6 +2,7 @@ import {useEffect,useState} from 'react';
 import {doc,onSnapshot} from 'firebase/firestore';
 import {RefreshCw,Wrench} from 'lucide-react';
 import {db} from '../firebase';
+import StartupScreen from '../components/StartupScreen';
 import './availability.css';
 
 type Mode='online'|'maintenance'|'disabled';
@@ -36,6 +37,6 @@ export default function Availability({children}:{children:React.ReactNode}){
    <button type="button" onClick={()=>setAttempt(n=>n+1)}><RefreshCw key={attempt} className={attempt>0?'nexus-maintenance-refreshing':undefined} size={17} aria-hidden="true"/> Comprobar disponibilidad</button>
   </section>
  </main>;
- if(!ready)return <div className="nexus-maintenance nexus-availability-loading" role="status"><img src="/nexus-icon.svg" width="44" height="44" alt="Nexus Chat"/></div>;
+ if(!ready)return <StartupScreen phase="session"/>;
  return children;
 }
