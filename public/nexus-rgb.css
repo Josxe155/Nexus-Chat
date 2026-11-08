@@ -77,7 +77,7 @@ html[data-nexus-rgb=on][data-motion=off] { --nexus-rgb-animation: none; }
       .auth-card, .permission-review > div, .nexus-notice-card, .release-update-banner,
       .mobile-menu, .inbox-menu, .inbox-reference-menu, .desktop-reference-message-menu, .floating-message-menu,
       .feature-backdrop > .feature-dialog, .nx-web-modal-shade > .nx-web-modal,
-      .attachment-panel, .expression-picker, .mobile-selection-reactions, .desktop-quick-reactions,
+      .attachment-panel, .expression-picker, .phone-expression-sheet, .mobile-selection-reactions, .desktop-quick-reactions,
       .profile-quick-card, .privacy-review-card, .status-card, .community-card,
       .messenger-input-pill, .desktop-reference-composer, .nx-ai-composer,
       .mobile-voice-reference[data-held=false]:not(.nx-ai-composer *),

@@ -1,0 +1,55 @@
+.phone-expression-sheet{
+ --expression-height:min(calc(var(--phone-expression-room,100dvh)*.41),calc(var(--phone-expression-room,100dvh) - 116px));
+ --expression-surface:#15191d;
+ --expression-line:#48535a;
+ --expression-ink:#edf2f4;
+ --expression-muted:#9aa7ae;
+ display:flex;flex:none;flex-direction:column;min-height:0;overflow:hidden;box-sizing:border-box;
+ width:calc(100% + 16px);height:max(0px,var(--expression-height));margin:3px -8px 0;
+ padding-bottom:env(safe-area-inset-bottom,0px);border-radius:29px 29px 0 0;
+ background:var(--expression-surface);color:var(--expression-ink);
+}
+.phone-expression-sheet[data-expanded=true]{--expression-height:min(calc(var(--phone-expression-room,100dvh)*.74),calc(var(--phone-expression-room,100dvh) - 116px))}
+html:root[data-nexus-web=messenger][data-nexus-surface=workspace][data-nexus-mode][data-nexus-palette] .chat-composer:has(.phone-expression-sheet){padding-bottom:0!important}
+html[data-nexus-mode=light] .phone-expression-sheet{--expression-surface:#f4f7f8;--expression-line:#c0cdd2;--expression-ink:#18272e;--expression-muted:#50656e}
+.phone-expression-sheet button{touch-action:manipulation}
+.phone-expression-sheet button:focus-visible,.phone-expression-search:focus-within{outline:2px solid var(--nx-accent,#21c063);outline-offset:-2px}
+.phone-expression-grip{display:grid;place-items:center;height:20px;flex:none;width:100%;touch-action:none!important}
+.phone-expression-grip>span{height:4px;width:32px;border-radius:999px;background:var(--expression-muted)}
+.phone-expression-toolbar{display:grid;grid-template-columns:42px minmax(0,1fr) 42px;align-items:center;gap:8px;flex:none;min-height:37px;margin:0 9px 6px}
+.phone-expression-toolbar>button{display:grid;place-items:center;height:36px;color:var(--expression-ink)}
+.phone-expression-toolbar svg{width:22px;height:22px;stroke-width:2.2}
+.phone-expression-toolbar [role=tablist]{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));width:100%;max-width:230px;justify-self:center;border:1px solid var(--expression-line);border-radius:18px;overflow:hidden}
+.phone-expression-toolbar [role=tab]{display:grid;place-items:center;height:27px;min-height:0;padding:0;color:var(--expression-muted);font-size:11px;letter-spacing:.05em}
+.phone-expression-toolbar [role=tab]+[role=tab]{border-inline-start:1px solid var(--expression-line)}
+.phone-expression-toolbar [role=tab][aria-selected=true]{color:var(--expression-ink);background:color-mix(in srgb,var(--expression-ink) 10%,transparent)}
+.phone-expression-search{display:flex;align-items:center;gap:8px;flex:none;min-height:34px;margin:0 11px 6px;padding:0 10px;border:1px solid var(--expression-line);border-radius:18px}
+.phone-expression-search input{flex:1;min-width:0;background:transparent;color:inherit;border:0;font-size:16px;outline:none}
+.phone-expression-suggestions,.phone-expression-shelves{display:flex;flex:none;align-items:center;overflow:auto;scrollbar-width:none}
+.phone-expression-suggestions{gap:8px;padding:4px 12px 7px}
+.phone-expression-suggestions button{flex:none;white-space:nowrap;padding:5px 9px;border:1px solid var(--expression-line);border-radius:20px;color:var(--expression-muted);font-size:14px}
+.phone-expression-suggestions button[aria-pressed=true]{color:var(--expression-ink);border-color:var(--nx-accent,#21c063)}
+.phone-expression-body{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;scrollbar-width:thin}
+.phone-expression-body p{padding:8px 12px;color:var(--expression-muted);font-size:13px}
+.phone-expression-sheet .emoji-grid{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:2px;padding:2px 5px}
+.phone-expression-sheet .emoji-grid button{font:400 25px/1 'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',NexusEmoji,sans-serif;min-width:0;height:39px;padding:0}
+.phone-expression-sheet :is(.remote-expressions,.saved-sticker-picker){padding:0 4px;overflow:visible}
+.phone-expression-sheet .remote-expression-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;padding:0}
+.phone-expression-sheet[data-tab=gif] .remote-expression-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+.phone-expression-sheet .remote-expression-grid article{position:relative;min-width:0;overflow:hidden}
+.phone-expression-sheet .remote-expression-grid button{display:grid;place-items:center;width:100%;height:auto;min-height:0;aspect-ratio:1;padding:0;border-radius:0;background:transparent;overflow:hidden}
+.phone-expression-sheet[data-tab=gif] .remote-expression-grid button{aspect-ratio:1.6}
+.phone-expression-sheet .remote-expression-grid img{display:block;width:100%;height:100%;min-height:0;object-fit:contain;border-radius:0}
+.phone-expression-sheet[data-tab=gif] .remote-expression-grid img{object-fit:cover}
+.phone-expression-sheet .remote-expression-grid a{position:absolute;right:0;bottom:0;margin:0;padding:0 2px;color:#f3f6f7;background:#000a;font-size:8px}
+.phone-expression-sheet .remote-expression-grid .phone-expression-create{align-content:center;gap:3px;border:1px solid var(--expression-line);border-radius:10px;color:var(--nx-accent,#21c063);font-size:12px;line-height:1;text-align:center}
+.phone-expression-create>span{width:28px;height:28px;display:grid;place-items:center;border-radius:50%;background:var(--nx-accent,#21c063);color:var(--nx-accent-ink,#081d16)}
+.phone-expression-shelves{min-height:42px;gap:7px;padding:2px 4px;background:var(--expression-surface)}
+.phone-expression-shelves button{display:grid;place-items:center;width:40px;height:38px;flex:none;border-radius:9px;color:var(--expression-muted)}
+.phone-expression-shelves svg{width:21px;height:21px}
+.phone-expression-shelves button[aria-pressed=true]{color:var(--expression-ink);background:color-mix(in srgb,var(--expression-ink) 13%,transparent)}
+@media(max-width:359px){.phone-expression-sheet .emoji-grid button{font-size:22px}.phone-expression-sheet .remote-expression-grid{gap:5px}.phone-expression-toolbar{gap:5px}}
+@media(prefers-reduced-motion:no-preference){
+ html:not([data-motion=off]) .phone-expression-sheet{transition:height .24s cubic-bezier(.2,.75,.24,1);animation:phone-expression-enter .2s ease-out}
+ @keyframes phone-expression-enter{from{opacity:0;transform:translateY(10px)}}
+}
