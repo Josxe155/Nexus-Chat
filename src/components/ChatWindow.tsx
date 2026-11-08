@@ -25,6 +25,7 @@ import PinMessageDialog,{messagePinned,setMessagePin,usePinClock,useSharedPins} 
 import {useMobileBack} from '../features/useMobileBack';
 import MediaViewer from '../features/MediaViewer';
 import AttachmentCard from '../features/AttachmentCard';
+import {useExperience} from '../features/DeviceExperience';
 import AppLock from '../features/AppLock';
 import MobileChatOptions from '../features/MobileChatOptions';
 import ChannelDetails from '../features/ChannelDetails';
@@ -153,7 +154,7 @@ export default function ChatWindow({
   useEffect(()=>()=>{if(gesture.current)clearTimeout(gesture.current.timer);},[]);
   useEffect(()=>{const listener=(event:KeyboardEvent)=>{if(event.defaultPrevented)return;if(event.key==='Escape'&&(event.target as HTMLElement)?.closest('[role=dialog],.floating-message-menu'))return;if(event.key==='Escape'){setBackgroundMenu(null);setSelectingMessages(false);setSelectedIds([]);setOpenMessageId(null);setShowContact(false);}if((event.ctrlKey||event.metaKey)&&event.shiftKey&&event.key.toLowerCase()==='f'){event.preventDefault();setIsSearchingMessages(true);}};document.addEventListener('keydown',listener);return()=>document.removeEventListener('keydown',listener);},[]);
   const palette=useInterfacePalette();const bubbleDefault=defaultBubble(palette,theme);
-  const preferences=usePreferences(currentUser.uid);const [manualMedia,setManualMedia]=useState<Record<string,string>>({});
+  const preferences=usePreferences(currentUser.uid),mediaMotion=useExperience().mediaMotion;const [manualMedia,setManualMedia]=useState<Record<string,string>>({});
   const appearance=useAppearance(currentUser.uid,activeChat.id),resolvedMedia=useMediaURLs(messages.filter(message=>!isViewOnceVisual(message)&&!realtime?.media[message.transferId||'']),currentUser.uid);
   const voiceTrack=(message:Message):VoiceTrack=>({key:currentUser.uid+':'+activeChat.id+':'+message.id,uid:currentUser.uid,chatId:activeChat.id,messageId:message.id,src:manualMedia[message.id]||resolvedMedia[message.id]||realtime?.media[message.transferId||'']||(!isPrivateMedia(message.fileUrl)?message.fileUrl||'':''),label:message.senderId===currentUser.uid?currentUser.nombre:users.find(user=>user.uid===message.senderId)?.nombre||'Contacto Nexus',photo:users.find(user=>user.uid===message.senderId)?.foto||(message.senderId===currentUser.uid?currentUser.foto:''),expiresAt:message.expiresAt});
   const followingVoice=(id:string)=>{const after=messages.slice(messages.findIndex(message=>message.id===id)+1),stop=after.findIndex(message=>message.type!=='audio'||!!message.deletedAt||!!isOneTimeMedia(message));return (stop<0?after:after.slice(0,stop)).map(voiceTrack).reduce<VoiceTrack[]>((list,track,index,tracks)=>{if(track.src&&tracks.slice(0,index).every(value=>!!value.src))list.push(track);return list;},[]);};
@@ -628,7 +629,7 @@ export default function ChatWindow({
                         {msg.type==='contact'&&msg.contact&&<button className="shared-contact-card" onClick={()=>onOpenContact?.(msg.contact!.uid)}><UserRound size={30}/><span><strong>{msg.contact.name}</strong><small>@{msg.contact.username}</small><small>Abrir conversación</small></span></button>}
                         {msg.locationShare&&<LiveLocationCard message={msg} uid={currentUser.uid}/>}
                         {msg.type==='poll'&&<PollCard message={msg} userId={currentUser.uid} users={users}/>}
-                        {isViewOnceVisual(msg)&&!isDeleted?<SingleViewMedia key={msg.id} message={msg} uid={currentUser.uid}/>:['image','sticker','video','video-note','document'].includes(msg.type)&&<AttachmentCard message={msg} url={mediaURL} onOpen={()=>{setClipboardMessage(msg);setImageViewer(msg.id);}}/>}
+                        {isViewOnceVisual(msg)&&!isDeleted?<SingleViewMedia key={msg.id} message={msg} uid={currentUser.uid}/>:['image','sticker','video','video-note','document'].includes(msg.type)&&<AttachmentCard message={msg} url={phoneExpressions&&(msg.type==='sticker'&&mediaMotion?.sticker===false||msg.type==='image'&&/\.gif$/i.test(msg.fileName||'')&&mediaMotion?.gif===false)?undefined:mediaURL} onOpen={()=>{setClipboardMessage(msg);setImageViewer(msg.id);}}/>}
                         {!isViewOnceVisual(msg)&&['image','video'].includes(msg.type)&&msg.content&&msg.content!==msg.fileName&&<div className="media-caption"><RichText text={msg.content}/></div>}
                         {msg.type === 'audio'&&(msg.fileName?.startsWith('nota-unica-')?<SingleListenAudio uid={currentUser.uid} chatId={activeChat.id} messageId={msg.id} src={mediaURL||''} sender={msg.senderId===currentUser.uid}/>:desktopWeb&&!msg.voiceNote?<DesktopFileAudio track={voiceTrack(msg)} following={followingVoice(msg.id)}/>:<AudioPlayer src={mediaURL||''} track={voiceTrack(msg)} following={followingVoice(msg.id)}/>)}
                         

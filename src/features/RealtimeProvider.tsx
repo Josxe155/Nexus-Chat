@@ -10,6 +10,7 @@ import CallScreen from './CallScreen';
 import {startDialing,stopDialing,playCallConnected,playCallEnded} from './CallSounds';
 import {queueNotificationEvent} from './push';
 import {getPreferences} from './preferences';
+import {mobileSettingsActive,limitCallBitrate} from './mobileSettingsModel';
 import {devicePreferences} from './DeviceSettings';
 import {uuid} from './uuid';
 import {captureConstraints,acquireCapture} from './DeviceSettings';
@@ -65,7 +66,7 @@ export default function RealtimeProvider({user,users,knownIds,children}:{user:Us
   const audio=mixedAudio.current||localRef.current?.getAudioTracks()[0];const video=screenRef.current?.getVideoTracks()[0]||localRef.current?.getVideoTracks()[0];const outgoing=new MediaStream([audio,video].filter(Boolean) as MediaStreamTrack[]);if(audio)pc.addTrack(audio,outgoing);if(roomRef.current?.mode!=='file'){pc.addTransceiver(video||'video',{direction:'sendrecv',streams:[outgoing]});}
   pc.onicecandidate=event=>{if(event.candidate&&roomRef.current?.id===activeRoom)signal(uid,{kind:'candidate',candidate:event.candidate.toJSON()},activeRoom).catch(fail);};
   pc.ontrack=event=>{if(roomRef.current?.id!==activeRoom)return;event.track.onmute=event.track.onunmute=()=>{if(roomRef.current?.id!==activeRoom)return;if(event.track.kind==='video'&&!event.track.muted){callHadVideo.current=true;updateDoc(doc(db,'users',user.uid,'private','call-'+activeRoom),{mode:'video'}).catch(()=>{});}setRemote(previous=>({...previous,[uid]:new MediaStream(previous[uid]?.getTracks().filter(track=>track.readyState==='live')||[])}));};setRemote(previous=>{const tracks=(previous[uid]?.getTracks()||[]).filter(track=>track.readyState==='live'&&track.id!==event.track.id&&track.kind!==event.track.kind);return {...previous,[uid]:new MediaStream([...tracks,event.track])};});};
-  pc.onconnectionstatechange=()=>{if(roomRef.current?.id!==activeRoom)return;if(pc.connectionState==='connected'&&!connectedOnce.current){connectedOnce.current=true;setConnectedAt(Date.now());setConnecting(false);playCallConnected();if(roomRef.current)logCall(roomRef.current,'connected');}if(pc.connectionState==='failed')stopDialing();};
+  pc.onconnectionstatechange=()=>{if(roomRef.current?.id!==activeRoom)return;if(pc.connectionState==='connected'&&!connectedOnce.current){connectedOnce.current=true;setConnectedAt(Date.now());setConnecting(false);playCallConnected();if(roomRef.current)logCall(roomRef.current,'connected');}if(pc.connectionState==='failed')stopDialing();if(pc.connectionState==='connected'&&mobileSettingsActive()&&getPreferences(user.uid).chat.lessCallData)limitCallBitrate(pc);};
   const restart=async()=>{if(roomRef.current?.id!==activeRoom)return;if(user.uid<uid){if(pc.signalingState!=='stable')return;const offer=await pc.createOffer({iceRestart:true});await pc.setLocalDescription(offer);await signal(uid,{kind:'offer',sdp:{type:offer.type,sdp:offer.sdp}},activeRoom);}else await signal(uid,{kind:'restart'},activeRoom);};
   cleanups.current.push(attachCallRecovery(pc,restart,()=>roomRef.current?.id===activeRoom&&peers.current.get(uid)===pc));
   pc.ondatachannel=event=>wire(event.channel);

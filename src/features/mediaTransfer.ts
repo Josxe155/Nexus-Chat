@@ -2,6 +2,7 @@ import {storeMedia} from './mediaCache';
 import {apiFetch} from './api';
 import {trackTransfer} from './transferUsage';
 import {shouldDownload,usePreferences} from './preferences';
+import {browserConnection} from './mobileSettingsModel';
 import {useEffect,useState} from 'react';
 import {auth} from '../firebase';
 const CHUNK=1024*1024;
@@ -29,8 +30,10 @@ async function resolveMedia(url:string,uid:string){
 export function useMediaURLs(items:{id:string;fileUrl?:string;fileSize?:number;type?:string;voiceNote?:boolean;fileName?:string;force?:boolean}[],uid:string){
  const preferences=usePreferences(uid),[entries,setEntries]=useState<Record<string,{source:string;url:string;uid:string}>>({});
  useEffect(()=>{const clear=()=>setEntries({});window.addEventListener('nexus:cache-cleared',clear);return()=>window.removeEventListener('nexus:cache-cleared',clear);},[]);
+ const [networkRevision,setNetworkRevision]=useState(0);
+ useEffect(()=>{const connection=browserConnection(),refresh=()=>setNetworkRevision(value=>value+1);connection?.addEventListener?.('change',refresh);return()=>connection?.removeEventListener?.('change',refresh);},[]);
  const revision=JSON.stringify(items.map(item=>[item.id,item.fileUrl,item.force,item.type,item.voiceNote,item.fileSize]));
- useEffect(()=>{let alive=true;for(const item of items)if(shouldDownload(item,uid)&&isPrivateMedia(item.fileUrl)&&(item.fileSize||0)<=100*1024**2)resolveMedia(item.fileUrl!,uid).then(url=>{if(alive)setEntries(previous=>({...previous,[item.id]:{source:item.fileUrl!,url,uid}}));}).catch(()=>{});return()=>{alive=false;};},[revision,uid,JSON.stringify(preferences.chat.downloads)]);
+ useEffect(()=>{let alive=true;for(const item of items)if(shouldDownload(item,uid)&&isPrivateMedia(item.fileUrl)&&(item.fileSize||0)<=100*1024**2)resolveMedia(item.fileUrl!,uid).then(url=>{if(alive)setEntries(previous=>({...previous,[item.id]:{source:item.fileUrl!,url,uid}}));}).catch(()=>{});return()=>{alive=false;};},[revision,uid,JSON.stringify(preferences.chat.downloads),JSON.stringify(preferences.chat.networkDownloads),networkRevision]);
  return Object.fromEntries(items.filter(item=>entries[item.id]?.source===item.fileUrl&&entries[item.id]?.uid===uid).map(item=>[item.id,entries[item.id].url]));
 }
 export function safeDownloadURL(value:string){try{const url=new URL(value,location.origin);if(url.protocol==='https:'||url.protocol==='http:'&&url.origin===location.origin||url.protocol==='blob:'&&url.origin===location.origin)return url.href;}catch{}throw Error('La dirección del archivo no es válida.');}

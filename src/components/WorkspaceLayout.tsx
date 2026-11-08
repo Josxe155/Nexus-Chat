@@ -5,6 +5,7 @@ import {pauseVoice} from '../features/voicePlayback';
 import {auth} from '../firebase';import AppLock from '../features/AppLock';
 import {useInterfacePalette} from '../features/InterfacePalette';
 import {applyExperience} from '../features/DeviceExperience';
+import {applyMobileBranding,mobileSettingsQuery} from '../features/mobileSettingsModel';
 import React, {useEffect, useState} from 'react';
 interface Props {theme: 'light' | 'dark'; showChat: boolean; sidebar: React.ReactNode; children: React.ReactNode;}
 export default function WorkspaceLayout({theme,showChat,sidebar,children}: Props) {
@@ -12,6 +13,7 @@ export default function WorkspaceLayout({theme,showChat,sidebar,children}: Props
   useEffect(()=>{if(locked)pauseVoice();},[locked]);
   useEffect(()=>{const element=document.documentElement;element.dataset.nexusSurface='workspace';element.dataset.nexusMode=theme;element.dataset.nexusPalette=palette;return()=>{delete element.dataset.nexusSurface;delete element.dataset.nexusMode;delete element.dataset.nexusPalette;};},[theme,palette]);
   const [viewportHeight, setViewportHeight] = useState<number>();
+  useEffect(()=>{const device=matchMedia(mobileSettingsQuery);applyMobileBranding();device.addEventListener('change',applyMobileBranding);window.addEventListener('storage',applyMobileBranding);return()=>{device.removeEventListener('change',applyMobileBranding);window.removeEventListener('storage',applyMobileBranding);};},[]);
   useEffect(()=>{applyExperience();window.addEventListener('nexus:experience',applyExperience);window.addEventListener('storage',applyExperience);return()=>{window.removeEventListener('nexus:experience',applyExperience);window.removeEventListener('storage',applyExperience);};},[]);
   useEffect(() => {
     const viewport = window.visualViewport;

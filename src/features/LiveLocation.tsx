@@ -16,6 +16,11 @@ export async function startLiveLocation(chat:Chat,uid:string,duration:number){
  session.stop=()=>{if(watch!==undefined)navigator.geolocation.clearWatch(watch);clearTimeout(timer);clearTimeout(expiry);};const expiry=setTimeout(()=>void stopLiveLocation(id).catch(()=>{}),duration);sessions.set(id,session);
  try{await postMessage(chat,uid,'Ubicación en tiempo real','text',{locationShare:{id,expiresAt}});watch=navigator.geolocation.watchPosition(position=>{latest=position;if(timer)return;timer=setTimeout(()=>{timer=undefined;void write();},Math.max(0,15000-(Date.now()-lastWrite)));},()=>{void stopLiveLocation(id).catch(()=>{});},{enableHighAccuracy:true,maximumAge:5000,timeout:20000});changed();return id;}catch(error){await stopLiveLocation(id).catch(()=>{});throw error;}
 }
+export function useActiveLocations(uid:string,enabled=true){
+ const [active,setActive]=useState<Session[]>([]);
+ useEffect(()=>{if(!enabled){setActive([]);return;}const refresh=()=>setActive([...sessions.values()].filter(session=>session.uid===uid&&!session.ended));refresh();window.addEventListener('nexus:live-location',refresh);return()=>window.removeEventListener('nexus:live-location',refresh);},[uid,enabled]);
+ return active;
+}
 export function LiveLocationManager({uid}:{uid:string}){
  const [active,setActive]=useState<Session[]>([]);useEffect(()=>{const refresh=()=>setActive([...sessions.values()].filter(session=>session.uid===uid)),stop=()=>{for(const session of sessions.values())if(session.uid===uid)void stopLiveLocation(session.id).catch(()=>{});};refresh();window.addEventListener('nexus:live-location',refresh);window.addEventListener('pagehide',stop);return()=>{stop();window.removeEventListener('nexus:live-location',refresh);window.removeEventListener('pagehide',stop);};},[uid]);
  if(!active.length)return null;return <aside className="live-location-banner" role="status"><MapPin size={17}/><span>Compartiendo tu ubicación en {active.length} {active.length===1?'chat':'chats'}</span><button onClick={()=>{for(const session of active)void stopLiveLocation(session.id).catch(()=>{});}}>Dejar de compartir</button></aside>;

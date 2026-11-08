@@ -1,3 +1,4 @@
+import {mobileSettingsActive,vibrationPattern} from './mobileSettingsModel';
 import {noticePreview,notificationClientId} from './notificationPreview';
 import {useEffect,useRef,useState} from 'react';
 import {createPortal} from 'react-dom';
@@ -31,6 +32,7 @@ export function IncomingCallNotice({uid,id,name,photo,video,onAccept,onDecline}:
   window.addEventListener('nexus:preferences',show);window.addEventListener('nexus:push-state',show);
   return()=>{live=false;clear();document.removeEventListener('visibilitychange',show);window.removeEventListener('nexus:preferences',show);window.removeEventListener('nexus:push-state',show);};
  },[id,uid,name,video]);
+ useEffect(()=>{if(document.visibilityState==='visible'&&mobileSettingsActive()){const settings=getPreferences(uid).notifications.calls,pattern=vibrationPattern(settings.vibration);if(settings.enabled&&pattern.length)navigator.vibrate?.(pattern);}},[uid,id]);
  const run=async(fn:()=>Promise<void>)=>{if(busy)return;setBusy(true);setError('');try{await fn();}catch(e){setError(e instanceof Error?e.message:'No se pudo responder a la llamada.');setBusy(false);}};
  return <aside className="incoming-call-notice" role="dialog" aria-modal="false" aria-label="Llamada entrante"><small>Nexus Chat · {video?'Videollamada':'Llamada de voz'} entrante</small><div className="incoming-call-person"><img src={urls[id]||avatar(photo)} alt=""/><div><h2>{name}</h2><p>{video?<Video size={17}/>:<Phone size={17}/>}Te está llamando…</p></div></div>{error&&<p role="alert">{error}</p>}<div className="incoming-call-actions"><button disabled={busy} onClick={()=>run(onDecline)}><PhoneOff/>Rechazar</button><button disabled={busy} onClick={()=>run(onAccept)}>{video?<Video/>:<Phone/>}Aceptar</button></div></aside>;
 }

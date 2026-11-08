@@ -1,6 +1,7 @@
 import TemporaryBadge from '../features/TemporaryBadge';
 import OfficialChat,{OfficialBadge,OfficialChatRow,useOfficialChat} from '../features/OfficialChat';
 import {usePhoneExpressions} from '../features/PhoneExpressionSheet';
+import {usePreferences} from '../features/preferences';
 import ProfileQuickView from '../features/ProfileQuickView';
 import {useMobileBack} from '../features/useMobileBack';
 import {StatusProvider,StatusRing,useStatuses} from '../features/StatusExperience';
@@ -67,7 +68,20 @@ function MobileSidebarContent(p:SidebarProps&{desktop?:boolean}){
  const [expiryClock,setExpiryClock]=useState(Date.now());useEffect(()=>{const next=Math.min(...p.chats.map(chat=>chat.lastMessage?.expiresAt||Infinity).filter(time=>time>Date.now()));if(Number.isFinite(next)){const timer=setTimeout(()=>setExpiryClock(Date.now()),Math.min(2147483647,Math.max(1,next-Date.now()+20)));return()=>clearTimeout(timer);}},[p.chats,expiryClock]);
  useEffect(()=>{const update=(event:Event)=>{const next=(event as CustomEvent).detail;if(next?.uid===p.currentUser.uid)p.onUserChange?.(next);};window.addEventListener('nexus:profile-update',update);return()=>window.removeEventListener('nexus:profile-update',update);},[p.currentUser.uid,p.onUserChange]);
  const rt=useRealtime();const uid=p.currentUser.uid;const groupPhotos=useMediaURLs(p.chats.filter(chat=>chat.photoURL).map(chat=>({id:chat.id,fileUrl:chat.photoURL,force:true,fileSize:1})),uid);
- const phone=usePhoneExpressions();
+ const phone=usePhoneExpressions(),chatPreferences=usePreferences(uid).chat;
+ const archivedMessages=useRef(new Map<string,number>()),archiveAccount=useRef(uid);
+ useEffect(()=>{
+  if(archiveAccount.current!==uid){archivedMessages.current.clear();archiveAccount.current=uid;}
+  const previous=archivedMessages.current,next=new Map<string,number>();
+  for(const chat of p.chats){
+   const latest=chat.lastMessage,stamp=latest?.timestamp||0,seen=previous.get(chat.id);
+   next.set(chat.id,Math.max(stamp,seen||0));
+   if(phone&&!desktop&&chatPreferences.keepArchived===false&&chat.kind!=='channel'&&chat.archived?.[uid]&&seen!==undefined&&stamp>seen&&latest?.senderId!==uid&&(chat.unreadCount?.[uid]||0)>0){
+    void setDoc(doc(db,'chats',chat.id),{archived:{[uid]:false}},{merge:true}).catch(()=>setError('No se pudo sacar el chat de Archivados.'));
+   }
+  }
+  archivedMessages.current=next;
+ },[uid,phone,desktop,p.chats,chatPreferences.keepArchived]);
  const official=useOfficialChat(!desktop&&phone,uid,screen==='official');
  const seenThrough=privateDocs.find(item=>item.id==='official-chat')?.seenThrough;
  const officialLatest=official.notices?.[0];

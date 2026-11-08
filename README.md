@@ -72,6 +72,12 @@ Capturas de la aplicación con **datos ficticios de demostración**. No incluyen
 
 Esta distribución es exclusiva de computadora. Nexus Messenger conserva sus pantallas móviles. Se usan los datos reales del chat y del proveedor; no se inventan nombres de paquetes de stickers.
 
+## ⚙️ Ajustes en celular
+
+La vista de celular reúne Apariencia, Privacidad, Chats, Notificaciones, Almacenamiento y datos, Accesibilidad y Ayuda y comentarios en pantallas y diálogos adaptados al ancho del teléfono. Los colores, los iconos de pestaña y el horario de enfoque están disponibles sin suscripción.
+
+Las opciones de descarga usan el perfil de red cuando el navegador lo informa y la regla general en los demás casos. La vibración, el límite de datos de llamadas y el icono de pestaña dependen de las funciones admitidas por el navegador. «Liberar espacio» administra copias de archivos guardadas localmente. El historial permite exportar, archivar, vaciar o quitar conversaciones del historial propio.
+
 ## 📞 Llamadas y avisos en el navegador
 
 Las llamadas directas dan un margen de 18 segundos para que vuelva un participante que se desconecta de la señalización. Si la conexión vuelve, Nexus vuelve a registrar su presencia y reintenta restablecer la comunicación cuando hace falta. El cambio entre cámaras conserva o restaura la anterior si la otra no se puede abrir.
