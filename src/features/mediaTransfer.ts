@@ -7,11 +7,17 @@ import {auth} from '../firebase';
 const CHUNK=1024*1024;
 async function headers(extra:Record<string,string>={}){const token=await auth.currentUser?.getIdToken();if(!token)throw Error('Inicia sesión para compartir archivos.');return {Authorization:'Bearer '+token,...extra};}
 async function result(response:Response){const data=await response.json();if(!response.ok)throw Error(data.error||'No se pudo completar la transferencia.');return data;}
-export async function uploadMedia(file:File,context:{chatId?:string;scope?:'chat'|'status'|'community'|'profile'|'group';referenceId?:string},progress?:(percent:number)=>void){
+export async function uploadMedia(file:File,context:{chatId?:string;scope?:'chat'|'status'|'community'|'profile'|'group';referenceId?:string;viewOnce?:boolean},progress?:(percent:number)=>void){
  const init=await result(await apiFetch('/api/media',{method:'POST',headers:await headers({'Content-Type':'application/json'}),body:JSON.stringify({name:file.name,size:file.size,type:file.type||'application/octet-stream',...context})}));
  try{for(let offset=0,index=0;offset<file.size;offset+=CHUNK,index++){let sent=false;for(let attempt=0;attempt<3&&!sent;attempt++){try{await result(await apiFetch(`/api/media/${init.id}/chunks/${index}`,{method:'PUT',headers:await headers({'Content-Type':'application/octet-stream'}),body:file.slice(offset,offset+CHUNK)}));sent=true;}catch(error){if(attempt===2)throw error;}}trackTransfer(auth.currentUser?.uid||'','sent',Math.min(CHUNK,file.size-offset));progress?.(Math.round(Math.min(file.size,offset+CHUNK)/file.size*100));}return await result(await apiFetch(`/api/media/${init.id}/complete`,{method:'POST',headers:await headers()}));}catch(error){apiFetch(`/api/media/${init.id}`,{method:'DELETE',headers:await headers()}).catch(()=>{});throw error;}
 }
 export function isPrivateMedia(url?:string){return !!url&&/^\/api\/media\/[a-f0-9-]{36}$/.test(url);}
+export async function loadSingleMedia(url:string,signal:AbortSignal){
+ if(!isPrivateMedia(url))throw Error('El archivo no está disponible.');
+ const response=await apiFetch(url,{headers:await headers(),cache:'no-store',signal});
+ if(!response.ok)throw Error('No se pudo cargar el archivo.');
+ return response.blob();
+}
 const cache=new Map<string,string>();
 const pending=new Map<string,Promise<string>>();let cacheGeneration=0;
 async function resolveMedia(url:string,uid:string){

@@ -72,6 +72,12 @@ Capturas de la aplicación con **datos ficticios de demostración**. No incluyen
 
 Esta distribución es exclusiva de computadora. Nexus Messenger conserva sus pantallas móviles. Se usan los datos reales del chat y del proveedor; no se inventan nombres de paquetes de stickers.
 
+## 🔒 Visualización única y mensajes temporales
+
+En Nexus Messenger puedes marcar una foto o un video individual para **visualización única** desde la revisión del archivo. La apertura se registra por cuenta. El archivo queda fuera del visor normal, la galería, el reenvío y la exportación de chats. El navegador todavía permite capturar el contenido mientras se muestra.
+
+Si otra persona quiere conservar un mensaje temporal, Nexus envía una solicitud dentro del chat. La caducidad sigue corriendo hasta que el remitente apruebe. Si rechaza la solicitud o revoca lo que otra persona conservó, queda bloqueada una nueva solicitud para ese mensaje.
+
 ## 📣 Nexus Chat Oficial
 
 En celulares, **Nexus Chat Oficial** aparece en la lista de conversaciones con una insignia propia. El chat es de solo lectura y muestra los últimos 50 avisos. Al abrirlo se guardan en la cuenta los avisos leídos.

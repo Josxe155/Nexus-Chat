@@ -263,7 +263,7 @@ export default function App() {
   const handleSendMessage = async (
     content: string, 
     type: Message['type'], 
-    fileDetails?: { fileUrl: string; fileName: string; fileSize: number; transferId?: string; contact?: {uid:string;name:string;username:string} },
+    fileDetails?: { fileUrl: string; fileName: string; fileSize: number; transferId?: string; viewOnce?: boolean; contact?: {uid:string;name:string;username:string} },
     replyTo?: Message['replyTo']
   ) => {
     if (!currentUser || !activeChatId) return;
