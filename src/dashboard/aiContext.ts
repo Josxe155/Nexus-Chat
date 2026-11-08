@@ -2,7 +2,7 @@ import {collection,doc,getDocFromServer,getDocsFromServer,limit,orderBy,query,st
 import {metricRows,type OverviewSnapshot} from './Overview';
 import {version} from '../webVersion.json';
 
-export const sources=['Actividad','Chats','Ajustes','Reportes','Avisos oficiales','Mantenimiento'] as const;
+export const sources=['Vista general','Actividad','Chats','Personas','Comunidades y canales','Archivos','Llamadas y estados','Ajustes','Reportes','Avisos oficiales','Mantenimiento'] as const;
 export type Source=typeof sources[number];
 export type Person={id:string;label:string};
 export type ChatChoice={id:string;label:string;kind:string};
@@ -48,7 +48,22 @@ export async function readChat(db:Firestore,chat:ChatChoice,person:Person,after?
   next:rows.size>20?page.at(-1):undefined};
 }
 
-export async function readSection(db:Firestore,source:Exclude<Source,'Chats'>,snapshot?:OverviewSnapshot,uid?:string){
+export async function readSection(db:Firestore,source:Exclude<Source,'Chats'>,snapshot?:OverviewSnapshot,uid?:string):Promise<Record<string,unknown>>{
+ if(source==='Vista general'){
+  const sections=['Actividad','Ajustes','Reportes','Avisos oficiales','Mantenimiento'] as const;
+  const results=await Promise.allSettled(sections.map(section=>readSection(db,section,snapshot,uid)));
+  return {fuente:source,alcance:'Resumen combinado del dashboard. Selecciona una sección para revisar sus registros.',secciones:Object.fromEntries(sections.map((section,index)=>{
+   const result=results[index];return [section,result.status==='fulfilled'?result.value:{estado:'Sin datos disponibles'}];
+  }))};
+ }
+ if(source==='Personas'||source==='Comunidades y canales'||source==='Archivos'||source==='Llamadas y estados'){
+  if(!snapshot)throw Error('Espera a que se carguen las estadísticas.');
+  const metrics=snapshot.metrics;
+  if(source==='Personas')return {fuente:source,cuentas:metrics.users,visitantes:metrics.visitors,activasUltimos7Dias:metrics.active};
+  if(source==='Comunidades y canales')return {fuente:source,comunidades:metrics.communities,grupos:metrics.groups,canales:metrics.channels};
+  if(source==='Archivos')return {fuente:source,archivos:metrics.files,bytes:metrics.bytes,tiposDeMensaje:metrics.types};
+  return {fuente:source,llamadas:metrics.calls,salasAbiertas:metrics.activeCalls,estados:metrics.statuses};
+ }
  if(source==='Actividad'){
   if(!snapshot)throw Error('Abre Resumen y espera a que terminen de cargar las cifras.');
   return {fuente:source,lectura:date(snapshot.updatedAt),metricas:Object.fromEntries(metricRows(snapshot.metrics)),dias:snapshot.metrics.days,tipos:snapshot.metrics.types};
