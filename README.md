@@ -72,6 +72,12 @@ Capturas de la aplicación con **datos ficticios de demostración**. No incluyen
 
 Esta distribución es exclusiva de computadora. Nexus Messenger conserva sus pantallas móviles. Se usan los datos reales del chat y del proveedor; no se inventan nombres de paquetes de stickers.
 
+## 📞 Llamadas y avisos en el navegador
+
+Las llamadas directas dan un margen de 18 segundos para que vuelva un participante que se desconecta de la señalización. Si la conexión vuelve, Nexus vuelve a registrar su presencia y reintenta restablecer la comunicación cuando hace falta. El cambio entre cámaras conserva o restaura la anterior si la otra no se puede abrir.
+
+Cuando las vistas previas están desactivadas, los avisos de mensajes usan el nombre de Nexus y un texto genérico. Los avisos de llamada pueden volver a la pestaña que está recibiendo la llamada. Los avisos dependen de los permisos del navegador y de que Nexus siga ejecutándose.
+
 ## 🔒 Visualización única y mensajes temporales
 
 En Nexus Messenger puedes marcar una foto o un video individual para **visualización única** desde la revisión del archivo. La apertura se registra por cuenta. El archivo queda fuera del visor normal, la galería, el reenvío y la exportación de chats. El navegador todavía permite capturar el contenido mientras se muestra.

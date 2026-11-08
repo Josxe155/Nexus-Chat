@@ -1,10 +1,36 @@
+import {noticePreview,notificationClientId} from './notificationPreview';
 import {useEffect,useRef,useState} from 'react';
 import {createPortal} from 'react-dom';
 import {Phone,PhoneOff,Video,Mic,MicOff,GripVertical} from 'lucide-react';
 import {avatar} from './avatar';import {useMediaURLs} from './mediaTransfer';import {getPreferences} from './preferences';import {pushEnabled} from './push';
 export function IncomingCallNotice({uid,id,name,photo,video,onAccept,onDecline}:{uid:string;id:string;name:string;photo?:string;video:boolean;onAccept:()=>Promise<void>;onDecline:()=>Promise<void>}){
  const urls=useMediaURLs([{id,fileUrl:photo,force:true,fileSize:1}],uid),[busy,setBusy]=useState(false),[error,setError]=useState('');
- useEffect(()=>{let notice:Notification|undefined,live=true,registration:ServiceWorkerRegistration|undefined;const tag='nexus-incoming-'+id;const clear=()=>{notice?.close();registration?.getNotifications({tag}).then(items=>items.forEach(item=>item.close())).catch(()=>{});};const show=async()=>{if(document.visibilityState==='visible'){clear();return;}if(!getPreferences(uid).notifications.calls.enabled||!pushEnabled(uid))return;const options={body:video?'Videollamada entrante':'Llamada de voz entrante',icon:'/nexus-icon.svg',tag,requireInteraction:true,silent:true,data:{url:location.origin+'/?call='+encodeURIComponent(id)}};try{registration=await navigator.serviceWorker?.getRegistration();if(!live)return;if(registration)await registration.showNotification(getPreferences(uid).notifications.preview?name:'Nexus Chat',options);else{notice=new Notification(getPreferences(uid).notifications.preview?name:'Nexus Chat',options);notice.onclick=()=>{window.focus();notice?.close();};}if(!live)clear();}catch{}};void show();document.addEventListener('visibilitychange',show);return()=>{live=false;clear();document.removeEventListener('visibilitychange',show);};},[id,uid,name,video]);
+ useEffect(()=>{
+  let notice:Notification|undefined,live=true,registration:ServiceWorkerRegistration|undefined,revision=0;
+  const tag='nexus-incoming-'+id;
+  const clear=()=>{notice?.close();registration?.getNotifications({tag}).then(items=>items.forEach(item=>item.close())).catch(()=>{});};
+  const show=async()=>{
+   const current=++revision,prefs=getPreferences(uid).notifications;
+   const eligible=()=>live&&current===revision&&document.visibilityState==='hidden';
+   if(!eligible()||!prefs.calls.enabled||!pushEnabled(uid)){clear();return;}
+   const type=video?'Videollamada entrante':'Llamada de voz entrante';
+   const preview=noticePreview(name,type,prefs.preview);
+   const options:NotificationOptions={body:prefs.preview?preview.body:type,icon:'/nexus-icon.svg',tag,requireInteraction:true,silent:true};
+   try{
+    registration=await navigator.serviceWorker?.getRegistration();
+    if(!eligible())return;
+    if(registration?.active){
+     const clientId=await notificationClientId(registration.active);
+     if(!eligible())return;
+     await registration.showNotification(preview.title,{...options,data:{url:'/',clientId}});
+    }else{notice=new Notification(preview.title,options);notice.onclick=()=>{window.focus();notice?.close();};}
+    if(!live||document.visibilityState==='visible')clear();
+   }catch{}
+  };
+  void show();document.addEventListener('visibilitychange',show);
+  window.addEventListener('nexus:preferences',show);window.addEventListener('nexus:push-state',show);
+  return()=>{live=false;clear();document.removeEventListener('visibilitychange',show);window.removeEventListener('nexus:preferences',show);window.removeEventListener('nexus:push-state',show);};
+ },[id,uid,name,video]);
  const run=async(fn:()=>Promise<void>)=>{if(busy)return;setBusy(true);setError('');try{await fn();}catch(e){setError(e instanceof Error?e.message:'No se pudo responder a la llamada.');setBusy(false);}};
  return <aside className="incoming-call-notice" role="dialog" aria-modal="false" aria-label="Llamada entrante"><small>Nexus Chat · {video?'Videollamada':'Llamada de voz'} entrante</small><div className="incoming-call-person"><img src={urls[id]||avatar(photo)} alt=""/><div><h2>{name}</h2><p>{video?<Video size={17}/>:<Phone size={17}/>}Te está llamando…</p></div></div>{error&&<p role="alert">{error}</p>}<div className="incoming-call-actions"><button disabled={busy} onClick={()=>run(onDecline)}><PhoneOff/>Rechazar</button><button disabled={busy} onClick={()=>run(onAccept)}>{video?<Video/>:<Phone/>}Aceptar</button></div></aside>;
 }
