@@ -1,6 +1,7 @@
 import type {ReactNode,RefObject} from 'react';
 import {useEffect,useRef,useState} from 'react';
 import {Download,FileText,Sparkles,X} from 'lucide-react';
+import ReportVoice from './ReportVoice';
 import {version} from '../webVersion.json';
 import {metricRows,saveDashboardFile,type OverviewSnapshot} from './Overview';
 
@@ -79,13 +80,13 @@ export default function DashboardReport({snapshot,plan}:{snapshot?:OverviewSnaps
     'Incluye actividad, moderación, almacenamiento y mantenimiento. Usa solo las cifras proporcionadas; null significa sin datos.',
     'No inventes causas, tendencias, registros, personas ni recomendaciones de borrado. Distingue recuentos y datos no disponibles.',
     JSON.stringify(input),
-   ].join('\n')}],request.signal);
+   ].join('\n')}],request.signal,{maxTokens:3000,requireComplete:true});
    request.signal.throwIfAborted();
    setReport({text,source:'ia',at:snapshot.updatedAt});
   }catch{
    if(controller.current===request&&(!request.signal.aborted||request.signal.reason==='timeout')){
     setReport({text:localReport(input),source:'datos',at:snapshot.updatedAt});
-    setMessage('La IA no respondió. Se preparó un informe con las cifras verificadas.');
+    setMessage('No se recibió un informe completo de la IA. Se preparó un informe con las cifras verificadas.');
    }
   }finally{
    clearTimeout(deadline);
@@ -111,6 +112,7 @@ export default function DashboardReport({snapshot,plan}:{snapshot?:OverviewSnaps
      'nexus-informe.html','text/html;charset=utf-8'
     );
    }}><Download size={17}/> Descargar informe</button>
+   {report&&<ReportVoice key={report.text} report={reportElement} disabled={busy}/> }
   </div>
   {message&&<p className="notice" role="status">{message}</p>}
   {report&&<><p className="metrics-updated">{report.source==='ia'?'Informe generado con Nexus AI':'Informe de datos'} · Lectura del {dateLabel(report.at)} (Ecuador)</p><ReportPreview text={report.text} element={reportElement}/></>}
