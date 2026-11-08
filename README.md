@@ -185,6 +185,12 @@ npx firebase-tools deploy --only hosting,firestore:rules,firestore:indexes,datab
 
 El sitio publicado es **[nexus-chat-nc.web.app](https://nexus-chat-nc.web.app/)**. La carpeta generada es `dist/`; sus archivos y las dependencias no se versionan.
 
+### Versión de la web
+
+**Ajustes → Acerca de la web** muestra la versión que está abierta en el navegador y permite buscar actualizaciones. Se define en [src/webVersion.json](src/webVersion.json), y la compilación la incluye en `release.json` junto con su identificador técnico.
+
+La numeración de 2026 empieza en `26.1`. Se contaron 73 versiones distintas publicadas en el canal público de Nexus Chat hasta el 8 de noviembre de 2026, antes de esta entrega `26.74`. Sube el segundo número con cada nueva implementación pública. Usa un tercer número para una corrección de la versión en curso, como `26.74.1`. Los despliegues de prueba quedan fuera.
+
 Consulta el procedimiento completo en [INSTRUCCIONES-FIREBASE-HOSTING.md](docs/INSTRUCCIONES-FIREBASE-HOSTING.md).
 
 ## 🔐 Privacidad y alcance

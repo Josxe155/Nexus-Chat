@@ -4,40 +4,162 @@
  html:root[data-nexus-web=messenger][data-nexus-surface=workspace][data-nexus-mode][data-nexus-palette] .new-chat-fab{background:var(--nx-mobile-accent,#22c56a)!important}
  html[data-emoji-motion=off] :is(.emoji-grid,.phone-expression-toolbar,.message-reaction-summary,.chat-emoji) *{animation:none!important;transition:none!important}
 }
-.mobile-settings,.phone-settings-mask{--ps-bg:#0e1418;--ps-surface:#171e23;--ps-text:#edf2f4;--ps-muted:#a0abb1;--ps-line:#ffffff0d;--ps-accent:var(--nx-mobile-accent,#22c56a);color:var(--ps-text);color-scheme:dark}
+.mobile-settings,.phone-settings-mask{--ps-bg:#0f1418;--ps-surface:#171c21;--ps-text:#edf1f3;--ps-muted:#9aa4aa;--ps-line:#ffffff0c;--ps-accent:var(--nx-mobile-accent,#22c56a);color:var(--ps-text);color-scheme:dark}
 html[data-nexus-mode=light] :is(.mobile-settings,.phone-settings-mask){--ps-bg:#fff;--ps-surface:#f2f5f6;--ps-text:#14212a;--ps-muted:#52636d;--ps-line:#15212a18;color-scheme:light}
-.settings-center.mobile-settings{background:var(--ps-bg)!important;color:var(--ps-text)!important}
+.settings-center.mobile-settings{
+  --setting-muted:var(--ps-muted);
+  --setting-line:var(--ps-line);
+  background:var(--ps-bg)!important;
+  color:var(--ps-text)!important;
+  padding:0;
+  height:100%;
+  font-family:Roboto,system-ui,sans-serif;
+}
 html:root[data-nexus-surface=workspace][data-nexus-mode][data-nexus-palette] :is(.settings-center.mobile-settings,.settings-center.mobile-settings .settings-scroll,.settings-center.mobile-settings .settings-heading){background:var(--ps-bg)!important;color:var(--ps-text)!important}
 html:root[data-nexus-surface=workspace][data-nexus-mode][data-nexus-palette] .mobile-body:has(>.mobile-settings){padding:0!important}
 html:root[data-nexus-surface=workspace][data-nexus-mode][data-nexus-palette] .mobile-settings .phone-setting-row{background:transparent!important;border:0!important;border-radius:0!important}
 html:root[data-nexus-surface=workspace][data-nexus-mode][data-nexus-palette] .mobile-settings .phone-color-grid button:not(:is(.phone-icon-grid button)){background:var(--phone-swatch)!important}
-.settings-center.mobile-settings .settings-heading{background:var(--ps-bg)!important;color:var(--ps-text)!important;min-height:56px;border-bottom:1px solid var(--ps-line);gap:13px;padding:0 12px;box-sizing:border-box}
-.settings-center.mobile-settings .settings-heading h2{font-size:22px;line-height:1.12;font-weight:450;margin:0;min-width:0;overflow-wrap:anywhere}
-.settings-center.mobile-settings .settings-heading button{min-width:40px;min-height:44px;display:grid;place-items:center}
-.settings-center.mobile-settings .settings-scroll{padding:5px 0 max(16px,env(safe-area-inset-bottom))!important;min-height:0;overflow-x:hidden;background:var(--ps-bg)!important}
-.phone-settings-group{padding:6px 0;border-bottom:1px solid var(--ps-line)}
-.phone-setting-row,.phone-setting-toggle{display:flex;align-items:center;text-align:start;gap:16px;width:100%;padding:12px 16px;box-sizing:border-box;color:var(--ps-text);min-height:54px;background:none;border:0;line-height:1.34}
-.phone-setting-toggle{cursor:pointer}
-.phone-setting-row>span,.phone-setting-toggle>span{flex:1;min-width:0;overflow-wrap:anywhere}
-.phone-setting-row strong,.phone-setting-toggle strong{font-size:16px;font-weight:500;display:block}
-.phone-setting-row small,.phone-setting-toggle small,.phone-setting-options small{display:block;color:var(--ps-muted);font-size:13px;line-height:1.4;margin-top:3px}
-.phone-setting-row>svg{color:var(--ps-muted);flex:none}
-.phone-setting-row:active,.phone-settings-text-action:active{background:var(--ps-line)}
-.phone-setting-section-title,.mobile-settings .settings-scroll>h3{color:var(--ps-muted);font-size:13px;line-height:1.4;font-weight:500;margin:0;padding:11px 16px 4px}
-.phone-setting-note{margin:0;padding:10px 16px;color:var(--ps-muted);font-size:14px;line-height:1.55}
-.mobile-settings .phone-setting-toggle input[role=switch],.mobile-settings .setting-toggle input[role=switch]{appearance:none;flex:none;width:47px;height:27px;box-sizing:border-box;padding:0;border:1.5px solid #869198;border-radius:999px;background:#30393f;margin:0;position:relative;cursor:pointer}
+.settings-center.mobile-settings .settings-heading {
+  background:var(--ps-bg)!important;
+  color:var(--ps-text)!important;
+  height:auto;
+  min-height:56px;
+  border-bottom:1px solid var(--ps-line);
+  gap:8px;
+  padding:0 16px 0 8px;
+  box-sizing:border-box;
+}
+.settings-center.mobile-settings .settings-heading h2 {
+  font-size:21px;
+  line-height:1.2;
+  font-weight:400;
+  margin:0;
+  min-width:0;
+  overflow:hidden;
+  white-space:nowrap;
+  text-overflow:ellipsis;
+}
+.settings-center.mobile-settings .settings-heading button {
+  width:40px;
+  height:44px;
+  display:grid;
+  place-items:center;
+  flex:none;
+  background:transparent;
+}
+.settings-center.mobile-settings .settings-scroll {
+  flex:1;
+  min-height:0;
+  max-width:none;
+  margin:0;
+  padding:8px 0 max(14px,env(safe-area-inset-bottom))!important;
+  overflow-x:hidden;
+  background:var(--ps-bg)!important;
+}
+.phone-settings-group { padding:6px 0; border-bottom:1px solid var(--ps-line); }
+.phone-settings-group:last-child { border-bottom:0; }
+.phone-setting-row,.phone-setting-toggle {
+  display:flex;
+  align-items:center;
+  text-align:start;
+  gap:16px;
+  width:100%;
+  padding:10px 16px;
+  box-sizing:border-box;
+  color:var(--ps-text);
+  min-height:52px;
+  background:none;
+  border:0;
+  border-radius:0;
+  line-height:1.28;
+}
+.mobile-settings .settings-scroll .phone-setting-row { margin:0; box-shadow:none; }
+.mobile-settings .phone-setting-toggle { cursor:pointer; }
+.phone-setting-row>span,.phone-setting-toggle>span {
+  flex:1;
+  min-width:0;
+  overflow-wrap:anywhere;
+}
+.phone-setting-row strong,.phone-setting-toggle strong {
+  font-size:16px;
+  font-weight:400;
+  display:block;
+}
+.phone-setting-row small,.phone-setting-toggle small,.phone-setting-options small {
+  display:block;
+  color:var(--ps-muted);
+  font-size:13px;
+  line-height:1.35;
+  margin-top:3px;
+}
+.phone-setting-row>svg,.phone-setting-toggle>svg {
+  width:23px;
+  margin-inline:4px 12px;
+  color:var(--ps-muted);
+  flex:none;
+}
+.phone-setting-row>svg:last-child { width:18px; margin:0; }
+.phone-setting-value { flex:none; }
+.phone-setting-row:active,.phone-settings-text-action:active { background:var(--ps-line); }
+.mobile-settings .settings-scroll .phone-setting-section-title,.mobile-settings .settings-scroll>h3 {
+  color:var(--ps-muted);
+  font-size:13px;
+  line-height:1.4;
+  font-weight:500;
+  margin:0;
+  padding:14px 16px 4px;
+}
+.phone-setting-note,.mobile-settings .settings-scroll>.phone-setting-note {
+  margin:0;
+  padding:12px 16px;
+  color:var(--ps-muted);
+  font-size:14px;
+  line-height:1.45;
+}
+.phone-chat-settings :is(.phone-setting-row,.phone-setting-toggle):not(:has(>svg)),
+.mobile-settings[data-page=storage] :is(.phone-setting-row,.phone-setting-toggle):not(:has(>svg)) {
+  padding-inline-start:71px;
+}
+.phone-notification-settings .phone-settings-group { padding-bottom:8px; }
+.mobile-settings[data-page=appAppearance] .phone-setting-row { min-height:66px; }
+.mobile-settings[data-page=appStyle] .phone-settings-group { margin-top:6px; }
+.mobile-settings[data-page=animation] .phone-setting-toggle { min-height:46px; }
+.mobile-settings[data-page=animation] .phone-setting-note { padding-block:18px 9px; }
+.mobile-settings .settings-scroll>button.phone-inline-link,.phone-inline-link {
+  display:inline;
+  padding:0;
+  border:0;
+  background:none;
+  color:var(--ps-accent);
+  font-weight:600;
+}
+.mobile-settings .settings-scroll :is(.settings-radio,.settings-radios>label) {
+  display:flex;
+  align-items:center;
+  gap:18px;
+  padding:10px 17px;
+  margin:0;
+  min-height:46px;
+  font-size:15px;
+}
+.mobile-settings .settings-scroll .settings-radios { padding:0; }
+.mobile-settings[data-page=audience] .settings-scroll>h3:not(:first-child) {
+  margin-top:12px;
+  border-top:1px solid var(--ps-line);
+}
+.mobile-settings .phone-setting-toggle input[role=switch],.mobile-settings .setting-toggle input[role=switch]{appearance:none;flex:none;width:47px;height:27px;box-sizing:border-box;padding:0;border:1.5px solid #79868c;border-radius:999px;background:#283035;margin:0;position:relative;cursor:pointer}
 .mobile-settings .phone-setting-toggle input[role=switch]::before,.mobile-settings .setting-toggle input[role=switch]::before{content:'';position:absolute;inset:3px auto auto 3px;width:18px;height:18px;border-radius:50%;background:#96a2a8;transform:none}
 .mobile-settings .phone-setting-toggle input[role=switch]:checked,.mobile-settings .setting-toggle input[role=switch]:checked{background:var(--ps-accent);border-color:var(--ps-accent)}
 .mobile-settings .phone-setting-toggle input[role=switch]:checked::before,.mobile-settings .setting-toggle input[role=switch]:checked::before{inset-inline-start:auto;inset-inline-end:3px;background:#142421}
 .mobile-settings .phone-setting-toggle input[role=switch]:checked::after,.mobile-settings .setting-toggle input[role=switch]:checked::after{content:'✓';position:absolute;right:7px;top:2px;color:var(--ps-accent);font-size:13px;font-weight:700;transform:none}
-.mobile-settings :is(.settings-radio,.settings-radios>label,.setting-toggle,.setting-select){padding:12px 16px;color:var(--ps-text);border:0;background:transparent}
+.mobile-settings :is(.setting-toggle,.setting-select){padding:12px 16px;color:var(--ps-text);border:0;background:transparent}
 .mobile-settings .setting-toggle strong{font-weight:500;font-size:16px}
 .mobile-settings .setting-toggle small{color:var(--ps-muted);line-height:1.45}
 .mobile-settings .settings-scroll>p{padding:8px 16px;line-height:1.5}
 .mobile-settings input[type=radio],.phone-settings-dialog input{accent-color:var(--ps-accent)}
 .phone-settings-mask{position:fixed;inset:0;display:grid;place-items:center;background:#0008;z-index:15000;padding:20px;box-sizing:border-box}
-.phone-settings-dialog{background:var(--ps-surface);width:min(100%,382px);border-radius:25px;padding:22px;box-sizing:border-box;max-height:calc(100dvh - 40px);overflow:auto;box-shadow:0 14px 40px #0003}
-.phone-settings-dialog h3{font-size:22px;line-height:1.22;font-weight:520;margin:0 0 15px;color:var(--ps-text)}
+.phone-settings-dialog{background:var(--ps-surface);width:min(100%,382px);border-radius:27px;padding:22px 24px 15px;box-sizing:border-box;max-height:calc(100dvh - 40px);overflow:auto;box-shadow:0 14px 40px #0003}
+.phone-settings-dialog h3{font-size:22px;line-height:1.22;font-weight:450;margin:0 0 15px;color:var(--ps-text)}
 .phone-settings-dialog p{font-size:14px;line-height:1.5;color:var(--ps-muted);margin-bottom:13px}
 .phone-setting-options label{display:flex;align-items:center;gap:15px;min-height:49px;color:var(--ps-text);font-size:15px;cursor:pointer}
 .phone-setting-options input{width:19px;height:19px;flex:none}
@@ -45,24 +167,126 @@ html:root[data-nexus-surface=workspace][data-nexus-mode][data-nexus-palette] .mo
 .phone-settings-dialog button,.phone-settings-text-action{border:0;background:transparent;color:var(--ps-accent);border-radius:999px;font-weight:600;padding:10px 13px;min-height:44px}
 .phone-settings-primary{display:block;border:0;border-radius:999px;background:var(--ps-accent);color:#102019;text-align:center;padding:11px 19px;margin:16px auto;min-width:min(220px,80%);max-width:90%;width:max-content;font-weight:650}
 .phone-settings-primary:disabled,.phone-settings-dialog button:disabled{opacity:.45}
-.phone-color-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));justify-items:center;gap:20px 8px;padding:14px 15px 25px}
+.phone-color-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));justify-items:center;gap:18px 8px;padding:13px 12px 24px}
 .phone-color-grid button{position:relative;display:grid;place-items:center;width:min(58px,100%);aspect-ratio:1;border-radius:50%;border:1px solid var(--ps-line);color:white}
 .phone-color-grid button[aria-pressed=true]{outline:2px solid var(--ps-text);outline-offset:4px}
 .phone-icon-grid button{border-radius:17px}
 .phone-icon-grid img{width:100%;height:100%;object-fit:contain}
 .phone-icon-grid button svg{position:absolute;bottom:-3px;right:-3px;background:#17241d;border-radius:50%;color:var(--ps-accent)}
 .phone-setting-icon-preview,.phone-setting-color-preview{width:24px;height:24px;border-radius:50%;flex:none;object-fit:cover}
-.phone-privacy-card{display:flex;align-items:center;gap:10px;text-align:start;padding:12px;margin:9px 12px;width:calc(100% - 24px);border:0;border-radius:14px;background:color-mix(in srgb,var(--ps-accent) 18%,var(--ps-bg));color:var(--ps-text)}
-.phone-privacy-card span{flex:1;min-width:0}.phone-privacy-card small{display:block;margin-top:3px;color:var(--ps-muted)}.phone-privacy-card svg{color:var(--ps-accent);flex:none}
-.phone-settings-hero{text-align:center;padding:30px 20px 20px}.phone-settings-hero>span{width:84px;height:68px;display:grid;place-items:center;margin:0 auto 23px;border-radius:26px 26px 22px 12px;background:color-mix(in srgb,var(--ps-accent) 22%,var(--ps-surface));color:var(--ps-accent)}
+.phone-privacy-card {
+  display:flex;
+  align-items:flex-start;
+  margin:4px 12px 8px;
+  border-radius:12px;
+  background:#10382d;
+  color:#e8f4ed;
+  padding:0 3px 0 0;
+}
+.phone-privacy-card>button:first-child {
+  display:flex;
+  flex:1;
+  min-width:0;
+  align-items:center;
+  gap:13px;
+  text-align:start;
+  padding:12px 12px;
+  font-weight:400;
+}
+.phone-privacy-card span { flex:1; min-width:0; }
+.mobile-settings .phone-privacy-card small {
+  display:block;
+  margin-top:3px;
+  line-height:1.35;
+  color:#c0d1c8!important;
+}
+.phone-privacy-card svg,.phone-privacy-card b { color:#50d484; flex:none; }
+.phone-privacy-card .phone-privacy-dismiss {
+  color:#c0d1c8;
+  font-size:22px;
+  width:33px;
+  min-height:36px;
+}
+.phone-settings-hero{text-align:center;padding:30px 20px 20px}.phone-settings-hero>span{width:84px;height:68px;display:grid;place-items:center;margin:0 auto 23px;color:var(--ps-accent)}
 .phone-settings-hero h3,.phone-settings-empty h3,.phone-settings-about h3{font-size:22px;font-weight:500;line-height:1.24;color:var(--ps-text);margin:0 0 9px}.phone-settings-hero p,.phone-settings-empty p,.phone-settings-about p{font-size:14px;color:var(--ps-muted);line-height:1.5;margin:0}
 .phone-focus-times{display:grid;grid-template-columns:1fr 1fr;gap:12px}.phone-focus-times label{display:grid;gap:6px;font-size:14px}.phone-focus-times input{min-width:0;color:inherit;background:var(--ps-bg);padding:7px;border:1px solid var(--ps-line);border-radius:9px}
 .phone-usage-totals{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:20px 17px;color:var(--ps-muted)}.phone-usage-totals :is(small,h3){grid-column:1/-1;margin:0}.phone-usage-totals h3{font-size:30px;font-weight:500}.phone-usage-totals strong{color:var(--ps-text)}
 .phone-settings-search{display:flex;align-items:center;gap:8px;border-radius:20px;background:var(--ps-surface);margin:10px 14px;padding:8px 12px;color:var(--ps-muted)}.phone-settings-search input{color:var(--ps-text);background:transparent;border:0;width:100%;min-width:0;font-size:16px}
 .phone-help-article{border-bottom:1px solid var(--ps-line);padding:13px 16px}.phone-help-article summary{display:flex;gap:13px;align-items:center;cursor:pointer}.phone-help-article p{color:var(--ps-muted);line-height:1.55;margin:9px 0 0}.phone-help-feedback{padding:12px 16px}.phone-help-feedback p{color:var(--ps-muted);line-height:1.5}.phone-help-feedback label{display:grid;gap:8px;margin:15px 0}.phone-help-feedback textarea{min-height:115px;border:1px solid var(--ps-muted);border-radius:9px;background:transparent;padding:10px;color:var(--ps-text);font-size:16px}
-.phone-settings-empty,.phone-settings-about{text-align:center;padding:0 20px;min-height:60dvh;display:flex;align-items:center;justify-content:center;flex-direction:column}.phone-settings-about{min-height:calc(100dvh - 80px);background-image:url('/chat-doodles.svg');background-size:300px}.phone-settings-about img{width:72px;height:72px;margin:24px 0}.phone-report{padding:14px 16px;border-bottom:1px solid var(--ps-line);overflow-wrap:anywhere}.phone-report small{display:block;color:var(--ps-muted)}
+.phone-settings-empty {
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  min-height:calc(100dvh - 95px);
+  padding:0 20px;
+  text-align:center;
+}
+.phone-settings-about {
+  --ps-accent:var(--nx-mobile-accent,#21c063);
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  gap:24px;
+  min-height:min(660px,calc(100dvh - 82px));
+  padding:36px 20px 24px;
+  box-sizing:border-box;
+  background:linear-gradient(#111b20b0,#111b20db),url('/chat-doodles.svg') center top/320px;
+  color:#edf1f3;
+}
+.web-about-brand { text-align:center; }
+.settings-center .web-about-brand h3 { color:inherit; margin:0 0 4px; font-size:24px; font-weight:500; }
+.settings-center .web-about-brand p { max-width:28ch; margin:0 auto; color:#b6c5cc!important; }
+.phone-settings-about img { display:block; width:76px; height:76px; margin:24px auto; }
+.phone-settings-about .phone-settings-primary,.phone-help-action .phone-settings-primary {
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+}
+.web-about-links { width:min(100%,420px); margin:0 auto; }
+.web-about-links :is(a,button) {
+  display:flex;
+  align-items:center;
+  gap:14px;
+  width:100%;
+  min-height:48px;
+  text-align:start;
+  color:#e3ecef;
+  border-top:1px solid #ffffff15;
+  font-size:15px;
+}
+.web-about-links svg { flex:none; }
+.phone-help-about { text-align:center; }
+.mobile-settings .phone-help-about .phone-setting-row { width:min(260px,100%); margin:0 auto; }
+.phone-help-brand { text-align:center; padding:21px 14px 4px; }
+.phone-help-brand img { width:58px; height:58px; margin:0 auto 10px; }
+.mobile-settings .settings-scroll .phone-help-brand h3 { color:var(--ps-text); font-size:20px; font-weight:500; margin:0 0 12px; }
+.phone-help-topics .phone-setting-row { min-height:45px; }
+.phone-help-topics .phone-setting-row svg { color:var(--ps-accent); }
+.phone-help-action { display:flex; justify-content:end; padding:5px 16px; }
+.phone-help-action .phone-settings-primary { margin:8px 0; min-width:0; }
+.phone-help-feedback textarea { display:block; width:100%; box-sizing:border-box; }
+.mobile-settings .phone-help-feedback .phone-feedback-file {
+  position:relative;
+  display:grid;
+  place-items:center;
+  width:82px;
+  height:76px;
+  overflow:hidden;
+  border-radius:10px;
+  background:var(--ps-surface);
+}
+.phone-feedback-file input { position:absolute; inset:0; opacity:0; cursor:pointer; }
+.phone-storage-summary { padding:13px 0 12px; }
+.phone-storage-summary p { margin:0 0 10px; color:var(--ps-muted); }
+.phone-storage-summary div { display:flex; justify-content:space-between; gap:12px; }
+.phone-storage-summary span:last-child:not(:first-child) { text-align:right; }
+.phone-storage-summary strong { font-size:21px; font-weight:450; }
+.phone-storage-summary small { display:block; font-size:12px; }
+.phone-report{padding:14px 16px;border-bottom:1px solid var(--ps-line);overflow-wrap:anywhere}.phone-report small{display:block;color:var(--ps-muted)}
 .mobile-settings .storage-data{padding:0 16px}.mobile-settings .settings-scroll>.settings-error,.mobile-settings .settings-scroll>.settings-success{margin:6px 14px}
-.mobile-settings .settings-push{margin:8px 14px;background:var(--ps-surface);border:0;border-radius:14px;padding:13px}
+.mobile-settings .settings-push{margin:0;background:transparent;border:0;border-radius:0;padding:10px 16px}.mobile-settings .settings-push h3{display:none}
 .phone-chat-style{padding:0 12px;min-width:0}
 .phone-chat-style:not([data-section=preview]) .chat-style-preview{display:none}
 .phone-style-actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));padding:10px 0 16px}
@@ -74,3 +298,64 @@ html:root[data-nexus-surface=workspace][data-nexus-mode][data-nexus-palette] .mo
 .phone-chat-style .official-color-grid button{height:auto;width:min(54px,100%);aspect-ratio:1}
 .phone-ai-presets{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin:7px 0 15px}.phone-ai-presets button{border:1px solid var(--ps-line);border-radius:13px;line-height:1.3}.phone-ai-presets+.phone-settings-search{margin:0}
 @media(prefers-reduced-motion:no-preference){html:not([data-motion=off]) .phone-settings-dialog{animation:phone-setting-enter .18s ease-out}@keyframes phone-setting-enter{from{opacity:0;transform:scale(.96)}}}
+
+.mobile-settings .settings-scroll .phone-settings-primary{background:var(--ps-accent);color:#102019;border-radius:999px}
+
+.phone-chat-style .phone-gallery h3 { margin:7px 0 8px; font-size:13px; font-weight:400; }
+.phone-chat-style .phone-gallery .official-style-presets,
+.phone-chat-style .phone-gallery .wallpaper-grid {
+  margin:0 0 14px;
+  grid-auto-columns:28%;
+  padding:2px 2px 5px;
+  scroll-snap-type:x proximity;
+}
+.phone-gallery :is(.official-style-presets,.wallpaper-grid)>button {
+  scroll-snap-align:start;
+  position:relative;
+  overflow:hidden;
+  isolation:isolate;
+}
+.phone-gallery :is(.official-style-presets,.wallpaper-grid)>button>img { width:100%; height:100%; object-fit:cover; }
+.phone-gallery .phone-gallery-check {
+  position:absolute;
+  bottom:9px;
+  left:calc(50% - 10px);
+  padding:3px;
+  width:20px;
+  height:20px;
+  box-sizing:border-box;
+  border-radius:50%;
+  background:#edf1f3;
+  color:#0f1418;
+}
+.phone-chat-style .official-color-grid button[aria-pressed=true] { outline:1px solid var(--ps-text); outline-offset:3px; }
+.phone-chat-style .official-appearance-footer { padding-inline:0; }
+
+.phone-setting-options input {
+  appearance:none;
+  display:grid;
+  place-content:center;
+  box-sizing:border-box;
+  border:1.5px solid var(--ps-muted);
+  border-radius:3px;
+  background:transparent;
+  margin:0 4px 0 0;
+}
+.phone-setting-options input[type=radio] { border-radius:50%; }
+.phone-setting-options input:checked { border-color:var(--ps-accent); }
+.phone-setting-options input[type=radio]:checked::after {
+  content:'';
+  width:9px;
+  height:9px;
+  border-radius:50%;
+  background:var(--ps-accent);
+}
+.phone-setting-options input[type=checkbox]:checked { background:var(--ps-accent); }
+.phone-setting-options input[type=checkbox]:checked::after {
+  content:'';
+  width:8px;
+  height:4px;
+  border:solid #102019;
+  border-width:0 0 2px 2px;
+  transform:translateY(-1px) rotate(-45deg);
+}
