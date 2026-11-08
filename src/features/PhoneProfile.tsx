@@ -20,7 +20,7 @@ export default function PhoneProfile({user, photo, bio, number, busy, error, go,
   const edit = (next: EditField) => {setDraft(next==='name'?user.nombre:user.username);setField(next);};
   return <div className="phone-profile-page">
     <div className="phone-profile-photo">
-      <button type="button" aria-label="Ver foto del perfil" onClick={()=>go('profilePhoto')}><img src={photo} alt="Foto del perfil"/></button>
+      <button type="button" className="phone-profile-image-button" aria-label="Ver foto del perfil" onClick={()=>go('profilePhoto')}><img src={photo} alt="Foto del perfil"/></button>
       <button type="button" className="phone-profile-camera" aria-label="Cambiar foto del perfil" onClick={()=>go('profilePhotoEdit')}><Camera size={22}/></button>
     </div>
     <SettingsRow label="Nombre" detail={user.nombre} icon={User} onClick={()=>edit('name')}/>

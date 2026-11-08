@@ -1,9 +1,12 @@
 .settings-center.mobile-settings { position:relative; }
-html:root[data-nexus-surface=workspace] .settings-center.mobile-settings[data-page=""] .settings-heading {
-  position:absolute;
-  inset:0 0 auto;
-  z-index:2;
-  background:linear-gradient(180deg,#15202832,transparent),url("/chat-doodles.svg") center top/360px,var(--ps-bg)!important;
+html:root[data-nexus-surface=workspace][data-nexus-mode][data-nexus-palette] .settings-center.mobile-settings[data-page=""] {
+  background:linear-gradient(transparent 52px,var(--ps-bg) 182px),
+    url('/chat-doodles.svg') center top/360px no-repeat,var(--ps-bg)!important;
+}
+html:root[data-nexus-surface=workspace][data-nexus-mode][data-nexus-palette] .settings-center.mobile-settings[data-page=""] :is(.settings-heading,.settings-scroll) {
+  background:transparent!important;
+}
+.settings-center.mobile-settings[data-page=""] .settings-heading {
   border:0;
   padding-right:5px;
 }
@@ -18,11 +21,10 @@ html:root[data-nexus-surface=workspace] .settings-center.mobile-settings[data-pa
 }
 .phone-settings-actions button:disabled { opacity:.4; }
 .phone-settings-identity {
-  padding:61px 16px 14px;
+  padding:5px 16px 14px;
   display:flex;
   align-items:center;
   flex-direction:column;
-  background:linear-gradient(180deg,#15202832 0%,var(--ps-bg) 176px),url('/chat-doodles.svg') center top/360px no-repeat;
 }
 .phone-settings-identity .phone-settings-info-bubble {
   z-index:1;
@@ -83,19 +85,35 @@ html:root[data-nexus-surface=workspace] .settings-center.mobile-settings[data-pa
 .phone-profile-page .phone-setting-row { min-height:72px; }
 .phone-profile-photo {
   position:relative;
-  width:min(164px,64vw);
+  width:clamp(132px,41.5vw,164px);
   aspect-ratio:1;
-  margin:23px auto 36px;
+  margin:18px auto 42px;
 }
-.phone-profile-photo img { display:block; width:100%; aspect-ratio:1; object-fit:cover; border-radius:50%; }
+.phone-profile-photo .phone-profile-image-button {
+  display:block;
+  width:100%;
+  height:100%;
+  padding:0;
+  border:0;
+  border-radius:50%;
+  overflow:hidden;
+}
+.phone-profile-image-button img {
+  display:block;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  object-position:center;
+}
 .phone-profile-photo .phone-profile-camera {
   display:grid;
   place-items:center;
   position:absolute;
-  right:0;
-  bottom:0;
-  width:49px;
-  height:49px;
+  inset-inline-end:0;
+  bottom:-2px;
+  width:30%;
+  height:30%;
+  padding:0;
   border-radius:50%;
   background:var(--ps-accent);
   color:#0f241b;
