@@ -46,15 +46,17 @@ function Feedback({busy,message,error}:{busy:boolean;message:string;error:string
  return <>{(busy||message)&&<p className="feedback" role="status">{message||'Procesando…'}</p>}{error&&<p className="feedback error" role="alert">{error}</p>}</>;
 }
 
-function Access({user,onLogout}:{user:User|null;onLogout:()=>Promise<void>}){
+function Access({user,error,retry,onLogout}:{user:User|null;error?:string;retry:()=>void;onLogout:()=>Promise<void>}){
  const [password,setPassword]=useState(''),[email,setEmail]=useState('');
  const action=useAction();
  return <section className="access panel-card"><span className="eyebrow">ACCESO PRIVADO</span><h1>Accede al dashboard</h1>
   <p>Usa una cuenta administradora autorizada de Nexus Chat.</p>
   {user&&<p>Sesión actual: {user.email||'Cuenta de Nexus'}.</p>}
-  <button disabled={action.busy} onClick={()=>void action.run(loginGoogle)}>Continuar con Google</button>
+  {error&&<p className="feedback error" role="alert">{error}</p>}
+  {user&&<button className="secondary" disabled={action.busy} onClick={retry}>Volver a comprobar acceso</button>}
+  <button disabled={action.busy} onClick={()=>void action.run(async()=>{await loginGoogle();retry();})}>Continuar con Google</button>
   <form className="password-access" onSubmit={event=>{
-   event.preventDefault();const value=password;setPassword('');void action.run(()=>loginPassword(email,value));
+   event.preventDefault();const value=password;setPassword('');void action.run(async()=>{await loginPassword(email,value);retry();});
   }}>
    <label>Correo de tu cuenta administradora<input type="email" aria-label="Correo de administración" autoComplete="username" value={email} onChange={e=>setEmail(e.target.value)} required/></label>
    <label>Contraseña alternativa<input type="password" aria-label="Contraseña del panel" autoComplete="current-password" value={password} onChange={e=>setPassword(e.target.value)} required/></label>
@@ -208,14 +210,14 @@ function Workspace({user,db,rtdb,onLogout}:{user:User;db:Firestore;rtdb:Database
  </>;
 }
 function Dashboard(){
- const {user,allowed,checking,db,rtdb,sessionAuth}=useDashboardSession();
+ const {user,allowed,checking,error,retry,db,rtdb,sessionAuth}=useDashboardSession();
  const logout=()=>logoutDashboard(sessionAuth);
  return <>
   <header className="dashboard-header"><a href="/dashboard.html" className="dashboard-brand"><img src="/nexus-icon.svg" width="42" height="42" alt=""/><span>Dashboard · Nexus Chat<small>Panel privado</small></span></a>
    <a className="dashboard-open" href="/">Abrir Nexus <ArrowUpRight size={16}/></a></header>
   <main>{checking?<section className="panel-card"><h1>Comprobando acceso…</h1></section>:allowed&&user
    ?<Workspace key={user.uid+sessionAuth.app?.name} user={user} db={db} rtdb={rtdb} onLogout={logout}/>
-   :<Access user={user} onLogout={logout}/>}</main>
+   :<Access user={user} error={error} retry={retry} onLogout={logout}/>}</main>
   <footer>Dashboard · Nexus Chat <span>v{version}</span></footer>
  </>;
 }

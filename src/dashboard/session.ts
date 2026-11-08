@@ -1,6 +1,6 @@
-import {useEffect,useState} from 'react';
+import {useEffect,useRef,useState} from 'react';
 import {initializeApp,getApps} from 'firebase/app';
-import {getAuth,onAuthStateChanged,signInWithPopup,GoogleAuthProvider,signInWithEmailAndPassword,setPersistence,browserSessionPersistence,browserLocalPersistence,signOut,type User} from 'firebase/auth';
+import {getAuth,onIdTokenChanged,signInWithPopup,GoogleAuthProvider,signInWithEmailAndPassword,setPersistence,browserSessionPersistence,browserLocalPersistence,signOut,type User} from 'firebase/auth';
 import {getFirestore,doc,getDocFromServer,onSnapshot,type Firestore} from 'firebase/firestore';
 import {getDatabase} from 'firebase/database';
 import config from '../../firebase-applet-config.json';
@@ -12,7 +12,7 @@ const secondaryAuth=getAuth(secondaryApp),secondaryDb=getFirestore(secondaryApp)
 export async function verifyDashboardAccess(user:User,db:Firestore,provider?:'google.com'|'password'){
  const token=await user.getIdTokenResult();
  const method=token.signInProvider;
- if(!user.emailVerified||!['google.com','password'].includes(method||'')||(provider&&method!==provider))return false;
+ if(token.claims.email_verified!==true||!['google.com','password'].includes(method||'')||(provider&&method!==provider))return false;
  return (await getDocFromServer(doc(db,'dashboardAdmins',user.uid))).data()?.enabled===true;
 }
 
@@ -34,41 +34,60 @@ export async function loginPassword(email:string,password:string){
  }
 }
 
+type Candidate={user:User|null;allowed:boolean;checking:boolean;failed:boolean};
+const clients=[
+ {sessionAuth:primaryAuth,db:primaryDb,rtdb:primaryRtdb},
+ {sessionAuth:secondaryAuth,db:secondaryDb,rtdb:secondaryRtdb},
+] as const;
+const pending:Candidate={user:null,allowed:false,checking:true,failed:false};
+
 export function useDashboardSession(){
- const [state,setState]=useState({user:null as User|null,allowed:false,checking:true,db:primaryDb,rtdb:primaryRtdb,sessionAuth:primaryAuth});
+ const [candidates,setCandidates]=useState<[Candidate,Candidate]>([pending,pending]);
+ const [attempt,setAttempt]=useState(0);
+ const retry=()=>setAttempt(value=>value+1);
+ const allowedRef=useRef(false);
  useEffect(()=>{
-  let live=true,revision=0;
-  const users:(User|null|undefined)[]=[undefined,undefined];
-  const update=async()=>{
-   if(users.some(u=>u===undefined))return;
-   const version=++revision;
-   setState(s=>({...s,checking:true,allowed:false}));
-   for(const index of [0,1]){
-    const user=users[index],db=index?secondaryDb:primaryDb;
-    if(!user)continue;
-    try{
-     const allowed=await verifyDashboardAccess(user,db,index?'password':'google.com');
-     if(!live||version!==revision)return;
-     if(allowed){
-      setState({user,allowed:true,checking:false,db,rtdb:index?secondaryRtdb:primaryRtdb,sessionAuth:index?secondaryAuth:primaryAuth});
-      return;
-     }
-    }catch{/* Keep private views closed when permission cannot be verified. */}
-   }
-   if(live&&version===revision)setState({user:users[0]||users[1]||null,allowed:false,checking:false,db:primaryDb,rtdb:primaryRtdb,sessionAuth:primaryAuth});
-  };
-  const stops=[onAuthStateChanged(primaryAuth,u=>{users[0]=u;void update();}),onAuthStateChanged(secondaryAuth,u=>{users[1]=u;void update();})];
-  return()=>{live=false;revision++;stops.forEach(stop=>stop());};
- },[]);
- const uid=state.user?.uid;
- useEffect(()=>{
-  if(!state.allowed||!uid)return;
-  const close=()=>setState(current=>current.user?.uid===uid?{...current,allowed:false,checking:false}:current);
-  return onSnapshot(doc(state.db,'dashboardAdmins',uid),{includeMetadataChanges:true},snapshot=>{
-   if(!snapshot.metadata.fromCache&&snapshot.data()?.enabled!==true)close();
-  },close);
- },[state.allowed,state.db,uid]);
- return state;
+  let live=true;
+  const revisions=[0,0];
+  const clearRoleListeners=[()=>{},()=>{}];
+  async function check(index:number,user:User|null){
+   const current=++revisions[index],{db}=clients[index];
+   clearRoleListeners[index]();
+   const update=(result:Candidate)=>{
+    if(!live||revisions[index]!==current)return;
+    setCandidates(previous=>index===0?[result,previous[1]]:[previous[0],result]);
+   };
+   if(!user){update({user:null,allowed:false,checking:false,failed:false});return;}
+   update({user,allowed:false,checking:true,failed:false});
+   let timer:ReturnType<typeof setTimeout>|undefined;
+   try{
+    const allowed=await Promise.race([
+     verifyDashboardAccess(user,db,index===1?'password':undefined),
+     new Promise<never>((_,reject)=>{timer=setTimeout(()=>reject(Error('Tiempo de espera agotado')),12000);}),
+    ]);
+    if(!live||revisions[index]!==current)return;
+    update({user,allowed,checking:false,failed:false});
+    if(allowed)clearRoleListeners[index]=onSnapshot(doc(db,'dashboardAdmins',user.uid),{includeMetadataChanges:true},snapshot=>{
+     if(!snapshot.metadata.fromCache&&snapshot.data()?.enabled!==true)update({user,allowed:false,checking:false,failed:false});
+    },()=>update({user,allowed:false,checking:false,failed:true}));
+   }catch{update({user,allowed:false,checking:false,failed:true});}
+   finally{clearTimeout(timer);}
+  }
+  const stops=clients.map(({sessionAuth},index)=>onIdTokenChanged(sessionAuth,user=>void check(index,user)));
+  const reconnect=()=>{if(!allowedRef.current)clients.forEach(({sessionAuth},index)=>{if(sessionAuth.currentUser)void check(index,sessionAuth.currentUser);});};
+  window.addEventListener('online',reconnect);
+  return()=>{live=false;stops.forEach(stop=>stop());clearRoleListeners.forEach(stop=>stop());window.removeEventListener('online',reconnect);};
+ },[attempt]);
+
+ const selected=candidates.findIndex(value=>value.allowed);
+ const allowed=selected!==-1;
+ allowedRef.current=allowed;
+ const user=allowed?candidates[selected].user:candidates[0].user||candidates[1].user;
+ const checking=!allowed&&(candidates.every(value=>value.checking)||candidates.some(value=>value.checking&&value.user));
+ const error=!checking&&!allowed&&user?(candidates.some(value=>value.failed)
+  ?'No se pudo verificar tu permiso con Firebase. Vuelve a comprobar el acceso.'
+  :'La cuenta de esta sesión no tiene acceso administrativo al dashboard.'):undefined;
+ return {user,allowed,checking,error,retry,...clients[allowed?selected:0]};
 }
 
 export async function logoutDashboard(selected:typeof primaryAuth){
