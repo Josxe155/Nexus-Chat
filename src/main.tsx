@@ -1,4 +1,3 @@
-import TVExperience from './features/TVExperience';
 import ReleaseManager from './features/ReleaseManager';
 import Availability from './features/Availability';
 
@@ -15,7 +14,7 @@ import './messenger.css';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <ErrorBoundary><Availability><TVExperience/><App /><ReleaseManager/></Availability></ErrorBoundary>
+    <ErrorBoundary><Availability><App /><ReleaseManager/></Availability></ErrorBoundary>
   </StrictMode>,
 );
 
@@ -68,7 +67,6 @@ import './features/release-notice.css';
 
 import './layout-audit-polish.css';
 
-import './features/tv-experience.css';
 
 import './features/reaction-notice-polish.css';
 

@@ -4,7 +4,15 @@ service cloud.firestore {
   // Permanent production rules: no global date limit, unmatched paths denied.
   function signedIn(){return request.auth != null && (request.auth.token.get('firebase',{}).get('sign_in_provider','')!='password' || request.auth.token.get('email_verified',false)==true) && !exists(/databases/$(database)/documents/deletedAccounts/$(request.auth.uid));}
   function operator(){return signedIn() && request.auth.token.get('email_verified',false)==true && request.auth.token.get('firebase',{}).get('sign_in_provider','') in ['google.com','password'] && exists(/databases/$(database)/documents/dashboardAdmins/$(request.auth.uid)) && get(/databases/$(database)/documents/dashboardAdmins/$(request.auth.uid)).data.enabled==true;}
-  function cleanupDue(time){return operator() && get(/databases/$(database)/documents/publicConfig/cleanup).data.enabled==true && get(/databases/$(database)/documents/publicConfig/cleanup).data.execution=='browser' && get(/databases/$(database)/documents/publicConfig/cleanup).data.nextDueAt<=request.time.toMillis() && time<get(/databases/$(database)/documents/publicConfig/cleanup).data.nextDueAt;}
+  function cleanupDue(time){
+   let plan=get(/databases/$(database)/documents/publicConfig/cleanup).data;
+   return operator() && plan.execution=='browser' && ((
+     plan.enabled==true && plan.nextDueAt<=request.time.toMillis() && time<plan.nextDueAt
+   ) || (
+     plan.status=='running' && plan.leaseUntil>request.time.toMillis()
+     && plan.get('manualCutoff',0)>0 && plan.manualCutoff<=request.time.toMillis() && time<plan.manualCutoff
+   ));
+  }
   match /officialNotices/{id}{
    allow read: if signedIn();
    allow create: if operator()
@@ -19,9 +27,9 @@ service cloud.firestore {
    let original=get(/databases/$(database)/documents/chats/$(d.chatId)/messages/$(d.messageId)).data;
    return original.senderId==d.targetId && original.senderId!=request.auth.uid
     && original.timestamp>=room(d.chatId).get('historyStartsAt',{}).get(request.auth.uid,0)
-    && original.get('deletedAt',0)==0 && original.get('expiresAt',request.time.toMillis()+1)>request.time.toMillis()
+    && original.get('deletedAt',0) in [0,null] && (original.get('expiresAt',0) in [0,null] || original.expiresAt>request.time.toMillis())
     && !('sealed' in original) && original.content!='🚫 Este mensaje fue eliminado'
-    && d.content==original.content && d.type==original.type && d.fileName==original.get('fileName','');
+    && d.content==original.content && d.type==original.type && d.fileName==(original.get('fileName',null)==null ? '' : original.fileName);
   }
   match /messageReports/{id}{
    allow read: if operator() || (signedIn() && resource.data.reporter==request.auth.uid);
@@ -105,7 +113,7 @@ service cloud.firestore {
   match /nexusIdentities/{uid}{allow get: if signedIn() && request.auth.uid==uid;allow list,write: if false;}
   match /nexusNumbers/{uid}{allow get: if signedIn() && request.auth.uid==uid;allow create: if signedIn() && request.auth.uid==uid && request.resource.data.keys().hasOnly(['country','callingCode','number','numberKey']) && request.resource.data.country is string && request.resource.data.country.size()==2 && request.resource.data.callingCode.matches('[0-9]{1,3}') && request.resource.data.number is string && request.resource.data.number.size()<=40 && request.resource.data.numberKey.matches('[+][1-9][0-9]{6,14}') && getAfter(/databases/$(database)/documents/nexusNumberReservations/$(request.resource.data.numberKey.replace('[+]',''))).data.uid==uid;allow update,delete,list: if false;}
   match /nexusNumberReservations/{number}{allow get: if signedIn();allow create: if signedIn() && number.matches('[1-9][0-9]{6,14}') && request.resource.data.keys().hasOnly(['uid']) && request.resource.data.uid==request.auth.uid && getAfter(/databases/$(database)/documents/nexusNumbers/$(request.auth.uid)).data.numberKey=='+'+number;allow list,update,delete: if false;}
-  match /communityReports/{id}{allow read: if signedIn() && resource.data.reporter==request.auth.uid;allow create,update: if signedIn() && request.resource.data.keys().hasOnly(['reporter','kind','targetId','chatId','reason','at']) && request.resource.data.reporter==request.auth.uid && request.resource.data.kind in ['user','group','channel'] && request.resource.data.reason is string && request.resource.data.reason.size()>0 && request.resource.data.reason.size()<=1000 && request.resource.data.at<=request.time.toMillis()+60000 && member(request.resource.data.chatId) && (request.resource.data.kind=='user' ? request.resource.data.targetId in room(request.resource.data.chatId).participants && request.resource.data.targetId!=request.auth.uid : request.resource.data.targetId==request.resource.data.chatId) && (!exists(/databases/$(database)/documents/communityReports/$(id)) || resource.data.reporter==request.auth.uid);allow delete: if false;}
+  match /communityReports/{id}{allow read: if operator() || (signedIn() && resource.data.reporter==request.auth.uid);allow create,update: if signedIn() && request.resource.data.keys().hasOnly(['reporter','kind','targetId','chatId','reason','at']) && request.resource.data.reporter==request.auth.uid && request.resource.data.kind in ['user','group','channel'] && request.resource.data.reason is string && request.resource.data.reason.size()>0 && request.resource.data.reason.size()<=1000 && request.resource.data.at<=request.time.toMillis()+60000 && member(request.resource.data.chatId) && (request.resource.data.kind=='user' ? request.resource.data.targetId in room(request.resource.data.chatId).participants && request.resource.data.targetId!=request.auth.uid : request.resource.data.targetId==request.resource.data.chatId) && (!exists(/databases/$(database)/documents/communityReports/$(id)) || resource.data.reporter==request.auth.uid);allow delete: if false;}
   function mediaRead(d){return d.owner==request.auth.uid || (d.complete && (d.scope=='chat' ? member(d.chatId) && d.createdAt>=room(d.chatId).get('historyStartsAt',{}).get(request.auth.uid,0) : d.scope=='group' ? member(d.chatId) : d.scope=='profile' ? audienceAllowed(d.owner,'photoAudience','photoExcluded') : d.scope=='status' ? exists(/databases/$(database)/documents/statuses/$(d.referenceId)) && get(/databases/$(database)/documents/statuses/$(d.referenceId)).data.expiresAt>request.time.toMillis() && request.auth.uid in get(/databases/$(database)/documents/statuses/$(d.referenceId)).data.audienceIds : d.scope=='community' && request.auth.uid in get(/databases/$(database)/documents/communities/$(d.referenceId)).data.members));}
   function validSingleMedia(d){
    return d.get('viewOnce',false)==false || (d.viewOnce==true && d.scope=='chat' && d.name.matches('vista-unica-.*') && d.type.matches('(image/(jpeg|png|webp|avif)|video/[-a-z0-9.+]+)') && d.expiresAt is number && d.expiresAt>request.time.toMillis() && d.expiresAt<=request.time.toMillis()+1213260000);
@@ -273,7 +281,13 @@ service cloud.firestore {
     allow delete: if signedIn() && (uid==request.auth.uid || status().owner==request.auth.uid);
    }
   }
-  match /publicConfig/cleanup {allow read: if signedIn();allow create,update: if operator() && request.resource.data.keys().hasOnly(['enabled','execution','firstDueAt','nextDueAt','warningDays','status','leaseUntil','runId','lastCompletedAt','counts']) && request.resource.data.enabled is bool && request.resource.data.execution=='browser' && request.resource.data.nextDueAt is number && request.resource.data.warningDays==3 && request.resource.data.status in ['scheduled','running','error'];allow delete: if false;}
+  match /publicConfig/availability {
+   allow get: if true;
+   allow create,update: if operator()
+    && request.resource.data.keys().hasOnly(['maintenance','updatedAt'])
+    && request.resource.data.maintenance is bool && request.resource.data.updatedAt==request.time;
+  }
+  match /publicConfig/cleanup {allow read: if signedIn();allow create,update: if operator() && request.resource.data.keys().hasOnly(['enabled','execution','firstDueAt','nextDueAt','warningDays','status','leaseUntil','runId','lastCompletedAt','counts','manualCutoff']) && request.resource.data.enabled is bool && request.resource.data.execution=='browser' && request.resource.data.nextDueAt is number && request.resource.data.warningDays==3 && request.resource.data.status in ['scheduled','running','error'] && (!('manualCutoff' in request.resource.data) || (request.resource.data.manualCutoff is number && request.resource.data.manualCutoff>0 && request.resource.data.manualCutoff<=request.time.toMillis() && request.resource.data.status=='running' && request.resource.data.leaseUntil is number && request.resource.data.leaseUntil>request.time.toMillis() && request.resource.data.leaseUntil<=request.time.toMillis()+360000));allow delete: if false;}
   match /{document=**}{allow read,write: if false;}
  }
 }

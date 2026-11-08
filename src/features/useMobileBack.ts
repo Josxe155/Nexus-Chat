@@ -1,5 +1,4 @@
 import {useEffect,useRef} from 'react';
-import {isTVDisplay} from './TVExperience';
 
 // One same-document history entry protects the current mobile screen. Each
 // overlay registers its own close action; the last opened one closes first.
@@ -20,6 +19,6 @@ function install(){if(installed)return;installed=true;window.addEventListener('p
 export function useMobileBack(active:boolean,onBack:()=>void,priority=50){
  const callback=useRef(onBack);callback.current=onBack;
  useEffect(()=>{if(!active)return;install();const key=Symbol(),query=matchMedia('(max-width:1023px), (hover:none) and (max-width:1366px)');
-  const update=()=>{if(query.matches&&!(isTVDisplay()&&innerWidth>=1024)){if(!layers.has(key))layers.set(key,{close:()=>callback.current(),priority});}else layers.delete(key);sync();};
+  const update=()=>{if(query.matches){if(!layers.has(key))layers.set(key,{close:()=>callback.current(),priority});}else layers.delete(key);sync();};
   update();query.addEventListener('change',update);window.addEventListener('nexus:display-mode',update);window.addEventListener('resize',update);return()=>{query.removeEventListener('change',update);window.removeEventListener('nexus:display-mode',update);window.removeEventListener('resize',update);layers.delete(key);sync();};},[active,priority]);
 }

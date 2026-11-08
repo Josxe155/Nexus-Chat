@@ -1,13 +1,14 @@
 import {useEffect,useMemo,useRef,useState} from 'react';
 import {createRoot} from 'react-dom/client';
 import {ArrowUpRight,Bell,CalendarClock,FileText,Flag,LayoutDashboard,LogOut,ShieldCheck,Wifi,WifiOff} from 'lucide-react';
-import {getDoc,onSnapshot,runTransaction,setDoc,type Firestore} from 'firebase/firestore';
+import {deleteField,getDoc,onSnapshot,runTransaction,type Firestore} from 'firebase/firestore';
 import type {Database} from 'firebase/database';
 import type {User} from 'firebase/auth';
 import {version} from '../webVersion.json';
 import DashboardReport from './DashboardReport';
 import MessageReports from './MessageReports';
 import OfficialNotices from './OfficialNotices';
+import MaintenanceMode from './MaintenanceMode';
 import Overview,{type OverviewSnapshot} from './Overview';
 import {useDashboardSession,loginGoogle,loginPassword,logoutDashboard} from './session';
 import {createActions} from './actions';
@@ -70,7 +71,7 @@ function Workspace({user,db,rtdb,onLogout}:{user:User;db:Firestore;rtdb:Database
  const [page,setPage]=useState(currentPage),[snapshot,setSnapshot]=useState<OverviewSnapshot>();
  const [plan,setPlan]=useState<Plan>(),[planError,setPlanError]=useState(''),[retry,setRetry]=useState(0);
  const [preview,setPreview]=useState<Awaited<ReturnType<typeof engine.inspect>>>();
- const [confirmation,setConfirmation]=useState(''),[auto,setAuto]=useState(false),[now,setNow]=useState(Date.now());
+ const [confirmation,setConfirmation]=useState(''),[manualConfirmation,setManualConfirmation]=useState(''),[auto,setAuto]=useState(false),[now,setNow]=useState(Date.now());
  const [online,setOnline]=useState(()=>navigator.onLine),[published,setPublished]=useState('');
  const attempted=useRef<number | undefined>(undefined);
 
@@ -89,12 +90,13 @@ function Workspace({user,db,rtdb,onLogout}:{user:User;db:Firestore;rtdb:Database
  const due=hasDate&&(plan?.enabled||plan!.nextDueAt!>now)?plan!.nextDueAt!:engine.nextMonth(now);
  const leased=plan?.status==='running'&&(plan.leaseUntil??0)>now;
  const ready=!!plan&&!planError;
- const run=()=>action.run(async()=>{
+ const run=(manual=false)=>action.run(async()=>{
   setPreview(undefined);
   try{
-   const result=await engine.executeDue(action.setMessage);
-   setPreview(result);setConfirmation('');
+   const result=await engine.executeDue(action.setMessage,manual);
+   setPreview(result);setConfirmation('');setManualConfirmation('');
   }catch(error){setAuto(false);throw error;}
+  if(manual){action.setMessage('Limpieza inmediata completada.');return;}
   const latest=await getDoc(planRef).then(s=>s.data()).catch(()=>undefined);
   if(!latest||validDate(latest.nextDueAt)&&latest.nextDueAt<=Date.now()){
    setAuto(false);action.setMessage('Limpieza completada. Revisa la próxima fecha antes de continuar.');
@@ -110,7 +112,7 @@ function Workspace({user,db,rtdb,onLogout}:{user:User;db:Firestore;rtdb:Database
   await runTransaction(db,async transaction=>{
    const current=(await transaction.get(planRef)).data();
    if(current?.enabled||Number(current?.leaseUntil)>Date.now())throw Error('El plan ya está activo o en ejecución.');
-   transaction.set(planRef,{enabled:true,execution:'browser',firstDueAt:new Date(due).toISOString(),nextDueAt:due,warningDays:3,status:'scheduled',leaseUntil:0},{merge:true});
+   transaction.set(planRef,{enabled:true,execution:'browser',firstDueAt:new Date(due).toISOString(),nextDueAt:due,warningDays:3,status:'scheduled',leaseUntil:0,manualCutoff:deleteField()},{merge:true});
   });
   action.setMessage('Plan mensual guardado.');
  }
@@ -125,7 +127,7 @@ function Workspace({user,db,rtdb,onLogout}:{user:User;db:Firestore;rtdb:Database
    <section><small><ShieldCheck size={15}/> Cuenta autorizada</small><strong>{user.email||'Cuenta de Nexus'}</strong></section>
    <section><small><CalendarClock size={15}/> Limpieza mensual</small><strong>{!ready?'Sin comprobar':plan.enabled?'Plan activo':'Sin activar'}</strong>
     {ready&&plan.enabled&&hasDate&&<small>{dateLabel(plan.nextDueAt!)} · Ecuador</small>}</section>
-   <section><small><LayoutDashboard size={15}/> Versión de Nexus</small><strong>V{version}</strong></section>
+   <section><small><LayoutDashboard size={15}/> Versión de Nexus</small><strong>v{version}</strong></section>
    <section><small>{online?<Wifi size={15}/>:<WifiOff size={15}/>} Navegador</small><strong>{online?'En línea':'Sin conexión'}</strong></section>
   </div>
   <nav className="dashboard-nav" aria-label="Secciones del dashboard">
@@ -146,8 +148,12 @@ function Workspace({user,db,rtdb,onLogout}:{user:User;db:Firestore;rtdb:Database
       {validDate(plan.lastCompletedAt)&&<small>Última ejecución · {dateLabel(plan.lastCompletedAt)}</small>}</div>}
      <div className="actions">
       <button disabled={action.busy||!ready||plan?.enabled||leased} onClick={()=>void action.run(activate)}>Activar plan mensual</button>
-      <button className="secondary" disabled={action.busy||!ready||!plan?.enabled} onClick={()=>void action.run(async()=>{
-       await setDoc(planRef,{enabled:false},{merge:true});setAuto(false);action.setMessage('Plan pausado.');
+      <button className="secondary" disabled={action.busy||!ready||!plan?.enabled||leased} onClick={()=>void action.run(async()=>{
+       await runTransaction(db,async transaction=>{
+        const current=(await transaction.get(planRef)).data();
+        if(Number(current?.leaseUntil)>Date.now())throw Error('Hay una limpieza en curso.');
+        transaction.update(planRef,{enabled:false,manualCutoff:deleteField()});
+       });setAuto(false);action.setMessage('Plan pausado.');
       })}>Pausar plan</button>
      </div>
      <label className="toggle"><input type="checkbox" checked={auto} disabled={action.busy||!ready||!plan?.enabled||!hasDate} onChange={e=>{attempted.current=undefined;setAuto(e.target.checked);}}/>Ejecutar al llegar la fecha mientras este panel esté abierto</label>
@@ -158,16 +164,24 @@ function Workspace({user,db,rtdb,onLogout}:{user:User;db:Firestore;rtdb:Database
       <label htmlFor="cleanup-confirmation">Escribe BORRAR CONTENIDO</label><input id="cleanup-confirmation" aria-label="Confirmación de limpieza" value={confirmation} onChange={e=>setConfirmation(e.target.value)} autoComplete="off"/>
       <button disabled={action.busy||!ready||!plan?.enabled||!hasDate||leased||due>now||confirmation!=='BORRAR CONTENIDO'} onClick={()=>void run()}>Ejecutar limpieza pendiente</button>
      </div>
+     <div className="danger"><h3>Ejecutar ahora</h3><p>Borra los mensajes, estados y archivos elegibles existentes hasta el momento de iniciar. Conserva perfiles, contactos, grupos y la fecha del plan mensual.</p>
+      <label htmlFor="cleanup-now-confirmation">Escribe LIMPIAR AHORA</label>
+      <input id="cleanup-now-confirmation" value={manualConfirmation} onChange={e=>setManualConfirmation(e.target.value)} autoComplete="off"/>
+      <button type="button" disabled={action.busy||!ready||leased||manualConfirmation!=='LIMPIAR AHORA'} onClick={()=>{
+       if(confirm('¿Ejecutar la limpieza inmediata? El contenido eliminado no se puede recuperar.')){setAuto(false);void run(true);}
+      }}>Ejecutar limpieza ahora</button>
+     </div>
     </section>
     <div className="side">
-     <section className="panel-card"><span className="badge">PUBLICACIÓN</span><h2>Versión de Nexus</h2><strong className="version-value">V{version}</strong>
+     <MaintenanceMode db={db}/>
+     <section className="panel-card"><span className="badge">PUBLICACIÓN</span><h2>Versión de Nexus</h2><strong className="version-value">v{version}</strong>
       {published&&<p role="status">La web pública sirve {published}.</p>}
       <button className="secondary" disabled={action.busy} onClick={()=>void action.run(async()=>{
        const response=await fetch('/release.json',{cache:'no-store',signal:AbortSignal.timeout(12000)});
        if(!response.ok)throw Error('No se pudo comprobar la versión.');
        const data=await response.json();
        if(typeof data.version!=='string'||!/^\d+\.\d+(?:\.\d+)?$/.test(data.version))throw Error('La publicación no indica una versión válida.');
-       setPublished('V'+data.version);
+       setPublished('v'+data.version);
       })}>Comprobar versión</button>
      </section>
      <section className="panel-card"><span className="badge">ESTE NAVEGADOR</span><h2>Caché de actualizaciones</h2>
@@ -195,7 +209,7 @@ function Dashboard(){
   <main>{checking?<section className="panel-card"><h1>Comprobando acceso…</h1></section>:allowed&&user
    ?<Workspace key={user.uid+sessionAuth.app?.name} user={user} db={db} rtdb={rtdb} onLogout={logout}/>
    :<Access user={user} onLogout={logout}/>}</main>
-  <footer>Dashboard · Nexus Chat <span>V{version}</span></footer>
+  <footer>Dashboard · Nexus Chat <span>v{version}</span></footer>
  </>;
 }
 createRoot(document.getElementById('root')!).render(<Dashboard/>);

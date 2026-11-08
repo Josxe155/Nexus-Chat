@@ -82,11 +82,11 @@ function MobileSidebarContent(p:SidebarProps&{desktop?:boolean}){
   }
   archivedMessages.current=next;
  },[uid,phone,desktop,p.chats,chatPreferences.keepArchived]);
- const official=useOfficialChat(!desktop&&phone,uid,screen==='official');
+ const official=useOfficialChat(!!uid,uid,screen==='official');
  const seenThrough=privateDocs.find(item=>item.id==='official-chat')?.seenThrough;
  const officialLatest=official.notices?.[0];
  const officialUnread=official.notices?.filter(notice=>!(seenThrough instanceof Timestamp)||notice.publishedAt>seenThrough).length||0;
- const showOfficial=!desktop&&phone&&screen==='chats'&&!selectingChats&&(filter==='all'||(filter==='unread'&&officialUnread>0))&&('nexus chat oficial '+(officialLatest?.title||'')).toLowerCase().includes(search.trim().toLowerCase());
+ const showOfficial=screen==='chats'&&!selectingChats&&(filter==='all'||(filter==='unread'&&officialUnread>0))&&('nexus chat oficial '+(officialLatest?.title||'')).toLowerCase().includes(search.trim().toLowerCase());
  useEffect(()=>onSnapshot(collection(db,'users',uid,'private'),s=>setPrivateDocs(s.docs.map(d=>({id:d.id,...d.data()}))),()=>{}),[uid]);
  const perform=async(fn:()=>Promise<void>)=>{setError('');setBusy(true);try{await fn();}catch(e){setError(e instanceof Error?e.message:'No se pudo completar la acción.');}finally{setBusy(false);}};
  useMobileBack(!desktop&&(screen!=='chats'||!!hub),()=>{setScreen('chats');setHub(null);setNav('chats');},10);

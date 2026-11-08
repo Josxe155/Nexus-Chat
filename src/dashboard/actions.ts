@@ -17,7 +17,53 @@ async function inspect(cutoff:number,execute=false,onProgress=(text:string)=>{},
  let fileCursor;for(;;){await heartbeat();let q=query(collection(db,'mediaFiles'),where('createdAt','<',cutoff),orderBy('createdAt'),limit(100));if(fileCursor)q=query(q,startAfter(fileCursor));const rows=await getDocs(q);if(rows.empty)break;for(const file of rows.docs){const data=file.data();if(!['chat','status'].includes(data.scope)||protectedIds.has(file.id)){counts.protectedFiles++;continue;}counts.files++;counts.bytes+=Number(data.size)||0;if(execute){await heartbeat();await remove(ref(rtdb,'clientMedia/'+file.id));const batch=writeBatch(db);batch.delete(file.ref);await batch.commit();}onProgress(counts.files+' archivos revisados');}fileCursor=rows.docs.at(-1);if(rows.size<100)break;}
  return counts;
 }
-async function executeDue(onProgress:(text:string)=>void){const runId=crypto.randomUUID();const cutoff=await runTransaction(db,async tx=>{const s=await tx.get(planRef),p=s.data();if(!Number.isFinite(p?.nextDueAt)||p.nextDueAt<=0)throw Error('El plan no tiene una fecha de limpieza válida.');if(!p?.enabled||p.execution!=='browser'||p.nextDueAt>Date.now())throw Error('La fecha de limpieza todavía no ha llegado.');if(p.leaseUntil>Date.now())throw Error('Hay una limpieza en curso en otra pestaña.');tx.update(planRef,{runId,status:'running',leaseUntil:Date.now()+300000});return p.nextDueAt as number;});let renewed=Date.now();const heartbeat=async()=>{await runTransaction(db,async tx=>{const s=await tx.get(planRef),p=s.data();if(p?.runId!==runId)throw Error('Otra pestaña retomó la limpieza.');if(!p.enabled||p.execution!=='browser')throw Error('El plan se ha pausado. La limpieza se detuvo antes del siguiente lote.');if(p.nextDueAt!==cutoff)throw Error('La fecha del plan cambió. Se detuvo la limpieza del ciclo anterior.');if(Date.now()-renewed>=60000){tx.update(planRef,{leaseUntil:Date.now()+300000});renewed=Date.now();}});};try{const counts=await inspect(cutoff,true,onProgress,heartbeat);await runTransaction(db,async tx=>{const s=await tx.get(planRef),p=s.data();if(p?.runId!==runId)throw Error('La tarea fue retomada en otra pestaña.');if(!p.enabled||p.execution!=='browser'||p.nextDueAt!==cutoff)throw Error('El plan cambió. Se detuvo la limpieza del ciclo anterior.');tx.update(planRef,{status:'scheduled',nextDueAt:nextMonth(cutoff),lastCompletedAt:Date.now(),leaseUntil:0,counts});});return counts;}catch(error){await runTransaction(db,async tx=>{const s=await tx.get(planRef);if(s.data()?.runId===runId&&s.data()?.nextDueAt===cutoff&&s.data()?.execution==='browser')tx.update(planRef,{status:'error',leaseUntil:0});}).catch(()=>{});throw error;}}
+async function executeDue(onProgress:(text:string)=>void,manual=false){
+ const runId=crypto.randomUUID();
+ const cutoff=await runTransaction(db,async tx=>{
+  const snapshot=await tx.get(planRef),plan=snapshot.data(),now=Date.now();
+  if(plan?.leaseUntil>now)throw Error('Hay una limpieza en curso en otra pestaña.');
+  const valid=Number.isFinite(plan?.nextDueAt)&&plan.nextDueAt>0;
+  if(!manual&&(!valid||!plan?.enabled||plan.execution!=='browser'||plan.nextDueAt>now))
+   throw Error('La fecha de limpieza todavía no ha llegado.');
+  const lease={runId,status:'running',leaseUntil:now+300000};
+  if(manual){
+   const schedule=valid?plan.nextDueAt:nextMonth(now);
+   tx.set(planRef,{
+    ...lease,enabled:valid&&plan.enabled===true,execution:'browser',warningDays:3,nextDueAt:schedule,manualCutoff:now,
+   },{merge:true});
+  }else{
+   tx.update(planRef,{...lease,manualCutoff:deleteField()});
+  }
+  return manual?now:plan!.nextDueAt as number;
+ });
+ function verify(plan:Record<string,any>|undefined){
+  if(plan?.runId!==runId||plan.execution!=='browser'||plan.status!=='running')throw Error('La limpieza ya no está asignada a esta pestaña.');
+  if(manual?plan.manualCutoff!==cutoff:!plan.enabled||plan.nextDueAt!==cutoff)
+   throw Error('La configuración cambió. La limpieza se detuvo antes del siguiente lote.');
+ }
+ let renewed=Date.now();
+ const heartbeat=async()=>{
+  await runTransaction(db,async tx=>{
+   verify((await tx.get(planRef)).data());
+   if(Date.now()-renewed>=60000)tx.update(planRef,{leaseUntil:Date.now()+300000});
+  });
+  if(Date.now()-renewed>=60000)renewed=Date.now();
+ };
+ try{
+  const counts=await inspect(cutoff,true,onProgress,heartbeat);
+  await runTransaction(db,async tx=>{
+   verify((await tx.get(planRef)).data());
+   tx.update(planRef,{status:'scheduled',lastCompletedAt:Date.now(),leaseUntil:0,counts,manualCutoff:deleteField(),...(!manual&&{nextDueAt:nextMonth(cutoff)})});
+  });
+  return counts;
+ }catch(error){
+  await runTransaction(db,async tx=>{
+   const plan=(await tx.get(planRef)).data();
+   if(plan?.runId===runId)tx.update(planRef,{status:'error',leaseUntil:0,manualCutoff:deleteField()});
+  }).catch(()=>{});
+  throw error;
+ }
+}
 
 return {planRef,nextMonth,inspect,executeDue};}
 export const {planRef,nextMonth,inspect,executeDue}=createActions({db:defaultDb,rtdb:defaultRtdb});

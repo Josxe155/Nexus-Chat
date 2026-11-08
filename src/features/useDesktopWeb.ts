@@ -1,5 +1,4 @@
 import {useEffect,useState} from 'react';
-import {isTVDisplay} from './TVExperience';
 const query='(min-width:1024px) and (hover:hover) and (pointer:fine)';
-const matches=()=>isTVDisplay()?window.innerWidth>=1024:window.matchMedia(query).matches&&!/Android|iPad|Tablet/i.test(navigator.userAgent)&&!(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+const matches=()=>window.matchMedia(query).matches&&!/Android|iPad|Tablet/i.test(navigator.userAgent)&&!(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
 export function useDesktopWeb(){const [desktop,setDesktop]=useState(matches);useEffect(()=>{const media=matchMedia(query),update=()=>{const value=matches();setDesktop(value);document.documentElement.dataset.nexusWeb=value?'desktop':'messenger';};update();media.addEventListener('change',update);window.addEventListener('nexus:display-mode',update);window.addEventListener('storage',update);window.addEventListener('resize',update);return()=>{media.removeEventListener('change',update);window.removeEventListener('nexus:display-mode',update);window.removeEventListener('storage',update);window.removeEventListener('resize',update);};},[]);return desktop;}

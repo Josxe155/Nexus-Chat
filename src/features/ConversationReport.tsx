@@ -5,7 +5,7 @@ import {blockContact} from './privacy';
 import {useMobileBack} from './useMobileBack';
 
 export function MessageReport({chatId,message,user,name,onClose}:{chatId:string;message:Message;user:UserProfile;name:string;onClose:()=>void}){
- const [block,setBlock]=useState(false),[busy,setBusy]=useState(false),[sent,setSent]=useState(false),[error,setError]=useState('');
+ const [complete,setComplete]=useState(false),[block,setBlock]=useState(false),[busy,setBusy]=useState(false),[sent,setSent]=useState(false),[error,setError]=useState('');
  const close=()=>{if(!busy)onClose();};
  useMobileBack(true,close,85);
  const submit=async(event:React.FormEvent)=>{
@@ -26,20 +26,21 @@ export function MessageReport({chatId,message,user,name,onClose}:{chatId:string;
     setSent(true);
    }
    if(block)await blockContact(user.uid,message.senderId);
-   onClose();
+   setComplete(true);
   }catch(cause){
-   setError(recorded?'El reporte se envió. Puedes volver a intentar el bloqueo.':cause instanceof Error?cause.message:'No se pudo enviar el reporte.');
+   setError(recorded?'El reporte se envió. Puedes volver a intentar el bloqueo.':cause&&typeof cause==='object'&&'code' in cause&&cause.code==='permission-denied'?'Nexus no pudo verificar este mensaje para reportarlo.':cause instanceof Error?cause.message:'No se pudo enviar el reporte.');
   }finally{setBusy(false);}
  };
  return <div className="feature-backdrop"><form className="feature-dialog conversation-tool message-report" role="dialog" aria-modal="true" aria-labelledby="message-report-title" onSubmit={submit}>
   <h2 id="message-report-title">Reporta a Nexus Chat</h2>
+  {complete?<><p role="status">El reporte se envió a Nexus Chat.</p><button type="button" onClick={close}>Listo</button></>:<>
   <p>Se enviará este mensaje a Nexus Chat. {name} no recibirá una notificación si lo reportas o bloqueas.</p>
   <label className="message-report-block">
    <input type="checkbox" checked={block} disabled={busy||sent} onChange={event=>setBlock(event.target.checked)}/>
    <span><strong>Bloquear a {name}</strong><small>Este usuario no podrá llamarte ni enviarte mensajes directos.</small></span>
   </label>
   {error&&<p role="alert">{error}</p>}
-  <div className="feature-actions"><button type="button" disabled={busy} onClick={close}>Cancelar</button><button type="submit" disabled={busy}>{sent?'Reintentar bloqueo':'Reportar'}</button></div>
+  <div className="feature-actions"><button type="button" disabled={busy} onClick={close}>Cancelar</button><button type="submit" disabled={busy}>{sent?'Reintentar bloqueo':'Reportar'}</button></div></>}
  </form></div>;
 }
 export default function ConversationReport({chat,user,onClose}:{chat:Chat;user:UserProfile;messages:Message[];onClose:()=>void}){

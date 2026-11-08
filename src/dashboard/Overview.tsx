@@ -1,7 +1,8 @@
 import {useEffect,useRef,useState} from 'react';
 import {collection,getCountFromServer,getDocs,query,where,orderBy,limit,startAfter,Timestamp,type Firestore,type QueryDocumentSnapshot} from 'firebase/firestore';
 import {get,ref,type Database} from 'firebase/database';
-import {Activity,CheckCheck,Download,Flag,HardDrive,Layers,MessageCircle,Phone,RefreshCw,Users,X} from 'lucide-react';
+import {Activity,ArrowUpRight,CheckCheck,Download,Flag,HardDrive,Layers,MessageCircle,Phone,RefreshCw,Users,X} from 'lucide-react';
+import MetricDetails,{isDelivered,type DetailKey} from './MetricDetails';
 
 type Metrics={
  users:number|null;visitors:number|null;active:number|null;messages:number|null;delivered:number|null;
@@ -9,8 +10,10 @@ type Metrics={
  groups:number|null;channels:number|null;communities:number|null;statuses:number|null;notices:number|null;reports:number|null;
  days:{label:string;count:number}[];types:Record<string,number>;
 };
-export type OverviewSnapshot={metrics:Metrics;updatedAt:number};
+export type OverviewSnapshot={metrics:Metrics;updatedAt:number;asOf:number};
 const formatDay=new Intl.DateTimeFormat('en-CA',{timeZone:'America/Guayaquil',year:'numeric',month:'2-digit',day:'2-digit'});
+const axis=new Intl.DateTimeFormat('es-EC',{timeZone:'UTC',day:'numeric',month:'short'});
+const dayLabel=(day:string)=>axis.format(new Date(day+'T12:00:00Z'));
 const number=new Intl.NumberFormat('es-EC');
 const numberLabel=(value:number|null)=>value===null?'—':number.format(value);
 const typeLabels:Record<string,string>={text:'Texto',image:'Imágenes',audio:'Audio',video:'Video',document:'Documentos',other:'Otros'};
@@ -38,9 +41,9 @@ export function saveDashboardFile(contents:string,name:string,type:string){
  setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
 
-export async function loadOverview(db:Firestore,rtdb:Database,signal:AbortSignal,onProgress:(text:string)=>void):Promise<Metrics>{
+export async function loadOverview(db:Firestore,rtdb:Database,signal:AbortSignal,onProgress:(text:string)=>void,now=Date.now()):Promise<Metrics>{
  checkAbort(signal);
- const now=Date.now(),count=async(name:string)=> (await getCountFromServer(collection(db,name))).data().count;
+ const count=async(name:string)=> (await getCountFromServer(collection(db,name))).data().count;
  const attempts=await Promise.allSettled([
   count('users'),count('dashboardVisits'),getCountFromServer(query(collection(db,'dashboardVisits'),where('lastVisitAt','>=',Timestamp.fromMillis(now-7*86400000)))).then(r=>r.data().count),
   count('communities'),count('statuses'),count('officialNotices'),count('messageReports'),
@@ -74,7 +77,7 @@ export async function loadOverview(db:Firestore,rtdb:Database,signal:AbortSignal
      const data=document.data();
      if(data.deletedAt)continue;
      messages++;
-     if(Array.isArray(participants)&&participants.some((id:string)=>id!==data.senderId&&(data.receivedBy?.[id]||data.readBy?.[id])))delivered++;
+     if(isDelivered(data,participants))delivered++;
      const bucket=typeof data.timestamp==='number'&&Math.abs(data.timestamp)<=8.64e15?buckets.get(formatDay.format(data.timestamp)):undefined;
      if(bucket)bucket.count++;
      const kind=Object.hasOwn(types,data.type)?data.type as keyof typeof types:'other';
@@ -128,23 +131,27 @@ export default function Overview({db,rtdb,onData}:{db:Firestore;rtdb:Database;on
  const [snapshot,setSnapshot]=useState<OverviewSnapshot>(),[busy,setBusy]=useState(false),[error,setError]=useState('');
  const [status,setStatus]=useState(''),[refresh,setRefresh]=useState(0),[cancelled,setCancelled]=useState(false);
  const request=useRef<AbortController|null>(null);
+ const [detail,setDetail]=useState<DetailKey>(),[selectedDay,setSelectedDay]=useState<string>();
  useEffect(()=>{
+  const asOf=Date.now();
   const controller=new AbortController();request.current=controller;setBusy(true);setCancelled(false);setStatus('');setError('');
-  loadOverview(db,rtdb,controller.signal,text=>{if(!controller.signal.aborted)setStatus(text);}).then(metrics=>{
+  loadOverview(db,rtdb,controller.signal,text=>{if(!controller.signal.aborted)setStatus(text);},asOf).then(metrics=>{
    if(controller.signal.aborted)return;
-   const next={metrics,updatedAt:Date.now()};setSnapshot(next);onData(next);
+   const next={metrics,updatedAt:Date.now(),asOf};setSnapshot(next);onData(next);
   }).catch(()=>{if(!controller.signal.aborted)setError('No se pudieron cargar las estadísticas. Vuelve a intentarlo.');})
    .finally(()=>{if(!controller.signal.aborted)setBusy(false);if(request.current===controller)request.current=null;});
   return()=>controller.abort();
  },[db,rtdb,refresh,onData]);
  const data=snapshot?.metrics;
  const cards=data?[
-  [Users,'Cuentas registradas',data.users],[Activity,'Usuarios activos · 7 días',data.active],
-  [MessageCircle,'Mensajes conservados',data.messages],[CheckCheck,'Mensajes con entrega',data.delivered],
-  [Phone,'Llamadas registradas',data.calls],[HardDrive,'Archivos registrados',data.files],
-  [Layers,'Grupos',data.groups],[Layers,'Canales',data.channels],[Layers,'Comunidades',data.communities],
-  [MessageCircle,'Estados guardados',data.statuses],[MessageCircle,'Avisos oficiales',data.notices],[Flag,'Reportes de mensajes',data.reports],
+  ['users',Users,'Cuentas registradas',data.users],['active',Activity,'Usuarios activos · 7 días',data.active],
+  ['messages',MessageCircle,'Mensajes conservados',data.messages],['delivered',CheckCheck,'Mensajes con entrega',data.delivered],
+  ['calls',Phone,'Llamadas registradas',data.calls],['files',HardDrive,'Archivos registrados',data.files],
+  ['groups',Layers,'Grupos',data.groups],['channels',Layers,'Canales',data.channels],['communities',Layers,'Comunidades',data.communities],
+  ['statuses',MessageCircle,'Estados guardados',data.statuses],['notices',MessageCircle,'Avisos oficiales',data.notices],['reports',Flag,'Reportes de mensajes',data.reports],
  ] as const:[];
+ const opened=cards.find(card=>card[0]===detail);
+ const day=data?.days.find(value=>value.label===selectedDay)||data?.days.at(-1);
  return <div className="dashboard-overview">
   <div className="overview-heading"><div><span className="badge">ACTIVIDAD DE NEXUS</span><h2>Actividad de la comunidad</h2></div>
    <div className="overview-tools">
@@ -157,11 +164,16 @@ export default function Overview({db,rtdb,onData}:{db:Firestore;rtdb:Database;on
   {busy&&<p role="status">{status||'Preparando estadísticas…'}</p>}
   {error&&<p role="alert">{error}</p>}
   {data&&metricRows(data).some(([,value])=>value===null)&&<p className="notice" role="status">Algunas fuentes no respondieron. Las métricas sin datos aparecen con —.</p>}
-  <div className="metric-grid">{cards.map(([Icon,label,value])=><section key={label} className="metric-card"><span className="metric-icon"><Icon size={20}/></span><small>{label}</small><strong>{numberLabel(value)}</strong></section>)}</div>
-  {data?.days.length? <div className="overview-charts"><section><div className="chart-heading"><h3>Mensajes · últimos 14 días</h3><small>Hora de Ecuador</small></div>
-   <div className="activity-chart" role="img" aria-label={'Mensajes diarios: '+data.days.map(d=>d.label+': '+d.count).join(', ')}>
-    {data.days.map(d=><div key={d.label} title={d.label+' · '+d.count}><span style={{height:(d.count/Math.max(1,...data.days.map(v=>v.count))*100)+'%'}}/><small>{d.label.slice(-2)}</small></div>)}
-   </div></section><section><h3>Contenido compartido</h3>{Object.entries(data.types).map(([type,value])=><div className="type-row" key={type}><span>{typeLabels[type]}</span><div><i style={{width:value/Math.max(1,data.messages??0)*100+'%'}}/></div><strong>{value}</strong></div>)}
+  <div className="metric-grid">{cards.map(([key,Icon,label,value])=><button type="button" key={key} className="metric-card" aria-haspopup="dialog" onClick={()=>setDetail(key)}>
+   <span className="metric-icon"><Icon size={20}/></span><ArrowUpRight className="metric-arrow" size={16}/><small>{label}</small><strong>{numberLabel(value)}</strong>
+  </button>)}</div>
+  {opened&&snapshot&&<MetricDetails key={opened[0]} db={db} rtdb={rtdb} metric={opened[0]} title={opened[2]} total={opened[3]} asOf={snapshot.asOf} onClose={()=>setDetail(undefined)}/>}
+  {data?.days.length? <div className="overview-charts"><section><div className="chart-heading"><h3>Mensajes por día</h3><small>Del {dayLabel(data.days[0].label)} al {dayLabel(data.days.at(-1)!.label)} · hora de Ecuador</small></div>
+   {day&&<p className="chart-day" aria-live="polite"><strong>{dayLabel(day.label)}</strong> · {number.format(day.count)} {day.count===1?'mensaje':'mensajes'}</p>}
+   <div className="activity-chart" aria-label="Últimos 14 días, de izquierda a derecha">
+    {data.days.map(d=><button type="button" key={d.label} title={dayLabel(d.label)+' · '+d.count} aria-label={dayLabel(d.label)+': '+d.count+' mensajes'} aria-pressed={day?.label===d.label} onClick={()=>setSelectedDay(d.label)}><span style={{height:(d.count/Math.max(1,...data.days.map(v=>v.count))*100)+'%'}}/></button>)}
+   </div>
+   <div className="chart-axis"><span>{dayLabel(data.days[0].label)}</span><span>{dayLabel(data.days[6].label)}</span><span>{dayLabel(data.days.at(-1)!.label)}</span></div></section><section><h3>Contenido compartido</h3>{Object.entries(data.types).map(([type,value])=><div className="type-row" key={type}><span>{typeLabels[type]}</span><div><i style={{width:value/Math.max(1,data.messages??0)*100+'%'}}/></div><strong>{value}</strong></div>)}
    <p className="storage-summary">{data.bytes===null?'Espacio sin datos':(data.bytes/1048576).toFixed(2)+' MB registrados'} · {numberLabel(data.activeCalls)} salas abiertas</p></section></div>:null}
   <p className="metrics-footnote">Los recuentos corresponden al contenido conservado. Las visitas identificadas solo incluyen cuentas con actividad registrada. Las llamadas cuentan salas.</p>
  </div>;

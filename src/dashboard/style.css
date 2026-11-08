@@ -55,10 +55,7 @@ textarea{resize:vertical}
 .metric-card strong{display:block;font-size:clamp(1.4rem,4vw,2rem);font-weight:650;line-height:1.15;margin-top:5px}
 .overview-charts,.grid{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:15px}
 .side{display:grid;gap:15px;align-content:start;min-width:0}
-.activity-chart{display:flex;align-items:stretch;gap:5px;height:160px;margin-top:16px;padding-bottom:22px}
-.activity-chart>div{position:relative;display:flex;align-items:flex-end;flex:1;min-width:0}
-.activity-chart span{width:100%;background:linear-gradient(#85dfb9,#4c8199);border-radius:5px 5px 0 0}
-.activity-chart small{position:absolute;bottom:-21px;left:50%;transform:translateX(-50%);font-size:.63rem}
+.activity-chart{display:flex;align-items:stretch;gap:3px;margin-top:10px}
 .type-row{display:grid;grid-template-columns:68px minmax(0,1fr) auto;align-items:center;gap:8px;margin:10px 0;font-size:.78rem}
 .type-row div{height:6px;background:#fff1;border-radius:6px;overflow:hidden}
 .type-row i{height:100%;display:block;background:#7de3bd}
@@ -114,3 +111,31 @@ footer span{color:var(--accent)}
  .report-fields{grid-template-columns:minmax(0,1fr)}
 }
 @media(prefers-reduced-motion:no-preference){button,.dashboard-nav a{transition:background .16s ease,filter .16s ease}}
+.metric-grid button.metric-card{position:relative;display:block;text-align:left;color:var(--text,#ecf6fc);width:100%;min-height:118px;font:inherit;cursor:pointer}
+.metric-grid button.metric-card:hover{border-color:var(--accent);background:#223846}
+.metric-grid button.metric-card:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.metric-arrow{position:absolute;top:16px;right:15px;color:var(--muted)}
+.metric-dialog{margin:auto;width:min(560px,calc(100% - 24px));max-height:min(700px,90dvh);padding:0;border:1px solid var(--line);border-radius:22px;background:var(--panel);color:inherit;overscroll-behavior:contain}
+.metric-dialog::backdrop{background:#030910b8}
+.metric-dialog-content{padding:clamp(15px,4vw,26px)}
+.metric-dialog header{position:sticky;top:0;display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--panel);padding-block:6px}
+.metric-dialog header h2{margin:6px 0}
+.metric-dialog .metric-close{display:grid;place-items:center;padding:0;min-width:44px}
+.metric-dialog ul{list-style:none;margin:12px 0;padding:0}
+.metric-dialog li{display:grid;gap:4px;padding:12px 0;border-top:1px solid var(--line);overflow-wrap:anywhere}
+.metric-dialog li small,.chart-axis,.chart-day{color:var(--muted)}
+.activity-chart{height:124px}
+.activity-chart button{display:flex;flex:1;align-items:flex-end;min-width:0;min-height:0;height:100%;padding:0 2px;border:0;border-radius:4px;background:transparent}
+.activity-chart button span{width:100%;min-height:2px;background:#60baab;border-radius:4px 4px 1px 1px}
+.activity-chart button:hover,.activity-chart button[aria-pressed=true]{background:#76d8be29}
+.activity-chart button[aria-pressed=true] span{background:#b2f6db}
+.chart-axis{display:flex;justify-content:space-between;font-size:.75rem;margin-top:8px}
+.chart-day{margin:12px 0 4px}
+.dashboard-report-center>.actions{margin:0 0 14px}
+.report-narrative p,.report-narrative li{line-height:1.68}
+.report-narrative ul{padding-inline-start:22px;margin-block:8px 16px}
+.maintenance-indicator{display:flex;align-items:center;gap:9px;margin:12px 0;color:var(--muted)}
+.maintenance-indicator span{width:8px;height:8px;border-radius:50%;background:#83e1b8}
+.maintenance-indicator[data-active=true] span{background:#ffbf76}
+.maintenance-mode summary{cursor:pointer;list-style:none;display:flex;gap:8px;align-items:center}
+@media(max-width:520px){.metric-grid button.metric-card{min-height:109px;padding:12px}.metric-arrow{top:12px;right:12px}}

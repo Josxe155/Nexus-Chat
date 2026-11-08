@@ -20,7 +20,6 @@ Una interfaz adaptable a móvil, tablet y computadora.
 [![Nexus AI](https://img.shields.io/badge/NEXUS%20AI-TEXTO%20%2B%20VOZ%20%2B%20IMAGEN-9272FF?style=for-the-badge)](#ajustes-de-conversación-y-voz)
 [![Archivos](https://img.shields.io/badge/ARCHIVOS-FOTOS%20%2B%20VIDEOS%20%2B%20DOCUMENTOS-3B82F6?style=for-the-badge)](#-el-proyecto)
 [![Dispositivos](https://img.shields.io/badge/DISE%C3%91O-M%C3%93VIL%20%2B%20TABLET%20%2B%20PC-06B6D4?style=for-the-badge)](docs/DISENO-RESPONSIVE.md)
-[![Televisión](https://img.shields.io/badge/TELEVISOR-MANDO%20%2B%20TECLADO-22C55E?style=for-the-badge)](#acciones-de-mensajes-y-pantallas-de-televisión)
 [![Actualización](https://img.shields.io/badge/ACTUALIZACI%C3%93N-MANUAL-F59E0B?style=for-the-badge)](#-comandos)
 [![Acceso](https://img.shields.io/badge/ACCESO-GOOGLE%20%2B%20CORREO-EA4335?style=for-the-badge&logo=google&logoColor=white)](#-configuración)
 [![Documentación](https://img.shields.io/badge/DOCUMENTACI%C3%93N-VER%20GU%C3%8DAS-64748B?style=for-the-badge&logo=readthedocs&logoColor=white)](docs/INDICE.md)
@@ -94,9 +93,9 @@ Si otra persona quiere conservar un mensaje temporal, Nexus envía una solicitud
 
 En celulares, **Nexus Chat Oficial** aparece en la lista de conversaciones con una insignia propia. El chat es de solo lectura y muestra los últimos 50 avisos. Al abrirlo se guardan en la cuenta los avisos leídos.
 
-El panel privado [`/dashboard.html`](https://nexus-chat-nc.web.app/dashboard.html) permite publicar y retirar novedades, avisos del servicio y recomendaciones de seguridad. Firestore comprueba que quien publica o retira tenga autorización de administración. Los avisos llegan dentro de Nexus y aparecen en tiempo real mientras la página está abierta.
+El panel privado [`/dashboard.html`](https://nexus-chat-nc.web.app/dashboard.html) permite publicar y retirar novedades, avisos del servicio y recomendaciones de seguridad. Firestore comprueba que quien publica o retira tenga autorización de administración. Los avisos llegan a Nexus Chat Oficial en celular, tablet y computadora y aparecen en tiempo real mientras la página está abierta.
 
-El **Dashboard · Nexus Chat** organiza el panel en Resumen, Reportes, Avisos, Mantenimiento e Informes. Permite consultar recuentos de actividad y almacenamiento, revisar reportes de mensajes y descargar un informe en Markdown. Para redactarlo, Nexus AI recibe cifras agregadas, fechas y el estado del plan mensual. El informe también se puede preparar directamente a partir de esas cifras.
+El **Dashboard · Nexus Chat** organiza el panel en Resumen, Reportes, Avisos, Mantenimiento e Informes. Permite consultar recuentos de actividad y almacenamiento, revisar reportes de mensajes y descargar un informe en HTML. Para redactarlo, Nexus AI recibe cifras agregadas, fechas y el estado del plan mensual. El informe también se puede preparar directamente a partir de esas cifras. Las tarjetas abren listas paginadas y la gráfica permite consultar cada fecha en hora de Ecuador. Reportes separa mensajes de contactos, grupos y canales. Mantenimiento controla el aviso público y permite ejecutar una limpieza inmediata con confirmación sin mover la fecha del plan mensual.
 
 ## 🧩 Tecnología
 
@@ -277,9 +276,9 @@ Las licencias de terceros incluidas con los recursos deben conservarse.
 
 Menús propios para escritorio y móvil, selección de mensajes, reacciones, notas de voz con pausa y preescucha, y avisos que respetan las preferencias. En escritorio, el fondo del chat continúa detrás de las barras: el contenedor exterior es transparente y solo la cápsula lleva color.
 
-### Acciones de mensajes y pantallas de televisión
+### Acciones de mensajes
 
-En el fondo del historial, el clic derecho permite seleccionar mensajes o cerrar el chat. Dentro de una burbuja abre las acciones de ese mensaje. El modo televisión amplía los controles y permite navegar con las flechas; su compatibilidad depende del navegador.
+En el fondo del historial, el clic derecho permite seleccionar mensajes o cerrar el chat. Dentro de una burbuja abre las acciones de ese mensaje.
 
 | Capacidad | Condición |
 | --- | --- |

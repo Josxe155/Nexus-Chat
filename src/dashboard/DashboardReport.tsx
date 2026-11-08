@@ -1,3 +1,4 @@
+import type {ReactNode,RefObject} from 'react';
 import {useEffect,useRef,useState} from 'react';
 import {Download,FileText,Sparkles,X} from 'lucide-react';
 import {version} from '../webVersion.json';
@@ -8,7 +9,7 @@ type PlanStatus={enabled:boolean;dueAt?:number};
 
 function formatInput(snapshot:OverviewSnapshot,plan?:PlanStatus){
  return {
-  version:'V'+version,
+  version:'v'+version,
   datosDel:dateLabel(snapshot.updatedAt)+' (Ecuador)',
   metricas:Object.fromEntries(metricRows(snapshot.metrics)),
   mensajesPorDia:snapshot.metrics.days,
@@ -25,22 +26,40 @@ function localReport(data:ReturnType<typeof formatInput>){
  ].join('\n');
 }
 
-function bold(text:string){
- return text.split(/(\*\*[^*]+\*\*)/).map((part,index)=>part.startsWith('**')&&part.endsWith('**')
-  ? <strong key={index}>{part.slice(2,-2)}</strong> : part);
+function formatted(value:string):ReactNode[]{
+ const chunks=value.split(/(\*\*\*[^*]+\*\*\*|\*\*[^*]+\*\*|__[^_]+__|\*[^*]+\*|_[^_]+_|`[^`]+`)/g);
+ return chunks.map((chunk,i)=>{
+  if(chunk.startsWith('***')&&chunk.endsWith('***'))return <strong key={i}><em>{chunk.slice(3,-3)}</em></strong>;
+  if(/^(\*\*|__)/.test(chunk)&&/(\*\*|__)$/.test(chunk)&&chunk.length>4)return <strong key={i}>{chunk.slice(2,-2)}</strong>;
+  if(/^([*_]).+\1$/.test(chunk))return <em key={i}>{chunk.slice(1,-1)}</em>;
+  if(chunk.charCodeAt(0)===96&&chunk.at(-1)?.charCodeAt(0)===96)return <code key={i}>{chunk.slice(1,-1)}</code>;
+  return chunk.replace(/[\x60*]+/g,'');
+ });
 }
 
-function ReportPreview({text}:{text:string}){
- return <article className="report-preview" aria-label="Vista previa del informe">{text.split(/\r?\n/).filter(line=>line.trim()&&line.trim()!=='---').map((line,index)=>{
-  if(/^#{1,6}\s/.test(line))return <h3 key={index}>{bold(line.replace(/^#{1,6}\s+/,''))}</h3>;
-  return <p key={index}>{bold(line.replace(/^[-*]\s+/,'• '))}</p>;
- })}</article>;
+function ReportPreview({text,element}:{text:string;element:RefObject<HTMLElement|null>}){
+ const lines=text.split(/\r?\n/),blocks:ReactNode[]=[];
+ const list=/^\s*(?:[-*+]\s+|\d+[.)]\s+)/;
+ for(let i=0;i<lines.length;i++){
+  const line=lines[i].trim();
+  if(!line||/^(?:[-*_]\s*){3,}$/.test(line)||/^\x60{3}/.test(line))continue;
+  const heading=/^#{1,6}\s+(.+?)(?:\s+#+)?$/.exec(line);
+  if(heading){blocks.push(<h3 key={i}>{formatted(heading[1])}</h3>);continue;}
+  if(list.test(line)){
+   const start=i,items:ReactNode[]=[];
+   for(;i<lines.length&&list.test(lines[i]);i++)items.push(<li key={i}>{formatted(lines[i].replace(list,''))}</li>);
+   i--;blocks.push(<ul key={start}>{items}</ul>);continue;
+  }
+  blocks.push(<p key={i}>{formatted(line.replace(/^>\s*/,''))}</p>);
+ }
+ return <article ref={element} className="report-preview report-narrative" aria-label="Vista previa del informe">{blocks}</article>;
 }
 
 export default function DashboardReport({snapshot,plan}:{snapshot?:OverviewSnapshot;plan?:PlanStatus}){
  const [report,setReport]=useState<{text:string;source:'ia'|'datos';at:number}>();
  const [busy,setBusy]=useState(false),[message,setMessage]=useState('');
  const controller=useRef<AbortController|null>(null);
+ const reportElement=useRef<HTMLElement>(null);
  useEffect(()=>()=>{controller.current?.abort();controller.current=null;},[]);
 
  async function generate(){
@@ -54,7 +73,9 @@ export default function DashboardReport({snapshot,plan}:{snapshot?:OverviewSnaps
    const {assistant}=await import('../features/staticServices');
    request.signal.throwIfAborted();
    const {text}=await assistant([{role:'user',content:[
-    'Redacta un informe operativo de Nexus Chat en español claro, con secciones Markdown, viñetas, negrita y emojis discretos.',
+    'Escribe un informe narrativo de Nexus Chat en español claro, de unas 250 a 350 palabras. Devuelve Markdown, sin envolverlo en un bloque de código.',
+    'Abre con un título y un párrafo de resumen ejecutivo que explique la actividad observada. Continúa con secciones breves y párrafos redactados, conectando cifras relevantes. Cierra con una observación basada en los datos.',
+    'Usa negrita para unas pocas cifras clave y emojis discretos en encabezados. Evita tablas, listados de todas las métricas y encabezados vacíos.',
     'Incluye actividad, moderación, almacenamiento y mantenimiento. Usa solo las cifras proporcionadas; null significa sin datos.',
     'No inventes causas, tendencias, registros, personas ni recomendaciones de borrado. Distingue recuentos y datos no disponibles.',
     JSON.stringify(input),
@@ -85,10 +106,13 @@ export default function DashboardReport({snapshot,plan}:{snapshot?:OverviewSnaps
     if(snapshot){setReport({text:localReport(formatInput(snapshot,plan)),source:'datos',at:snapshot.updatedAt});setMessage('');}
    }}>Preparar informe de datos</button>
    <button type="button" className="secondary icon-action" disabled={!report||busy} onClick={()=>{
-    if(report)saveDashboardFile(report.text,'nexus-informe.md','text/markdown;charset=utf-8');
+    if(reportElement.current)saveDashboardFile(
+     '<!doctype html><html lang="es"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Informe · Nexus Chat</title><style>body{font:16px/1.7 system-ui,sans-serif;color:#192731;margin:32px auto;padding:0 18px;max-width:750px}h3{color:#1d584a;line-height:1.3}strong{color:#102f2a}</style><body>'+reportElement.current.outerHTML+'</body></html>',
+     'nexus-informe.html','text/html;charset=utf-8'
+    );
    }}><Download size={17}/> Descargar informe</button>
   </div>
   {message&&<p className="notice" role="status">{message}</p>}
-  {report&&<><p className="metrics-updated">{report.source==='ia'?'Informe generado con Nexus AI':'Informe de datos'} · Lectura del {dateLabel(report.at)} (Ecuador)</p><ReportPreview text={report.text}/></>}
+  {report&&<><p className="metrics-updated">{report.source==='ia'?'Informe generado con Nexus AI':'Informe de datos'} · Lectura del {dateLabel(report.at)} (Ecuador)</p><ReportPreview text={report.text} element={reportElement}/></>}
  </section>;
 }
