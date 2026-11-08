@@ -72,7 +72,7 @@ function Workspace({user,db,rtdb,onLogout}:{user:User;db:Firestore;rtdb:Database
  const [plan,setPlan]=useState<Plan>(),[planError,setPlanError]=useState(''),[retry,setRetry]=useState(0);
  const [preview,setPreview]=useState<{counts:Awaited<ReturnType<typeof engine.inspect>>} & ({kind:'estimate';cutoff:number}|{kind:'deleted'})>();
  const [confirmation,setConfirmation]=useState(''),[manualConfirmation,setManualConfirmation]=useState(''),[auto,setAuto]=useState(false),[now,setNow]=useState(Date.now());
- const [online,setOnline]=useState(()=>navigator.onLine),[published,setPublished]=useState('');
+ const [online,setOnline]=useState(()=>navigator.onLine),[published,setPublished]=useState(''),[versionError,setVersionError]=useState(''),[checkingVersion,setCheckingVersion]=useState(false);
  const attempted=useRef<number | undefined>(undefined);
 
  useEffect(()=>{
@@ -96,7 +96,7 @@ function Workspace({user,db,rtdb,onLogout}:{user:User;db:Firestore;rtdb:Database
    const result=await engine.executeDue(action.setMessage,manual);
    setPreview({kind:'deleted',counts:result});setConfirmation('');setManualConfirmation('');
   }catch(error){setAuto(false);throw error;}
-  if(manual){action.setMessage('Limpieza inmediata completada.');return;}
+  if(manual){action.setMessage('');return;}
   const latest=await getDoc(planRef).then(s=>s.data()).catch(()=>undefined);
   if(!latest||validDate(latest.nextDueAt)&&latest.nextDueAt<=Date.now()){
    setAuto(false);action.setMessage('Limpieza completada. Revisa la próxima fecha antes de continuar.');
@@ -127,7 +127,7 @@ function Workspace({user,db,rtdb,onLogout}:{user:User;db:Firestore;rtdb:Database
    <section><small><ShieldCheck size={15}/> Cuenta autorizada</small><strong>{user.email||'Cuenta de Nexus'}</strong></section>
    <section><small><CalendarClock size={15}/> Limpieza mensual</small><strong>{!ready?'Sin comprobar':plan.enabled?'Plan activo':'Sin activar'}</strong>
     {ready&&plan.enabled&&hasDate&&<small>{dateLabel(plan.nextDueAt!)} · Ecuador</small>}</section>
-   <section><small><LayoutDashboard size={15}/> Versión de Nexus</small><strong>v{version}</strong></section>
+   <section><small><LayoutDashboard size={15}/> Versión de Nexus</small><strong><span className="version-prefix">v</span>{version}</strong></section>
    <section><small>{online?<Wifi size={15}/>:<WifiOff size={15}/>} Navegador</small><strong>{online?'En línea':'Sin conexión'}</strong></section>
   </div>
   <nav className="dashboard-nav" aria-label="Secciones del dashboard">
@@ -159,7 +159,7 @@ function Workspace({user,db,rtdb,onLogout}:{user:User;db:Firestore;rtdb:Database
      <label className="toggle"><input type="checkbox" checked={auto} disabled={action.busy||!ready||!plan?.enabled||!hasDate} onChange={e=>{attempted.current=undefined;setAuto(e.target.checked);}}/>Ejecutar al llegar la fecha mientras este panel esté abierto</label>
      <p className="notice">La ejecución automática requiere mantener el panel abierto y la sesión iniciada. El aviso a los usuarios se muestra tres días antes.</p>
      <button className="secondary" disabled={action.busy||!ready} onClick={()=>void action.run(async()=>{setPreview(undefined);const counts=await engine.inspect(due,false,action.setMessage);setPreview({kind:'estimate',counts,cutoff:due});action.setMessage('');})}>Revisar qué se eliminaría</button>
-     {preview&&<div className="result" role="status"><h3>{preview.kind==='estimate'?'Vista previa de la limpieza':'Contenido eliminado'}</h3>{preview.kind==='estimate'&&<small>Estimación hasta {dateLabel(preview.cutoff)} · Ecuador</small>}<p>{preview.counts.messages} mensajes · {preview.counts.statuses} estados · {preview.counts.files} archivos · {(preview.counts.bytes/1048576).toFixed(2)} MB</p><small>{preview.counts.protectedFiles} archivos protegidos.</small></div>}
+     {preview&&<div className="result" role="status"><h3>{preview.kind==='estimate'?'Vista previa de la limpieza':preview.counts.messages||preview.counts.statuses||preview.counts.files?'Contenido eliminado':'No se encontró contenido elegible'}</h3>{preview.kind==='estimate'&&<small>Estimación hasta {dateLabel(preview.cutoff)} · Ecuador</small>}<p>{preview.counts.messages} mensajes · {preview.counts.statuses} estados · {preview.counts.files} archivos · {(preview.counts.bytes/1048576).toFixed(2)} MB</p><small>{preview.counts.protectedFiles} archivos excluidos por protección o carga reciente.</small>{preview.kind==='deleted'&&<p>Realtime Database · {preview.counts.realtimeFiles} archivos encontrados y retirados. Firestore · {preview.counts.files} fichas de archivos retiradas.</p>}</div>}
      <div className="danger"><h3>Ejecución manual</h3><p>El borrado es irreversible y está disponible cuando llegue la fecha del plan.</p>
       <label htmlFor="cleanup-confirmation">Escribe BORRAR CONTENIDO</label><input id="cleanup-confirmation" aria-label="Confirmación de limpieza" value={confirmation} onChange={e=>setConfirmation(e.target.value)} autoComplete="off"/>
       <button disabled={action.busy||!ready||!plan?.enabled||!hasDate||leased||due>now||confirmation!=='BORRAR CONTENIDO'} onClick={()=>void run()}>Ejecutar limpieza pendiente</button>
@@ -175,14 +175,18 @@ function Workspace({user,db,rtdb,onLogout}:{user:User;db:Firestore;rtdb:Database
     <div className="side">
      <MaintenanceMode db={db}/>
      <section className="panel-card"><span className="badge">PUBLICACIÓN</span><h2>Versión de Nexus</h2><strong className="version-value">v{version}</strong>
-      {published&&<p role="status">La web pública sirve {published}.</p>}
-      <button className="secondary" disabled={action.busy} onClick={()=>void action.run(async()=>{
-       const response=await fetch('/release.json',{cache:'no-store',signal:AbortSignal.timeout(12000)});
+      {published&&<p role="status">La versión de Nexus es <span className="version-prefix">v</span>{published}. {published===version?'No hay actualizaciones disponibles.':'Hay una actualización disponible para este panel. Recarga para abrirla.'}</p>}
+      {versionError&&<p role="alert">{versionError}</p>}
+      <button className="secondary" disabled={checkingVersion} onClick={async()=>{
+       setCheckingVersion(true);setVersionError('');setPublished('');
+       try{const response=await fetch('/release.json',{cache:'no-store',signal:AbortSignal.timeout(12000)});
        if(!response.ok)throw Error('No se pudo comprobar la versión.');
        const data=await response.json();
        if(typeof data.version!=='string'||!/^\d+\.\d+(?:\.\d+)?$/.test(data.version))throw Error('La publicación no indica una versión válida.');
-       setPublished('v'+data.version);
-      })}>Comprobar versión</button>
+       setPublished(data.version);
+       }catch{setVersionError('No se pudo comprobar la versión. Intenta de nuevo.');}
+       finally{setCheckingVersion(false);}
+      }}>{checkingVersion?'Comprobando versión…':'Comprobar versión'}</button>
      </section>
      <section className="panel-card"><span className="badge">ESTE NAVEGADOR</span><h2>Caché de actualizaciones</h2>
       <p>Libera las descargas de versiones guardadas en este equipo.</p>

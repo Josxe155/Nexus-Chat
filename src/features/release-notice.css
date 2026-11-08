@@ -9,3 +9,12 @@ html:root .nexus-update-notice progress{width:100%;height:8px;display:block;marg
 html:root .nexus-update-notice.release-download-panel{left:50%!important;top:50%!important;right:auto!important;bottom:auto!important;transform:translate(-50%,-50%)!important;max-height:calc(100dvh - 32px);overflow:auto}
 @media(max-width:1023px),(pointer:coarse){html:root .nexus-update-notice:not(.release-download-panel){left:12px!important;right:12px!important;top:auto!important;bottom:calc(78px + env(safe-area-inset-bottom))!important;transform:none!important;width:auto!important;max-height:calc(100dvh - 106px);overflow:auto;flex-wrap:wrap;padding:14px!important;gap:10px!important}html:root .nexus-update-reopen{left:12px!important;right:12px!important;top:auto!important;bottom:calc(78px + env(safe-area-inset-bottom))!important;transform:none!important;justify-content:center;width:auto!important;white-space:normal;text-align:center}html:root .nexus-update-notice:not(.release-download-panel) .release-actions{width:100%;justify-content:flex-end}.nexus-update-notice>.release-orbit{display:none!important}}
 @media(max-height:420px){html:root .nexus-update-notice:not(.release-download-panel),html:root .nexus-update-reopen{bottom:8px!important;max-height:calc(100dvh - 16px)}}
+.web-release{width:min(100%,360px);margin:14px auto 0;padding:14px;border:1px solid var(--nx-border,#536472);border-radius:16px;text-align:start}
+.web-release-state{display:flex;align-items:center;gap:9px;min-height:30px;color:var(--nx-text,#e9edef)}
+.web-release-state svg{flex:none;color:var(--nx-accent,#6ce0b4)}
+.web-release-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.web-release-actions button{padding:8px 13px;min-height:44px;border-radius:14px;background:var(--nx-field,#29343d);color:var(--nx-text,#f0f4f7)}
+.web-release-actions button:disabled{opacity:.6}
+.web-release-progress{margin-top:8px;display:grid;gap:4px}
+.web-release-progress progress{width:100%;accent-color:var(--nx-accent,#6ce0b4)}
+@media(prefers-reduced-motion:no-preference){.web-release-spin{animation:web-release-turn 1s linear infinite}@keyframes web-release-turn{to{transform:rotate(360deg)}}}

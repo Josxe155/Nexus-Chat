@@ -1,7 +1,9 @@
 import type {UserProfile} from '../types';
-export function presenceFor(user:UserProfile,sessions:any,lastSeen:any,available=true){
+export const PRESENCE_HEARTBEAT_MS=20000;
+const SESSION_TTL=65000;
+export function presenceFor(user:UserProfile,sessions:any,lastSeen:any,available=true,now=Date.now()){
  const entries=sessions&&typeof sessions==='object'?Object.values(sessions):[];
- return {...user,online:available&&!user.privacy?.hideOnline&&entries.some(value=>value===true),lastSeen:user.privacy?.hideLastSeen?0:typeof lastSeen==='number'&&Number.isFinite(lastSeen)?lastSeen:(user.privacy?.schemaVersion===2?0:user.lastSeen||0)};
+ return {...user,online:available&&!user.privacy?.hideOnline&&entries.some(value=>typeof value==='number'&&Number.isFinite(value)&&value>now-SESSION_TTL&&value<=now+60000),lastSeen:user.privacy?.hideLastSeen?0:typeof lastSeen==='number'&&Number.isFinite(lastSeen)?lastSeen:(user.privacy?.schemaVersion===2?0:user.lastSeen||0)};
 }
 export function lastSeenLabel(value:number,now=Date.now(),_mobile=false){
  if(!Number.isFinite(value)||value<=0||value>now+60000)return '';

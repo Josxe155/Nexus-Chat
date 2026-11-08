@@ -1,4 +1,3 @@
-import ReleaseManager from './features/ReleaseManager';
 import Availability from './features/Availability';
 
 
@@ -14,7 +13,7 @@ import './messenger.css';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <ErrorBoundary><Availability><App /><ReleaseManager/></Availability></ErrorBoundary>
+    <ErrorBoundary><Availability><App /></Availability></ErrorBoundary>
   </StrictMode>,
 );
 

@@ -4,13 +4,15 @@ service cloud.firestore {
   // Permanent production rules: no global date limit, unmatched paths denied.
   function signedIn(){return request.auth != null && (request.auth.token.get('firebase',{}).get('sign_in_provider','')!='password' || request.auth.token.get('email_verified',false)==true) && !exists(/databases/$(database)/documents/deletedAccounts/$(request.auth.uid));}
   function operator(){return signedIn() && request.auth.token.get('email_verified',false)==true && request.auth.token.get('firebase',{}).get('sign_in_provider','') in ['google.com','password'] && exists(/databases/$(database)/documents/dashboardAdmins/$(request.auth.uid)) && get(/databases/$(database)/documents/dashboardAdmins/$(request.auth.uid)).data.enabled==true;}
+  function cutoffMillis(value){return value is timestamp ? value.toMillis() : value;}
   function cleanupDue(time){
    let plan=get(/databases/$(database)/documents/publicConfig/cleanup).data;
+   let cutoff=cutoffMillis(plan.get('manualCutoff',0));
    return operator() && plan.execution=='browser' && ((
      plan.enabled==true && plan.nextDueAt<=request.time.toMillis() && time<plan.nextDueAt
    ) || (
      plan.status=='running' && plan.leaseUntil>request.time.toMillis()
-     && plan.get('manualCutoff',0)>0 && plan.manualCutoff<=request.time.toMillis() && time<plan.manualCutoff
+     && cutoff>0 && cutoff<=request.time.toMillis() && time<cutoff
    ));
   }
   match /officialNotices/{id}{
@@ -287,7 +289,7 @@ service cloud.firestore {
     && request.resource.data.keys().hasOnly(['maintenance','updatedAt'])
     && request.resource.data.maintenance is bool && request.resource.data.updatedAt==request.time;
   }
-  match /publicConfig/cleanup {allow read: if signedIn();allow create,update: if operator() && request.resource.data.keys().hasOnly(['enabled','execution','firstDueAt','nextDueAt','warningDays','status','leaseUntil','runId','lastCompletedAt','counts','manualCutoff']) && request.resource.data.enabled is bool && request.resource.data.execution=='browser' && request.resource.data.nextDueAt is number && request.resource.data.warningDays==3 && request.resource.data.status in ['scheduled','running','error'] && (!('manualCutoff' in request.resource.data) || (request.resource.data.manualCutoff is number && request.resource.data.manualCutoff>0 && request.resource.data.manualCutoff<=request.time.toMillis() && request.resource.data.status=='running' && request.resource.data.leaseUntil is number && request.resource.data.leaseUntil>request.time.toMillis() && request.resource.data.leaseUntil<=request.time.toMillis()+360000));allow delete: if false;}
+  match /publicConfig/cleanup {allow read: if signedIn();allow create,update: if operator() && request.resource.data.keys().hasOnly(['enabled','execution','firstDueAt','nextDueAt','warningDays','status','leaseUntil','runId','lastCompletedAt','counts','manualCutoff']) && request.resource.data.enabled is bool && request.resource.data.execution=='browser' && request.resource.data.nextDueAt is number && request.resource.data.warningDays==3 && request.resource.data.status in ['scheduled','running','error'] && (!('manualCutoff' in request.resource.data) || (cutoffMillis(request.resource.data.manualCutoff)>0 && cutoffMillis(request.resource.data.manualCutoff)<=request.time.toMillis() && request.resource.data.status=='running' && request.resource.data.leaseUntil is number && request.resource.data.leaseUntil>request.time.toMillis() && request.resource.data.leaseUntil<=request.time.toMillis()+360000));allow delete: if false;}
   match /{document=**}{allow read,write: if false;}
  }
 }

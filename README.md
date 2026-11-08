@@ -302,3 +302,7 @@ Se retiran los porcentajes globales anteriores: no tenían una medición reprodu
 | Reportes de mensajes | El panel privado muestra el texto y los datos del mensaje seleccionado. El bloqueo del remitente es opcional. | Los reportes guardan el nombre del adjunto cuando existe. |
 
 [Detalle de selección y voz](docs/REVISION-MOVIL-SELECCION-Y-VOZ.md) · [Contacto e identidad](docs/ACTUALIZACION-MOVIL-2026-11-06.md).
+
+### Numeración de versiones
+
+Nexus usa `vAA.N.C`. `AA` son los dos últimos dígitos del año, `N` identifica la actualización general de ese año y `C` cuenta sus correcciones, hasta 5. Por ejemplo, `v27.100.5` es la quinta corrección de la actualización 100 de 2027. La comprobación y descarga se abren en **Acerca de la web**.

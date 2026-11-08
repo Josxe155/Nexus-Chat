@@ -1,4 +1,5 @@
-import {BookOpen, RefreshCw, Shield} from 'lucide-react';
+import {BookOpen, Shield} from 'lucide-react';
+import ReleaseManager from './ReleaseManager';
 import {version} from '../webVersion.json';
 
 export default function AboutWeb({onPolicies}: {onPolicies: () => void}) {
@@ -6,16 +7,10 @@ export default function AboutWeb({onPolicies}: {onPolicies: () => void}) {
     <div className="phone-settings-about">
       <div className="web-about-brand">
         <h3>Nexus Chat</h3>
-        <p>Versión {version}</p>
+        <p>Versión v{version}</p>
         <img src="/nexus-icon.svg?v=3" alt="" />
         <p>Mensajería, comunidades y llamadas desde tu navegador.</p>
-        <button
-          type="button"
-          className="phone-settings-primary"
-          onClick={() => window.dispatchEvent(new Event('nexus:show-update'))}
-        >
-          <RefreshCw size={18} aria-hidden="true" /> Buscar actualizaciones
-        </button>
+        <ReleaseManager/>
       </div>
       <div className="web-about-links">
         <a href="/guia.html" target="_blank" rel="noopener noreferrer">

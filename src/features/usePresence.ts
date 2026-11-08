@@ -1,4 +1,5 @@
 import {presencePolicy} from './privacy';
+import {PRESENCE_HEARTBEAT_MS} from './presence';
 import {uuid} from './uuid';
 import {useEffect} from 'react';
 import {onValue,ref,set,remove,onDisconnect,serverTimestamp} from 'firebase/database';
@@ -7,8 +8,8 @@ import {UserProfile} from '../types';
 export default function usePresence(user:UserProfile|null){useEffect(()=>{
  if(!user)return;
  let policy=presencePolicy(user.privacy);const uid=user.uid,session=ref(rtdb,`presenceSessions/${uid}/${uuid()}`),seen=ref(rtdb,`presenceLastSeen/${uid}`);
- let alive=true,connected=false,generation=0,queue=Promise.resolve();
- const sync=()=>{const revision=++generation;queue=queue.catch(()=>{}).then(async()=>{
+ let alive=true,connected=false,generation=0,armed=false,refreshing=false,queue=Promise.resolve();
+ const sync=()=>{armed=false;const revision=++generation;queue=queue.catch(()=>{}).then(async()=>{
   if(!alive||!connected||revision!==generation)return;
   // Do not disarm a live session while network writes are still in flight.
   if(!alive||revision!==generation)return;
@@ -24,10 +25,15 @@ export default function usePresence(user:UserProfile|null){useEffect(()=>{
   if(!alive||revision!==generation){await remove(session);return;}
   if(!policy.hideLastSeen)await set(seen,serverTimestamp());
   if(!alive||revision!==generation)return;
-  if(!policy.hideOnline){await set(session,true);if(!alive||revision!==generation)await remove(session);}
+  if(!policy.hideOnline){await set(session,serverTimestamp());if(!alive||revision!==generation)await remove(session);else armed=true;}
  }).catch(error=>{if(alive&&revision===generation)console.warn('No se pudo sincronizar la presencia.',error);});};
- const stop=onValue(ref(rtdb,'.info/connected'),snapshot=>{connected=snapshot.val()===true;if(connected)sync();});
+ const stop=onValue(ref(rtdb,'.info/connected'),snapshot=>{connected=snapshot.val()===true;if(connected)sync();else{armed=false;generation++;}});
+ const heartbeat=setInterval(()=>{
+  if(!alive||!connected||!armed||refreshing||document.visibilityState!=='visible')return;
+  refreshing=true;
+  void set(session,serverTimestamp()).catch(()=>{if(alive&&connected)sync();}).finally(()=>{refreshing=false;});
+ },PRESENCE_HEARTBEAT_MS);
  document.addEventListener('visibilitychange',sync);
- const pagehide=()=>{generation++;remove(session).catch(()=>{});if(!policy.hideLastSeen)set(seen,serverTimestamp()).catch(()=>{});};window.addEventListener('pagehide',pagehide);window.addEventListener('pageshow',sync);
- return()=>{alive=false;generation++;stop();document.removeEventListener('visibilitychange',sync);window.removeEventListener('pagehide',pagehide);window.removeEventListener('pageshow',sync);void (async()=>{try{await remove(session);if(!policy.hideLastSeen)await set(seen,serverTimestamp());await onDisconnect(session).cancel();}catch{/* Keep the server disconnect fallback if cleanup could not be confirmed. */}})();};
+ const pagehide=()=>{armed=false;generation++;remove(session).catch(()=>{});if(!policy.hideLastSeen)set(seen,serverTimestamp()).catch(()=>{});};window.addEventListener('pagehide',pagehide);window.addEventListener('pageshow',sync);
+ return()=>{alive=false;generation++;clearInterval(heartbeat);stop();document.removeEventListener('visibilitychange',sync);window.removeEventListener('pagehide',pagehide);window.removeEventListener('pageshow',sync);void (async()=>{try{await remove(session);if(!policy.hideLastSeen)await set(seen,serverTimestamp());await onDisconnect(session).cancel();}catch{/* Keep the server disconnect fallback if cleanup could not be confirmed. */}})();};
 },[user?.uid,JSON.stringify(user?.privacy)]);}

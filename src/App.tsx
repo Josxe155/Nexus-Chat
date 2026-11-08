@@ -60,6 +60,7 @@ import RealtimeProvider from './features/RealtimeProvider';
 import WorkspaceHub from './features/WorkspaceHub';
 import usePresence from './features/usePresence';
 import {presenceFor} from './features/presence';
+import useServerClock from './features/useServerClock';
 import {playNotification} from './features/Sounds';
 import {clearMediaURLs,queueMediaDeletion,flushMediaDeletions} from './features/mediaTransfer';
 
@@ -85,6 +86,7 @@ export default function App() {
   useEffect(()=>{if(currentUser&&chatsLoaded)voiceAllowedChats(currentUser.uid,new Set(chats.map(chat=>chat.id)));},[currentUser?.uid,chatsLoaded,chats.map(chat=>chat.id).join('|')]);
   const [pinnedIds,setPinnedIds]=useState<string[]>([]);
   const [presence,setPresence]=useState<Record<string,any>>({});
+  const presenceNow=useServerClock(5000);
   const [lastSeen,setLastSeen]=useState<Record<string,number>>({}),[presenceAvailable,setPresenceAvailable]=useState(false);
   useEffect(()=>{if(!currentUser){setPinnedIds([]);setPresence({});setLastSeen({});setPresenceAvailable(false);clearMediaURLs();return;}const stops=[onSnapshot(doc(db,'users',currentUser.uid,'private','preferences'),snap=>setPinnedIds((snap.data()?.pinnedChatIds||[]).slice(0,3)),()=>{}),onValue(realtimeRef(rtdb,'.info/connected'),snap=>setPresenceAvailable(snap.val()===true))];return()=>stops.forEach(stop=>stop());},[currentUser?.uid]);
   const [policyRevision,setPolicyRevision]=useState(0);useEffect(()=>{const update=()=>setPolicyRevision(value=>value+1);window.addEventListener('nexus:presence-policy',update);return()=>window.removeEventListener('nexus:presence-policy',update);},[]);
@@ -375,7 +377,7 @@ export default function App() {
   const protectedUsers=useAccessibleProfiles(users,currentUser?.uid||'',currentUser?.privacy);
   const projectedUsers=protectedUsers.map(person=>person.uid===currentUser?.uid?currentUser:contactNames[person.uid]&&currentUser?.privacy?.contactIds?.includes(person.uid)?{...person,nombre:[contactNames[person.uid].first,contactNames[person.uid].last].filter(Boolean).join(' ')}:person);
   const profileMedia=useMediaURLs(projectedUsers.map(person=>({id:person.uid,fileUrl:person.foto,force:true,fileSize:1})),currentUser?.uid||'');
-  const visibleUsers=projectedUsers.map(user=>presenceFor(user,presence[user.uid],lastSeen[user.uid],presenceAvailable));
+  const visibleUsers=projectedUsers.map(user=>presenceFor(user,presence[user.uid],lastSeen[user.uid],presenceAvailable,presenceNow));
   useNotificationController(currentUser,visibleChats,visibleUsers,handleSelectChat,chatsLoaded&&personal.loaded,mutedChatIds);
   useEffect(()=>{const next=Math.min(...paged.messages.map(message=>message.expiresAt||Infinity).filter(time=>time>Date.now()));if(!Number.isFinite(next))return;const timer=setTimeout(()=>setExpiryRevision(value=>value+1),Math.min(2147483647,Math.max(1,next-Date.now()+10)));return()=>clearTimeout(timer);},[paged.messages,expiryRevision]);
 

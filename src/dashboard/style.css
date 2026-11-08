@@ -139,3 +139,5 @@ footer span{color:var(--accent)}
 .maintenance-indicator[data-active=true] span{background:#ffbf76}
 .maintenance-mode summary{cursor:pointer;list-style:none;display:flex;gap:8px;align-items:center}
 @media(max-width:520px){.metric-grid button.metric-card{min-height:109px;padding:12px}.metric-arrow{top:12px;right:12px}}
+
+.version-prefix{text-transform:none;font-variant:normal;font-variant-caps:normal}
