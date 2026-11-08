@@ -72,6 +72,12 @@ Capturas de la aplicación con **datos ficticios de demostración**. No incluyen
 
 Esta distribución es exclusiva de computadora. Nexus Messenger conserva sus pantallas móviles. Se usan los datos reales del chat y del proveedor; no se inventan nombres de paquetes de stickers.
 
+## 📣 Nexus Chat Oficial
+
+En celulares, **Nexus Chat Oficial** aparece en la lista de conversaciones con una insignia propia. El chat es de solo lectura y muestra los últimos 50 avisos. Al abrirlo se guardan en la cuenta los avisos leídos.
+
+El panel privado [`/dashboard.html`](https://nexus-chat-nc.web.app/dashboard.html) permite publicar y retirar novedades, avisos del servicio y recomendaciones de seguridad. Firestore comprueba que quien publica o retira tenga autorización de administración. Los avisos llegan dentro de Nexus y aparecen en tiempo real mientras la página está abierta.
+
 ## 🧩 Tecnología
 
 | Capa | Tecnología | Función |

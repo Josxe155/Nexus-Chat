@@ -1,0 +1,14 @@
+.official-verified{display:inline-block;vertical-align:-.17em;color:#38a5ff;flex:none}
+.official-chat-row .chat-list-avatar img{background:#171e29;padding:5px;box-sizing:border-box}
+.official-chat{padding:14px 14px max(22px,env(safe-area-inset-bottom));color:var(--nx-text,#e9edef)}
+.mobile-shell>.mobile-body:has(>.official-chat){padding-bottom:0}
+.official-chat>header{display:flex;gap:11px;align-items:flex-start;margin-bottom:18px;padding:14px;background:var(--nx-field,#222a30);border-radius:14px}
+.official-chat>header svg{color:var(--nx-accent,#21c063);flex:none}
+.official-chat>header p,.official-chat>p{color:var(--nx-muted,#a4b1b7);font-size:13px;line-height:1.5;margin-top:5px}
+.official-chat>p button{color:inherit;text-decoration:underline}
+.official-chat ol{display:flex;flex-direction:column;align-items:flex-start;gap:10px;margin:0;padding:0;list-style:none}
+.official-chat li{width:min(92%,38rem);box-sizing:border-box;padding:11px 13px;background:var(--nx-field,#222a30);border-radius:4px 13px 13px 13px;overflow-wrap:anywhere}
+.official-chat li small{color:var(--nx-muted,#a4b1b7);font-size:12px}
+.official-chat li h2{font-size:16px;font-weight:650;margin:4px 0 5px}
+.official-chat li p{white-space:pre-wrap;font-size:14px;line-height:1.5}
+.official-chat time{display:block;text-align:end;margin-top:8px;color:var(--nx-muted,#a4b1b7);font-size:11px}

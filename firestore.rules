@@ -5,6 +5,16 @@ service cloud.firestore {
   function signedIn(){return request.auth != null && (request.auth.token.get('firebase',{}).get('sign_in_provider','')!='password' || request.auth.token.get('email_verified',false)==true) && !exists(/databases/$(database)/documents/deletedAccounts/$(request.auth.uid));}
   function operator(){return signedIn() && request.auth.token.get('email_verified',false)==true && request.auth.token.get('firebase',{}).get('sign_in_provider','') in ['google.com','password'] && exists(/databases/$(database)/documents/dashboardAdmins/$(request.auth.uid)) && get(/databases/$(database)/documents/dashboardAdmins/$(request.auth.uid)).data.enabled==true;}
   function cleanupDue(time){return operator() && get(/databases/$(database)/documents/publicConfig/cleanup).data.enabled==true && get(/databases/$(database)/documents/publicConfig/cleanup).data.execution=='browser' && get(/databases/$(database)/documents/publicConfig/cleanup).data.nextDueAt<=request.time.toMillis() && time<get(/databases/$(database)/documents/publicConfig/cleanup).data.nextDueAt;}
+  match /officialNotices/{id}{
+   allow read: if signedIn();
+   allow create: if operator()
+    && request.resource.data.keys().hasOnly(['category','title','body','publishedAt'])
+    && request.resource.data.category in ['Novedad','Aviso','Seguridad']
+    && request.resource.data.title is string && request.resource.data.title.size()>0 && request.resource.data.title.size()<=100
+    && request.resource.data.body is string && request.resource.data.body.size()>0 && request.resource.data.body.size()<=2000
+    && request.resource.data.publishedAt==request.time;
+   allow delete: if operator();
+  }
   function validMessageReport(d){
    let original=get(/databases/$(database)/documents/chats/$(d.chatId)/messages/$(d.messageId)).data;
    return original.senderId==d.targetId && original.senderId!=request.auth.uid
