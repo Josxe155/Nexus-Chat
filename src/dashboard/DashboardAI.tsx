@@ -1,3 +1,4 @@
+import {draftError,limitAnswer} from './assistantLimits';
 import {useEffect,useRef,useState} from 'react';
 import {Send,Sparkles,Square} from 'lucide-react';
 import type {Firestore} from 'firebase/firestore';
@@ -29,11 +30,12 @@ export default function DashboardAI({db,rtdb,user,snapshot}:{db:Firestore;rtdb:D
  useEffect(()=>()=>{request.current?.abort();request.current=null;},[]);
  async function ask(){
   if(request.current||!question.trim()||!ready)return;
+  const invalid=draftError(question);if(invalid){setError(invalid);return;}
   const prompt=question.trim();
   if(/^(?:borra|elimina|vac[ií]a|limpia)\s+(?:(?:el|este)\s+)?(?:historial|conversaci[oó]n)(?:\s+local)?(?:\s+(?:de\s+Nexus\s+Assistant|del\s+asistente))?\s*[.!]?$/iu.test(prompt)){clearAssistantHistory(user.uid);setQuestion('');return;}
   const controller=new AbortController();request.current=controller;
-  let timer=setTimeout(()=>controller.abort('timeout'),180000);const index=turns.length,plans:AssistantAction[]=[],executed:string[]=[];
-  const complete=(text:string,actions:AssistantAction[]=plans)=>setTurns(previous=>previous.map((turn,i)=>i===index?{...turn,answer:text,...(actions.length?{actions}:{} )}:turn));
+  let timer=setTimeout(()=>controller.abort('timeout'),600000);const index=turns.length,plans:AssistantAction[]=[],executed:string[]=[];
+  const complete=(text:string,actions:AssistantAction[]=plans)=>setTurns(previous=>previous.map((turn,i)=>i===index?{...turn,answer:limitAnswer(text).text,...(actions.length?{actions}:{} )}:turn));
   const commit=()=>{clearTimeout(timer);setCommitting(true);};
   setTurns(previous=>[...previous,{question:prompt,answer:'',at:Date.now()}]);setQuestion('');setBusy(true);setError('');
   try{
@@ -58,7 +60,7 @@ export default function DashboardAI({db,rtdb,user,snapshot}:{db:Firestore;rtdb:D
     const plan=plans.find(plan=>plan.id===(result as any).id);
     if(plan&&requestsImmediateAction(prompt,plan)){
      const text=await actions.execute(plan,signal,commit);plan.executedAt=Date.now();executed.push(text);
-     complete(executed.join('\n\n'));setCommitting(false);timer=setTimeout(()=>controller.abort('timeout'),180000);
+     complete(executed.join('\n\n'));setCommitting(false);timer=setTimeout(()=>controller.abort('timeout'),600000);
      return {executed:true,id:plan.id,message:text};
     }
     return result;
@@ -66,7 +68,7 @@ export default function DashboardAI({db,rtdb,user,snapshot}:{db:Firestore;rtdb:D
    const {askDashboardAI}=await import('./askDashboardAI');
    const context=JSON.stringify({version:'v'+version,fecha:new Date().toISOString(),administradorActual:user.uid,mapa:dataMap,resumen:snapshot??null,conversacion:assistantContextHistory(turns)});
    const result=await askDashboardAI(prompt,context,controller.signal,{declarations:[...readDeclarations,...actionDeclarations,localHistoryDeclaration],execute:executeTool});
-   if(!controller.signal.aborted)complete(result.text+(executed.length?'\n\nAcciones realizadas:\n'+executed.join('\n'): '')+proposals(plans)+(result.truncated?'\n\nLa respuesta quedó incompleta. Puedes pedir que continúe.':''));
+   if(!controller.signal.aborted)complete(result.text+(executed.length?'\n\nAcciones realizadas:\n'+executed.join('\n'): '')+proposals(plans)+(result.truncated?'\n\nNo se pudo completar toda la respuesta. Conservamos lo recibido; puedes pedir que continúe.':''));
   }catch(failure){if(request.current===controller){if(plans.length)complete((executed.length?'Acciones completadas:\n\n'+executed.join('\n\n'):'Se prepararon los siguientes cambios. Aún no se han ejecutado.')+proposals(plans));setQuestion(prompt);setError(controller.signal.reason==='timeout'?'La consulta tardó demasiado. Puedes volver a intentarlo.':controller.signal.aborted?'Consulta cancelada.':failure instanceof Error?failure.message:'No se pudo completar la consulta.');}}
   finally{clearTimeout(timer);if(request.current===controller){request.current=null;setBusy(false);setCommitting(false);}}
  }
@@ -80,10 +82,10 @@ export default function DashboardAI({db,rtdb,user,snapshot}:{db:Firestore;rtdb:D
   </div>
   <form className="dashboard-ai-composer" aria-label="Escribir una consulta" onSubmit={event=>{event.preventDefault();void ask();}}>
    <TransientNotice message={error} onClose={()=>setError('')}/>
-   <SpeakAnswer key={answer} text={answer} compact/>
-   <textarea aria-label="Escribe un mensaje" rows={1} maxLength={1500} value={question} disabled={busy||!ready} onChange={event=>setQuestion(event.target.value)} placeholder="Escribe un mensaje" onKeyDown={event=>{if(event.key==='Enter'&&!event.shiftKey&&!event.nativeEvent.isComposing){event.preventDefault();void ask();}}}/>
-   <DictateQuestion compact disabled={busy||!ready} onStart={()=>{baseDraft.current=question;}} onText={text=>setQuestion([baseDraft.current.trimEnd(),text].filter(Boolean).join(' ').slice(0,1500))}/>
-   {busy?<button type="button" className="dashboard-ai-composer-icon" disabled={committing} onClick={()=>request.current?.abort()} aria-label="Cancelar consulta"><Square size={18}/></button>:<button type="submit" className="dashboard-ai-composer-icon" disabled={!ready||!question.trim()} aria-label="Enviar consulta"><Send size={18}/></button>}
+   <SpeakAnswer text={answer} compact/>
+   <textarea aria-label="Escribe un mensaje" rows={1} value={question} disabled={busy||!ready} onChange={event=>{setQuestion(event.target.value);const invalid=draftError(event.target.value);if(invalid)setError(invalid);}} placeholder="Escribe un mensaje" title="Hasta 500 líneas. Usa Mayús + Intro para un salto de línea." onKeyDown={event=>{if(event.key==='Enter'&&!event.shiftKey&&!event.nativeEvent.isComposing){event.preventDefault();void ask();}}}/>
+   <DictateQuestion compact disabled={busy||!ready} onStart={()=>{baseDraft.current=question;}} onText={text=>setQuestion([baseDraft.current.trimEnd(),text].filter(Boolean).join(' '))}/>
+   {busy?<button type="button" className="dashboard-ai-composer-icon" disabled={committing} onClick={()=>request.current?.abort()} aria-label="Cancelar consulta"><Square size={18}/></button>:<button type="submit" className="dashboard-ai-composer-icon" disabled={!ready||!question.trim()||!!draftError(question)} aria-label="Enviar consulta"><Send size={18}/></button>}
   </form>
  </section>;
 }

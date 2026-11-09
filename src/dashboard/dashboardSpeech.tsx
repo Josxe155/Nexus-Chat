@@ -66,7 +66,7 @@ export function DictateQuestion({disabled,onText,onStart,compact=false}:{disable
 export function SpeakAnswer({text,compact=false}:{text:string;compact?:boolean}){
  const [state,setState]=useState<'idle'|'preparing'|'playing'>('idle'),[error,setError]=useState('');
  const cancel=useRef<(()=>void)|null>(null);
- useEffect(()=>{const stop=()=>{cancel.current?.();cancel.current=null;};window.addEventListener('nexus:stop-assistant-speech',stop);return()=>{window.removeEventListener('nexus:stop-assistant-speech',stop);stop();};},[text]);
+ useEffect(()=>{const stop=()=>{cancel.current?.();cancel.current=null;};window.addEventListener('nexus:stop-assistant-speech',stop);return()=>{window.removeEventListener('nexus:stop-assistant-speech',stop);stop();};},[]);
  function toggle(){
   if(state!=='idle'){cancel.current?.();cancel.current=null;return;}
   window.dispatchEvent(new Event('nexus:stop-assistant-dictation'));

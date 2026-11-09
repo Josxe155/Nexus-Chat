@@ -26,9 +26,24 @@ test('envía solo la muestra revisada y no solicita herramientas',async()=>{
  };
  assert.deepEqual(await ask(),{text:'Hay 8 cuentas.',truncated:false});
 });
-test('marca las respuestas cortadas',async()=>{
- mock({candidates:[{finishReason:'MAX_TOKENS',content:{parts:[{text:'Respuesta parcial'}]}}]});
- assert.deepEqual(await ask(),{text:'Respuesta parcial',truncated:true});
+test('continúa respuestas cortadas sin repetir acciones ni el texto solapado',async()=>{
+ let requests=0,actions=0;
+ globalThis.fetch=async(_url,options)=>{
+  const body=JSON.parse(options.body as string);requests++;
+  assert.equal(body.generationConfig.maxOutputTokens,32768);
+  if(requests===1)return new Response(JSON.stringify({candidates:[{finishReason:'STOP',content:{role:'model',parts:[{functionCall:{name:'write',args:{}},thoughtSignature:'signature'}]}}]}));
+  if(requests===2)return new Response(JSON.stringify({candidates:[{finishReason:'MAX_TOKENS',content:{role:'model',parts:[{text:'Una respuesta suficientemente larga que sigue incom'}]}}]}));
+  assert.equal(body.toolConfig.functionCallingConfig.mode,'NONE');
+  return new Response(JSON.stringify({candidates:[{finishReason:'STOP',content:{parts:[{text:'Una respuesta suficientemente larga que sigue incompleta.'}]}}]}));
+ };
+ const result=await requestDashboardAnswer('Escribe','{}',signal(),settings,{declarations:[{name:'write'}],execute:async()=>{actions++;return {executed:true}}});
+ assert.deepEqual(result,{text:'Una respuesta suficientemente larga que sigue incompleta.',truncated:false});assert.equal(actions,1);assert.equal(requests,3);
+});
+test('conserva la respuesta parcial si falla la continuación y respeta la cancelación',async()=>{
+ let requests=0;globalThis.fetch=async()=>{if(requests++)throw Error('network');return new Response(JSON.stringify({candidates:[{finishReason:'MAX_TOKENS',content:{parts:[{text:'Texto recibido'}]}}]}));};
+ assert.deepEqual(await ask(),{text:'Texto recibido',truncated:true});
+ const controller=new AbortController();globalThis.fetch=async()=>{controller.abort();throw Error('network');};
+ await assert.rejects(requestDashboardAnswer('consulta','{}',controller.signal,settings),{name:'AbortError'});
 });
 test('no muestra texto bloqueado ni detalles del proveedor',async()=>{
  mock({candidates:[{finishReason:'SAFETY',content:{parts:[{text:'No mostrar'}]}}]});
@@ -41,7 +56,7 @@ test('no muestra texto bloqueado ni detalles del proveedor',async()=>{
 test('valida configuración, muestra y cancelación antes de enviar',async()=>{
  let calls=0;globalThis.fetch=async()=>{calls++;throw Error('unexpected request');};
  await assert.rejects(requestDashboardAnswer('consulta','{}',signal(),{key:''}),/no está configurado/);
- await assert.rejects(requestDashboardAnswer('consulta','{',signal(),settings),/vista previa/);
+ await assert.rejects(requestDashboardAnswer('consulta','{',signal(),settings),/contexto/);
  await assert.rejects(requestDashboardAnswer('consulta','{}',signal(),{...settings,model:'../../other'}),/no es válida/);
  await assert.rejects(requestDashboardAnswer('consulta','x'.repeat(120001),signal(),settings),/demasiado larga/);
  await assert.rejects(requestDashboardAnswer('consulta','{}',AbortSignal.abort(),settings));
@@ -124,4 +139,43 @@ test('ejecuta órdenes directas y deja como propuestas las consultas y la limpie
  for(const prompt of ['edita el mensaje de Alexander','crea un aviso','Por favor, actualiza la configuración','elimina este documento'])assert.equal(requestsImmediateAction(prompt,plan),true);
  for(const prompt of ['prepara un aviso','¿Qué cambiarías?','consulta mis mensajes'])assert.equal(requestsImmediateAction(prompt,plan),false);
  assert.equal(requestsImmediateAction('ejecuta la limpieza',{...plan,kind:'cleanup'}),false);
+});
+
+test('acepta 500 líneas y mensajes largos; rechaza 501 sin enviar consultas',async()=>{
+ const {draftError,lineCount,limitAnswer}=await import('../src/dashboard/assistantLimits.ts');
+ const text=Array.from({length:500},(_,i)=>'Línea '+i+' con texto largo.').join('\n');let requests=0;
+ globalThis.fetch=async()=>{requests++;return new Response(JSON.stringify({candidates:[{finishReason:'STOP',content:{parts:[{text:'Completo.'}]}}]}));};
+ assert.equal(draftError(text),'');assert.equal((await requestDashboardAnswer(text,'{}',signal(),settings)).text,'Completo.');
+ await assert.rejects(requestDashboardAnswer(text+'\nOtra','{}',signal(),settings));assert.equal(requests,1);
+ assert.equal(limitAnswer(text).text,text);const limited=limitAnswer(text+'\nOtra');assert.equal(lineCount(limited.text),500);assert.match(limited.text,/tamaño máximo/);
+});
+test('divide audio largo por frases sin perder palabras, acentos ni comillas',async()=>{
+ const {spanishSpeechChunks}=await import('../src/features/speechChunks.ts');
+ const text=Array(500).fill('Mañana sí hay clase. Alexander dijo: "¡Buenos días!"').join(' ');
+ const chunks=spanishSpeechChunks(text);assert.ok(chunks.length>50);assert.ok(chunks.every(c=>c.length<=320));assert.equal(chunks.join(' '),text);
+ assert.deepEqual(spanishSpeechChunks('**Hola** `Nexus` https://example.org'),['Hola Nexus enlace']);
+});
+
+test('reintenta un fallo de audio sin repetir fragmentos y cancela sin alertas',async()=>{
+ const {playSpanish}=await import('../src/features/spanishSpeech.ts');
+ const original={Worker:globalThis.Worker,AudioContext:globalThis.AudioContext,document:globalThis.document,window:globalThis.window};
+ const workers:any[]=[],sources:any[]=[],states:string[]=[];let errors=0,closed=0;
+ class WorkerMock{
+  onerror:any;onmessage:any;terminated=false;jobs:string[]=[];
+  constructor(){workers.push(this);}postMessage(text:string){this.jobs.push(text);}terminate(){this.terminated=true;}
+ }
+ class AudioMock{
+  state='running';currentTime=0;destination={};resume(){return Promise.resolve();}close(){closed++;return Promise.resolve();}
+  decodeAudioData(){return Promise.resolve({duration:2});}
+  createBufferSource(){const source={buffer:null,onended:null as any,connect(){},disconnect(){},start(){},stop(){}};sources.push(source);return source;}
+ }
+ Object.assign(globalThis,{Worker:WorkerMock,AudioContext:AudioMock,document:new EventTarget(),window:new EventTarget()});
+ const flush=()=>new Promise(resolve=>setImmediate(resolve));
+ try{
+  const stop=playSpanish(Array(30).fill('Una frase breve en español.').join(' '),s=>states.push(s),()=>errors++);await flush();
+  assert.equal(workers[0].jobs.length,1);workers[0].onmessage({data:null});assert.equal(workers[0].terminated,true);assert.equal(workers.length,2);
+  assert.equal(workers[1].jobs[0],workers[0].jobs[0]);workers[1].onmessage({data:new ArrayBuffer(100)});await flush();
+  assert.equal(sources.length,1);assert.equal(workers[1].jobs.length,2);stop();assert.equal(closed,1);assert.equal(workers[1].terminated,true);assert.equal(errors,0);assert.equal(states.at(-1),'idle');
+  workers[1].onmessage({data:new ArrayBuffer(100)});await flush();assert.equal(sources.length,1);
+ }finally{Object.assign(globalThis,original);}
 });
