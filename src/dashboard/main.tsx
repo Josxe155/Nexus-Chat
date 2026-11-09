@@ -33,6 +33,7 @@ const validDate=(value:unknown):value is number=>typeof value==='number'&&Number
 function useAction(){
  const lock=useRef(false);
  const [busy,setBusy]=useState(false),[message,setMessage]=useState(''),[error,setError]=useState('');
+ useEffect(()=>{if(busy||(!message&&!error))return;const timer=setTimeout(()=>{setMessage('');setError('');},3000);return()=>clearTimeout(timer);},[busy,message,error]);
  async function run(action:()=>Promise<void>){
   if(lock.current)return;
   lock.current=true;
@@ -208,7 +209,7 @@ function Workspace({user,db,rtdb,onLogout}:{user:User;db:Firestore;rtdb:Database
     </div>
    </div>}
   </div>
-  <Feedback {...action}/>
+  {page!=='modo-ia'&&<Feedback {...action}/>}
  </>;
 }
 function Dashboard(){
