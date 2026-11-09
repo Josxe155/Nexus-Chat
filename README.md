@@ -52,6 +52,8 @@ Nexus Chat reúne conversaciones, archivos, estados, comunidades y llamadas en u
 > [!NOTE]
 > Es un proyecto en desarrollo. Las funciones dependen de los permisos del navegador, la conexión y las cuotas de los proveedores. El alcance y las diferencias pendientes se describen en [PENDIENTES-WHATSAPP.md](docs/PENDIENTES-WHATSAPP.md).
 
+El próximo bloque pendiente incluye favicon e iconos transparentes, Ajustes, sus categorías e información de contacto. El estado y los criterios de cierre están en [la lista de pendientes](docs/PENDIENTES-WHATSAPP.md#prioridades-del-9-de-noviembre-de-2026).
+
 ## Vista previa
 
 Capturas de la aplicación con **datos ficticios de demostración**. No incluyen conversaciones ni fotos personales del propietario.
