@@ -12,7 +12,7 @@ export const mobileSettingsActive=()=>matchMedia(mobileSettingsQuery).matches;
 export const readMobileAccent=()=>mobileColors.find(([,color])=>color===localStorage.getItem(accentKey))?.[1]||mobileColors[0][1];
 export const readMobileIcon=()=>mobileIcons.find(([,color])=>color===localStorage.getItem(iconKey))?.[1]||'';
 export function mobileIconURL(color:string){
- if(!mobileIcons.some(([,value])=>value===color)||!color)return '/nexus-icon.svg?v=3';
+ if(!mobileIcons.some(([,value])=>value===color)||!color)return '/nexus-icon.svg?v=4';
  return 'data:image/svg+xml,'+encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="16" fill="${color}"/><path d="M15 17h34v24H33L21 49v-8h-6zM22 24h20v3H22zm0 8h14v3H22z" fill="#101820" fill-rule="evenodd"/></svg>`);
 }
 export function applyMobileBranding(){

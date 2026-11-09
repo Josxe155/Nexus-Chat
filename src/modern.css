@@ -102,3 +102,5 @@
 .chat-menu-format{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));padding:6px 8px 10px;margin:0 6px 5px;border-bottom:1px solid var(--stroke);}.chat-menu-format button{min-height:38px;font-size:11px;text-align:center;}
 .chat-header-menu{max-height:calc(100dvh - 90px);overflow-y:auto;overscroll-behavior:contain;}
 .media-library article,.assistant-message,.mobile-notice{color:#edf0fa;}.mobile-assistant input{color:#edf0fa;}.nexus-workspace[data-theme=light] :is(.mobile-settings p,.mobile-page p,.mobile-person small,.mobile-chat-open small,.mobile-chat-open time,.mobile-settings small,.device-settings p){color:#59677b;}
+
+.nexus-brand img.brand-mark{object-fit:contain;transform:none;border-radius:12px;}

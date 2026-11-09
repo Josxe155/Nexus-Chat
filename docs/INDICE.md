@@ -40,3 +40,5 @@ El [README principal](../README.md) describe las funciones y el modelo de seguri
 - [Escritura y voz móvil](VOZ-MOVIL-2026-11-06.md): nuevas referencias, gestos y controles de reproducción.
 
 - [Revisión móvil: selección y voz](REVISION-MOVIL-SELECCION-Y-VOZ.md): video lento, reacciones, menús y contador de mensajes nuevos.
+
+- [Codex Cloud](CODEX-CLOUD.md): preparación, despliegue de prueba y evidencias de v26.76.2.

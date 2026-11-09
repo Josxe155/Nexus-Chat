@@ -13,7 +13,8 @@
     "build:hosting": "node scripts/build-hosting.cjs",
     "setup": "node scripts/setup-services.cjs",
     "postinstall": "node scripts/setup-services.cjs",
-    "check:docs": "node scripts/check-docs.cjs"
+    "check:docs": "node scripts/check-docs.cjs",
+    "test:dashboard-ai": "node --import tsx scripts/dashboard-ai.test.ts"
   },
   "dependencies": {
     "firebase": "^12.13.0",

@@ -1,1 +1,10 @@
-const fs=require('node:fs'),path=require('node:path');const target=path.join(__dirname,'../src/public-services.json'),example=path.join(__dirname,'../src/public-services.example.json');if(!fs.existsSync(target)){fs.copyFileSync(example,target);console.log('Configuración local creada en src/public-services.json. Añade tus claves para habilitar IA y Metered.');}
+const fs=require('node:fs'),path=require('node:path');
+const target=path.join(__dirname,'../src/public-services.json');
+const defaults=JSON.parse(fs.readFileSync(path.join(__dirname,'../src/public-services.example.json'),'utf8'));
+const existing=fs.existsSync(target)?JSON.parse(fs.readFileSync(target,'utf8')):{};
+const config={...defaults,...existing};
+if(process.env.GEMINI_API_KEY?.trim())config.geminiKey=process.env.GEMINI_API_KEY.trim();
+delete config.huggingFaceKey;
+fs.writeFileSync(target,JSON.stringify(config,null,2)+'\n',{mode:0o600});
+fs.chmodSync(target,0o600);
+console.log('Configuración local de servicios preparada; sus credenciales no se guardan en Git.');

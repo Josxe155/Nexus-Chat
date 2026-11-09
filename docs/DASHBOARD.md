@@ -48,3 +48,12 @@ Nexus AI reconoce órdenes como «genera una imagen de…», crea la imagen, per
 - El modo automático intenta cada fecha una sola vez. Si quedan ciclos vencidos después de una ejecución, se detiene para que el administrador revise el plan.
 - Las estadísticas indican cuándo terminaron de leerse; se pueden exportar como CSV o detener durante el escaneo, conservando el último resultado completo. La cancelación evita continuar leyendo otras páginas; las solicitudes ya enviadas pueden terminar.
 - Los recuentos y archivos CSV contienen cantidades, no textos de chats ni identidades de usuarios. No se modificó la autorización del panel.
+
+
+## Modo IA · v26.76.2
+
+El panel consulta Gemini mediante `generateContent`, con el modelo configurable en `geminiModel`. La configuración probada utiliza `gemini-3.1-flash-lite`. La clave se guarda únicamente en `src/public-services.json`, excluido de Git. `npm run setup` importa `GEMINI_API_KEY` desde el entorno y conserva la configuración existente de los otros servicios. Se retira el campo anterior `huggingFaceKey`. Las claves de esta arquitectura son accesibles al navegador al compilar; no se incluyen credenciales administrativas de Google.
+
+La sesión administradora y la vista previa siguen siendo obligatorias. Solo se envían la pregunta y la muestra revisada; el modelo no recibe herramientas de escritura ni acceso directo a Firebase. Los mensajes eliminados, caducados, de vista única o cifrados antiguos se excluyen del contexto de chats. El asistente general de Nexus mantiene su alternativa con OpenRouter.
+
+Los controles de dictado y lectura mantienen textos neutros. La lectura admite voces en español del sistema. Su disponibilidad real y la del dictado dependen del navegador y de los permisos. Las pruebas automatizadas de voz usan simulaciones; no certifican el micrófono ni la reproducción en un teléfono físico.

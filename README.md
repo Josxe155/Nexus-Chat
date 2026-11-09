@@ -95,7 +95,7 @@ En celulares, **Nexus Chat Oficial** aparece en la lista de conversaciones con u
 
 El panel privado [`/dashboard.html`](https://nexus-chat-nc.web.app/dashboard.html) permite publicar y retirar novedades, avisos del servicio y recomendaciones de seguridad. Firestore comprueba que quien publica o retira tenga autorización de administración. Los avisos llegan a Nexus Chat Oficial en celular, tablet y computadora y aparecen en tiempo real mientras la página está abierta.
 
-El **Dashboard · Nexus Chat** organiza el panel en Resumen, Reportes, Avisos, Mantenimiento, Informes y Modo IA. Permite consultar recuentos de actividad y almacenamiento, revisar reportes de mensajes y descargar un informe en HTML o escucharlo en español. La lectura se sintetiza en el navegador con [meSpeak y eSpeak](https://www.masswerk.at/mespeak/) ([GPL y fuentes](https://nexus-chat-nc.web.app/voices-license.txt)), sin enviar el texto a un servicio de voz. Para redactarlo, Nexus AI recibe cifras agregadas, fechas y el estado del plan mensual. El informe también se puede preparar directamente a partir de esas cifras. Modo IA consulta fuentes del panel con la sesión administradora. Las consultas pasan por una vista previa antes de enviarse a Hugging Face. La clave se define en la configuración local de servicios que se usa al compilar Hosting. El repositorio mantiene la plantilla sin credenciales. La barra inferior de Modo IA incluye dictado y lectura en español con una voz de Google disponible en el navegador. El bloqueo de aplicación se configura desde Privacidad y se aplica en ese navegador. El historial se consulta por páginas y el modelo trabaja en solo lectura. Las tarjetas abren listas paginadas y la gráfica permite consultar cada fecha en hora de Ecuador. Reportes separa mensajes de contactos, grupos y canales. Mantenimiento controla el aviso público y permite ejecutar una limpieza inmediata con confirmación sin mover la fecha del plan mensual.
+El **Dashboard · Nexus Chat** organiza el panel en Resumen, Reportes, Avisos, Mantenimiento, Informes y Modo IA. Permite consultar recuentos de actividad y almacenamiento, revisar reportes de mensajes y descargar un informe en HTML o escucharlo en español. La lectura se sintetiza en el navegador con [meSpeak y eSpeak](https://www.masswerk.at/mespeak/) ([GPL y fuentes](https://nexus-chat-nc.web.app/voices-license.txt)), sin enviar el texto a un servicio de voz. Para redactarlo, Nexus AI recibe cifras agregadas, fechas y el estado del plan mensual. El informe también se puede preparar directamente a partir de esas cifras. Modo IA consulta fuentes del panel con la sesión administradora. Las consultas pasan por una vista previa antes de enviarse a Gemini. La clave se define en la configuración local de servicios que se usa al compilar Hosting. El repositorio mantiene la plantilla sin credenciales. La barra inferior de Modo IA incluye dictado y lectura en español con una voz en español disponible en el navegador. El bloqueo de aplicación se configura desde Privacidad y se aplica en ese navegador. El historial se consulta por páginas y el modelo trabaja en solo lectura. Las tarjetas abren listas paginadas y la gráfica permite consultar cada fecha en hora de Ecuador. Reportes separa mensajes de contactos, grupos y canales. Mantenimiento controla el aviso público y permite ejecutar una limpieza inmediata con confirmación sin mover la fecha del plan mensual.
 
 ## 🧩 Tecnología
 
@@ -130,7 +130,7 @@ La instalación crea `src/public-services.json` desde la plantilla si el archivo
 
 | Archivo | Qué debes configurar | ¿Se sube a Git? |
 | :--- | :--- | :---: |
-| `src/public-services.json` | Claves de Groq, OpenRouter, Metered, GIPHY, KLIPY y Pollinations. | **No** |
+| `src/public-services.json` | Claves de Gemini (dashboard), Groq, OpenRouter, Metered, GIPHY, KLIPY y Pollinations. | **No** |
 | `src/public-services.example.json` | Plantilla sin claves para crear la configuración local. | Sí |
 | `firebase-applet-config.json` | Identificadores públicos de tu proyecto Firebase. | Sí |
 | `.firebaserc` · `firebase.json` | Proyecto de destino y sitio de Hosting. | Sí |
@@ -174,6 +174,8 @@ Configura los proveedores de Authentication, los dominios autorizados, las regla
 | `npm run lint` | Comprueba los tipos de TypeScript. |
 | `npm run build:hosting` | Compila la web y genera el manifiesto de actualización. |
 | `npm run preview` | Permite revisar una compilación local. |
+
+La revisión **v26.76.2** migra el Modo IA del dashboard a Gemini, permite usar las voces en español del sistema y renueva el logo y los favicons. El asistente general mantiene OpenRouter como alternativa. Consulta [la preparación y verificación en Codex Cloud](docs/CODEX-CLOUD.md) para conocer las pruebas y los accesos pendientes.
 
 ## ☁️ Publicación en Firebase
 

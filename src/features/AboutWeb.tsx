@@ -8,7 +8,7 @@ export default function AboutWeb({onPolicies}: {onPolicies: () => void}) {
       <div className="web-about-brand">
         <h3>Nexus Chat</h3>
         <p>Versión v{version}</p>
-        <img src="/nexus-icon.svg?v=3" alt="" />
+        <img src="/nexus-icon.svg?v=4" alt="" />
         <p>Mensajería, comunidades y llamadas desde tu navegador.</p>
         <ReleaseManager/>
       </div>

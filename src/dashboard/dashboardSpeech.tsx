@@ -88,8 +88,8 @@ export function SpeakAnswer({text,compact=false}:{text:string;compact?:boolean})
   if(!engine){setError('La lectura en voz alta no está disponible en este navegador.');return;}
   const spanish=engine.getVoices().filter(voice=>/^es(?:-|$)/i.test(voice.lang));
   const voice=spanish.find(value=>/google/i.test(value.name+' '+value.voiceURI)&&/es-(EC|US|MX)/i.test(value.lang))
-   ||spanish.find(value=>/google/i.test(value.name+' '+value.voiceURI));
-  if(!voice){setError('Este navegador no ofrece una voz de Google en español.');return;}
+   ||spanish.find(value=>/es-(EC|US|MX)/i.test(value.lang))||spanish[0];
+  if(!voice){setError('Este navegador no ofrece una voz en español.');return;}
   setError('');
   const parts=voiceSegments(text),current=++generation.current;
   if(!parts.length)return;
@@ -101,18 +101,18 @@ export function SpeakAnswer({text,compact=false}:{text:string;compact?:boolean})
    utterance.voice=voice!;utterance.lang=voice!.lang;
    speech.current=utterance;
    utterance.onend=()=>speak(index+1);
-   const failed=()=>{if(current===generation.current){stop();setPlaying(false);setError('No se pudo reproducir la respuesta con la voz de Google.');}};
+   const failed=()=>{if(current===generation.current){stop();setPlaying(false);setError('No se pudo reproducir la respuesta.');}};
    utterance.onerror=failed;
    try{engine.speak(utterance);}catch{failed();}
   }
   speak(0);
  }
- const hasGoogle=voices.some(voice=>/^es(?:-|$)/i.test(voice.lang)&&/google/i.test(voice.name+' '+voice.voiceURI));
+ const hasSpanish=voices.some(voice=>/^es(?:-|$)/i.test(voice.lang));
  return <div className="dashboard-voice-control">
-  <button type="button" className={compact?'dashboard-ai-composer-icon dashboard-ai-speaker':'secondary icon-action'} aria-label={playing?'Detener lectura':'Escuchar con Google'} title={playing?'Detener lectura':'Escuchar con Google'} disabled={!text} onClick={toggle}>
-   {playing?<Square size={15}/>:<Volume2 size={17}/>} {!compact&&(playing?'Detener lectura':'Escuchar con Google')}
+  <button type="button" className={compact?'dashboard-ai-composer-icon dashboard-ai-speaker':'secondary icon-action'} aria-label={playing?'Detener lectura':'Escuchar respuesta'} title={playing?'Detener lectura':'Escuchar respuesta'} disabled={!text} onClick={toggle}>
+   {playing?<Square size={15}/>:<Volume2 size={17}/>} {!compact&&(playing?'Detener lectura':'Escuchar respuesta')}
   </button>
-  {text&&!playing&&!error&&voices.length>0&&!hasGoogle&&<small>Requiere una voz de Google en español.</small>}
+  {text&&!playing&&!error&&voices.length>0&&!hasSpanish&&<small>Requiere una voz en español.</small>}
   {error&&<span role="alert">{error}</span>}
  </div>;
 }
