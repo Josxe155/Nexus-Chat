@@ -1,3 +1,4 @@
+import {useAutomaticAccountReports} from './features/accountReports';
 import ChooseUsername,{needsUsernameSelection} from './features/ChooseUsername';
 import {recordVisit} from './features/visitActivity';
 import PermissionReview from './features/PermissionReview';
@@ -71,6 +72,7 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const theme=useTheme();
   useAccountPreferences(currentUser?.uid);
+  useAutomaticAccountReports(currentUser?.uid);
   const contactNames=useContactNames(currentUser?.uid);
   useEffect(()=>{const select=(event:Event)=>{const id=(event as CustomEvent).detail;if(typeof id==='string'&&id.length<=512){setActiveChatId(id);setMobileView('chat');}};const close=()=>{setActiveChatId(null);setMobileView('sidebar');};window.addEventListener('nexus:select-chat',select);window.addEventListener('nexus:close-chat',close);return()=>{window.removeEventListener('nexus:select-chat',select);window.removeEventListener('nexus:close-chat',close);};},[]);
 

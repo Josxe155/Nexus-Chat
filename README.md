@@ -75,6 +75,8 @@ Esta distribución es exclusiva de computadora. Nexus Messenger conserva sus pan
 
 ## ⚙️ Ajustes en celular
 
+**v26.82.0** sustituye los subapartados de Cuenta con las referencias recibidas: informes separados, contraseña, correo, nombre de usuario y cierre de sesión. Los recorridos sin referencia y la activación de Drive siguen pendientes. Consulta [la correspondencia, funciones y verificación](docs/REFERENCIAS-CUENTA-DRIVE.md).
+
 La versión **v26.81.0** reorganiza Cuenta, incorpora recuperación de contraseña y verificación del correo y corrige la geometría compartida de flechas y botones de Ajustes. Consulta [el alcance y las comprobaciones](docs/CUENTA-Y-ALINEACION-AJUSTES.md).
 
 La vista de celular reúne Apariencia, Privacidad, Chats, Notificaciones, Almacenamiento y datos, Accesibilidad y Ayuda y comentarios en pantallas y diálogos adaptados al ancho del teléfono. Los colores, los iconos de pestaña y el horario de enfoque están disponibles sin suscripción.

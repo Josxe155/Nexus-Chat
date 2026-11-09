@@ -139,3 +139,7 @@ Revisión: 31 de octubre de 2026. Esta lista describe el código y las pruebas d
 - [Estadísticas de conexión del navegador](https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/getStats).
 
 Las pruebas de interfaz usan datos aislados, cámaras simuladas y varias resoluciones. Las de permisos usan emuladores Firebase, con criptografía real para los casos cifrados. No sustituyen pruebas físicas en todos los dispositivos. Los resultados exactos de esta entrega se guardan en los informes de verificación que acompañan al proyecto.
+
+## Referencias de Cuenta y Drive recibidas el 9 de noviembre
+
+La [correspondencia de las 15 capturas y la imagen de informes](REFERENCIAS-CUENTA-DRIVE.md) recoge las pantallas incorporadas y los recorridos pendientes. Drive dispone de módulos preparados con pruebas simuladas; su API sigue deshabilitada y no existe una acción de copia activa. Faltan referencias de copia/restauración, consentimiento y verificación real. También permanecen pendientes llaves de acceso, segundo factor, dispositivos de confianza, cambio de teléfono, formularios de cambio de correo/usuario, eliminación de usuario y clave de contacto.

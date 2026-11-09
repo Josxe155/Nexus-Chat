@@ -20,7 +20,7 @@ export default function AccountSettings({username,go,onLogout}:{username:string;
  <SettingsRow label="Dirección de correo electrónico" icon={Mail} onClick={()=>go('accountEmail')}/>
  <SettingsRow label="Notificaciones de seguridad" icon={Shield} onClick={()=>go('security')}/></section>
  <section className="account-settings-group" aria-labelledby="account-identity-title"><h3 id="account-identity-title">Tu cuenta</h3>
- <SettingsRow label="Nombre de usuario" detail={'@'+username} icon={AtSign} onClick={()=>go('profile')}/>
+ <SettingsRow label="Nombre de usuario" detail={'@'+username} icon={AtSign} onClick={()=>go('accountUsername')}/>
  <SettingsRow label="Número de Nexus" icon={Phone} onClick={()=>go('accountNumber')}/></section>
  <button type="button" className="phone-setting-row account-logout settings-danger" onClick={onLogout}><LogOut size={23}/><span>Cerrar sesión</span></button>
  </div>;

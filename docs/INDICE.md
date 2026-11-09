@@ -44,3 +44,5 @@ El [README principal](../README.md) describe las funciones y el modelo de seguri
 - [Codex Cloud](CODEX-CLOUD.md): preparación, despliegue de prueba y evidencias de v26.76.2.
 
 - [Cuenta y alineación de Ajustes](CUENTA-Y-ALINEACION-AJUSTES.md): funciones de cuenta, menú y verificación de v26.81.0.
+
+- [Referencias de Cuenta y Drive](REFERENCIAS-CUENTA-DRIVE.md): correspondencia de las capturas, pantallas incorporadas y pendientes de integración.

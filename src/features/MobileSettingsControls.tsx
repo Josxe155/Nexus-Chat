@@ -19,7 +19,7 @@ export function SettingsRow({label,detail,icon:Icon,end,onClick}:{label:string;d
 export function SettingsHero({icon:Icon,title,detail}:{icon:ComponentType<{size?:number}>;title:string;detail:string}){
  return <div className="phone-settings-hero"><span><Icon size={44}/></span><h3>{title}</h3><p>{detail}</p></div>;
 }
-export function SettingsDialog({title,children,onClose,actions}:{title:string;children?:ReactNode;onClose:()=>void;actions:ReactNode}){
+export function SettingsDialog({title,children,onClose,actions,className=''}:{title:string;children?:ReactNode;onClose:()=>void;actions:ReactNode;className?:string}){
  const box=useRef<HTMLDivElement>(null);
  useMobileBack(true,onClose,75);
  useEffect(()=>{
@@ -28,7 +28,7 @@ export function SettingsDialog({title,children,onClose,actions}:{title:string;ch
   if(dialog)(dialogControls(dialog)[0]||dialog).focus({preventScroll:true});
   return()=>{if(before?.isConnected)before.focus({preventScroll:true});};
  },[]);
- return createPortal(<div className="phone-settings-mask" onClick={event=>{if(event.target===event.currentTarget)onClose();}}><div ref={box} className="phone-settings-dialog" role="dialog" aria-modal="true" aria-label={title} tabIndex={-1} onKeyDown={event=>{
+ return createPortal(<div className="phone-settings-mask" onClick={event=>{if(event.target===event.currentTarget)onClose();}}><div ref={box} className={'phone-settings-dialog '+className} role="dialog" aria-modal="true" aria-label={title} tabIndex={-1} onKeyDown={event=>{
   if(event.key==='Escape'){event.stopPropagation();onClose();}
   if(event.key==='Tab'){
    const dialog=event.currentTarget,controls=dialogControls(dialog);
