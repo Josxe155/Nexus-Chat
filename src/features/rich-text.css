@@ -1,0 +1,12 @@
+.rich-message{min-width:0;max-width:100%;overflow-wrap:anywhere}
+.rich-message .rich-text-line{white-space:pre-wrap}
+.rich-message strong{font-weight:700}
+.rich-message em{font-style:italic}
+.rich-message s{text-decoration:line-through}
+.rich-message code{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:.93em;font-weight:400;white-space:pre-wrap;overflow-wrap:anywhere;background:#80808018;border-radius:4px;padding:1px 4px}
+.rich-message pre{display:block;max-width:100%;overflow-x:auto;white-space:pre;padding:10px 12px;border-radius:10px;background:#80808018;margin:8px 0;tab-size:2}
+.rich-message pre code{display:block;min-width:0;white-space:pre;overflow-wrap:normal;padding:0;background:none}
+.rich-message ul,.rich-message ol{padding-inline-start:24px;margin:6px 0;white-space:normal}
+.rich-message ul{list-style:disc}.rich-message ol{list-style:decimal}
+.rich-message li{white-space:pre-wrap;padding-inline-start:2px}
+.rich-message blockquote{margin:6px 0;padding-inline-start:12px;border-inline-start:3px solid #80808070;white-space:pre-wrap}

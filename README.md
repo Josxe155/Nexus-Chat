@@ -175,7 +175,7 @@ Configura los proveedores de Authentication, los dominios autorizados, las regla
 | `npm run build:hosting` | Compila la web y genera el manifiesto de actualización. |
 | `npm run preview` | Permite revisar una compilación local. |
 
-La versión **v26.78.0** convierte Modo IA en un chat sencillo, añade comandos de edición con auditoría y síntesis local en español. La revisión **v26.76.2** migra el Modo IA del dashboard a Gemini, permite usar las voces en español del sistema y renueva el logo y los favicons. El asistente general mantiene OpenRouter como alternativa. Consulta [la preparación y verificación en Codex Cloud](docs/CODEX-CLOUD.md) para conocer las pruebas y los accesos pendientes.
+La corrección **v26.78.1** conserva las comillas y los símbolos incompletos y corrige la negrita y el código en chats y respuestas de IA. La versión **v26.78.0** convierte Modo IA en un chat sencillo, añade comandos de edición con auditoría y síntesis local en español. La revisión **v26.76.2** migra el Modo IA del dashboard a Gemini, permite usar las voces en español del sistema y renueva el logo y los favicons. El asistente general mantiene OpenRouter como alternativa. Consulta [la preparación y verificación en Codex Cloud](docs/CODEX-CLOUD.md) para conocer las pruebas y los accesos pendientes.
 
 ## ☁️ Publicación en Firebase
 

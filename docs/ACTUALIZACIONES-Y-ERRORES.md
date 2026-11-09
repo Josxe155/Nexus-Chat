@@ -41,3 +41,16 @@ En móvil y escritorio se mantiene un aviso de actualización pendiente. Al cerr
 Cancelar guarda el fragmento recibido y conserva el número, incluso al cerrar y volver a abrir el panel. Continuar omite los archivos completos. Para un archivo parcial se vuelve a solicitar el cuerpo y se descarta el prefijo ya guardado: no se suma dos veces al contador, pero puede volver a consumir tráfico. El navegador puede eliminar la caché si necesita espacio. No se afirma que exista reanudación HTTP por rangos.
 
 Consulta [REVISION-MOVIL-Y-MANTENIMIENTO.md](REVISION-MOVIL-Y-MANTENIMIENTO.md) para las comprobaciones de interfaz y el estado pendiente de la limpieza mensual.
+
+
+## Formato de mensajes · v26.78.1
+
+El formateador compartido de chats, Nexus AI y Modo IA conserva apóstrofos y comillas rectas o tipográficas. Solo interpreta marcas de formato completas; los asteriscos y acentos graves sueltos o sin cerrar permanecen visibles. Se admiten negrita con uno o dos asteriscos, cursiva con guiones bajos, tachado y código. Las marcas dentro de código se muestran literalmente. Los bloques de código completos conservan saltos y sangría; si falta el cierre, se muestra el texto original, incluida la apertura.
+
+Los formatos anidados y la negrita entre varias líneas se procesan sin dejar marcas sobrantes. Las comillas y la puntuación posterior a una URL no se incorporan al enlace. El contenido se representa mediante elementos de React, sin interpretar HTML de los mensajes. Los mensajes escritos por el administrador en Modo IA usan el mismo formateador que las respuestas. La corrección no modifica el texto guardado ni el contenido de los comandos de edición.
+
+Verificación: cuatro pruebas del formateador, ocho pruebas del cliente de IA, tipos, documentación, compilación y Chromium en anchos de 390, 820 y 1440 píxeles. Se comprobaron comillas, símbolos sin cerrar, estilos anidados, código, listas, enlaces, HTML literal y ausencia de desbordamiento.
+
+La matriz de esta corrección tiene ocho comprobaciones: pruebas del formateador, pruebas de IA, tipos, documentación, compilación, visualización adaptable, archivos publicados y recorrido completo en dispositivos físicos. Una vez verificados los archivos publicados son siete de ocho, 87,5 % por tamaño. Las pruebas de dispositivos físicos siguen pendientes; este porcentaje no mide el proyecto completo.
+
+Referencia: [formato de mensajes de WhatsApp](https://faq.whatsapp.com/539178204879377/?cms_platform=web). Nexus también admite la negrita con dos asteriscos usada por las respuestas de IA.

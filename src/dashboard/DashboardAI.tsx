@@ -52,7 +52,7 @@ export default function DashboardAI({db,rtdb,user,snapshot}:{db:Firestore;rtdb:D
   {error&&<p className="feedback error" role="alert">{error}</p>}
   <div className="dashboard-ai-transcript" role="log" aria-label="Conversación de Modo IA" aria-live="polite">
    {!turns.length&&<div className="dashboard-chat-welcome"><Sparkles size={36}/><h3>¿En qué te ayudo?</h3><p>Escribe tu consulta o un comando.</p></div>}
-   {turns.map((turn,index)=><article key={index} className="dashboard-ai-turn"><p className="dashboard-ai-user-message">{turn.question}</p>{turn.answer&&<div className="report-preview" aria-label="Respuesta del Modo IA"><strong>Modo IA</strong><RichText text={turn.answer}/></div>}</article>)}
+   {turns.map((turn,index)=><article key={index} className="dashboard-ai-turn"><div className="dashboard-ai-user-message"><RichText text={turn.question}/></div>{turn.answer&&<div className="report-preview" aria-label="Respuesta del Modo IA"><strong>Modo IA</strong><RichText text={turn.answer}/></div>}</article>)}
    <div ref={bottom}/>
   </div>
   <form className="dashboard-ai-composer" aria-label="Escribir una consulta" onSubmit={event=>{event.preventDefault();void ask();}}>
