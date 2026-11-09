@@ -14,7 +14,6 @@ export default function ReportVoice({report,disabled}:{report:RefObject<HTMLElem
   const content=report.current?.innerText.split(/\n+/).map(line=>line.trim()).filter(Boolean).map(line=>/[.!?]$/.test(line)?line:line+'.').join(' ');
   if(!content)return;
   window.dispatchEvent(new Event('nexus:stop-assistant-speech'));
-  window.dispatchEvent(new Event('nexus:stop-assistant-dictation'));
   setError('');active.current=playSpanish(content,setState,()=>setError('No se pudo reproducir el informe. Vuelve a intentarlo.'));
  }
  return <>

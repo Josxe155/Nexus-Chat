@@ -8,7 +8,7 @@ import {createDashboardReader,dataMap,readDeclarations} from './aiReads';
 import {requestsImmediateAction} from './assistantActionCore';
 import {actionDeclarations,createAssistantActions,type AssistantAction} from './assistantActions';
 import {loadAssistantHistory,saveAssistantHistory,assistantContextHistory,localHistoryDeclaration,searchAssistantHistory,assistantAnchorValid,historyKey,clearAssistantHistory,type StoredTurn} from './assistantHistory';
-import {DictateQuestion,SpeakAnswer} from './dashboardSpeech';
+import {SpeakAnswer} from './dashboardSpeech';
 import TransientNotice from './TransientNotice';
 import {verifyDashboardAccess} from './session';
 import type {OverviewSnapshot} from './Overview';
@@ -21,7 +21,7 @@ function proposals(plans:AssistantAction[]){return plans.filter(plan=>!plan.exec
 export default function DashboardAI({db,rtdb,user,snapshot}:{db:Firestore;rtdb:Database;user:User;snapshot?:OverviewSnapshot}){
  const [question,setQuestion]=useState(''),[error,setError]=useState('');
  const [turns,setTurns]=useState<StoredTurn[]>([]),[ready,setReady]=useState(false),[busy,setBusy]=useState(false),[committing,setCommitting]=useState(false);
- const request=useRef<AbortController|null>(null),baseDraft=useRef(''),storageFailed=useRef(false),historyOwner=useRef('');
+ const request=useRef<AbortController|null>(null),storageFailed=useRef(false),historyOwner=useRef('');
  const bottom=useRef<HTMLDivElement|null>(null);
  const answer=[...turns].reverse().find(turn=>turn.answer)?.answer||'';
  useEffect(()=>{let live=true;const load=async()=>{setReady(false);storageFailed.current=false;try{const history=await loadAssistantHistory(user.uid);if(live){historyOwner.current=user.uid;setTurns(history);}}catch{if(live){setTurns([]);setError('No se pudo abrir el historial local. Esta conversación permanecerá solo durante la sesión.');storageFailed.current=true;}}finally{if(live)setReady(true);}};void load();const clear=()=>{request.current?.abort();void load();};const focus=()=>{void assistantAnchorValid().then(valid=>{if(live&&!valid)clear();});};const storage=(event:StorageEvent)=>{if(event.newValue===null&&(event.key===null||event.key===historyKey(user.uid)))clear();};window.addEventListener('nexus:assistant-history-cleared',clear);window.addEventListener('focus',focus);window.addEventListener('storage',storage);return()=>{live=false;window.removeEventListener('nexus:assistant-history-cleared',clear);window.removeEventListener('focus',focus);window.removeEventListener('storage',storage);};},[user.uid]);
@@ -84,7 +84,6 @@ export default function DashboardAI({db,rtdb,user,snapshot}:{db:Firestore;rtdb:D
    <TransientNotice message={error} onClose={()=>setError('')}/>
    <SpeakAnswer text={answer} compact/>
    <textarea aria-label="Escribe un mensaje" rows={1} value={question} disabled={busy||!ready} onChange={event=>{setQuestion(event.target.value);const invalid=draftError(event.target.value);if(invalid)setError(invalid);}} placeholder="Escribe un mensaje" title="Hasta 500 líneas. Usa Mayús + Intro para un salto de línea." onKeyDown={event=>{if(event.key==='Enter'&&!event.shiftKey&&!event.nativeEvent.isComposing){event.preventDefault();void ask();}}}/>
-   <DictateQuestion compact disabled={busy||!ready} onStart={()=>{baseDraft.current=question;}} onText={text=>setQuestion([baseDraft.current.trimEnd(),text].filter(Boolean).join(' '))}/>
    {busy?<button type="button" className="dashboard-ai-composer-icon" disabled={committing} onClick={()=>request.current?.abort()} aria-label="Cancelar consulta"><Square size={18}/></button>:<button type="submit" className="dashboard-ai-composer-icon" disabled={!ready||!question.trim()||!!draftError(question)} aria-label="Enviar consulta"><Send size={18}/></button>}
   </form>
  </section>;
