@@ -1,0 +1,27 @@
+/* Keep action geometry independent from heading length and row wrapping. */
+.settings-center .settings-heading>button{display:grid;place-items:center;flex:0 0 40px;width:40px;height:44px;padding:8px;box-sizing:border-box}
+.settings-center .settings-heading>button>svg{display:block;width:24px;height:24px;flex:none}
+.settings-center .settings-heading>h2{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.settings-center .settings-heading>.settings-overflow{margin-inline-start:auto}
+.settings-center .setting-row>svg,.settings-center .phone-setting-row>svg{display:block;flex:none;align-self:center}
+.settings-center .setting-row>span,.settings-center .phone-setting-row>span{min-width:0;overflow-wrap:anywhere}
+.settings-center .setting-row>span+svg{margin-inline-start:auto}
+.settings-center .phone-setting-row>.phone-setting-end{flex:0 0 auto;display:flex;align-items:center;justify-content:flex-end;gap:6px;margin-inline-start:auto}
+.settings-center .phone-setting-end>svg{display:block;width:18px;height:18px;flex:none}
+.account-settings-page{--ps-muted:var(--setting-muted);--ps-line:var(--setting-line);width:100%;max-width:760px}
+.account-settings-group{padding:12px 0 16px;border-bottom:1px solid var(--setting-line)}
+.settings-center .account-settings-group h3{font-size:14px;font-weight:500;margin:0;padding:14px 24px 12px;color:var(--setting-muted)}
+.settings-center .account-settings-page .phone-setting-row{display:flex;align-items:center;gap:24px;min-height:66px;width:100%;padding:14px 24px;text-align:start;box-sizing:border-box;background:transparent;border:0;border-radius:0;margin:0;line-height:1.35}
+.settings-center .account-settings-page .phone-setting-row>svg{width:24px;height:24px;margin:0;color:var(--setting-muted)}
+.settings-center .account-settings-page .phone-setting-row strong{font-size:17px;font-weight:400}
+.settings-center .account-settings-page .phone-setting-row small{font-size:13px;color:var(--setting-muted)}
+.settings-center .account-settings-page .account-logout{min-height:76px;font-size:17px}
+.settings-center .account-settings-page .account-logout>svg{color:inherit}
+.settings-account-menu.floating-message-menu{width:320px;max-width:calc(100vw - 16px);padding:10px 0;border-radius:16px;box-sizing:border-box}
+.settings-account-menu.floating-message-menu>button{display:flex;align-items:center;gap:14px;width:100%;min-height:54px;padding:12px 16px;text-align:start;white-space:normal;line-height:1.35}
+.settings-account-menu.floating-message-menu>button>svg{display:block;flex:0 0 22px;position:static}
+.settings-account-menu.floating-message-menu>button>span{min-width:0;overflow-wrap:anywhere}
+.account-detail{max-width:680px;padding:16px;overflow-wrap:anywhere}
+.account-detail p{line-height:1.6;color:var(--setting-muted)}
+.account-detail .settings-primary{padding:12px 18px;border-radius:24px;margin-top:12px}
+.account-detail a{display:inline-block;text-decoration:underline;padding:12px 0}

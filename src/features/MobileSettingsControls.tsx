@@ -14,7 +14,7 @@ function dialogControls(dialog: HTMLElement) {
 }
 
 export function SettingsRow({label,detail,icon:Icon,end,onClick}:{label:string;detail?:string;icon?:ComponentType<{size?:number}>;end?:ReactNode;onClick:()=>void}){
- return <button type="button" className="phone-setting-row" onClick={onClick}>{Icon&&<Icon size={23}/>}<span><strong>{label}</strong>{detail&&<small>{detail}</small>}</span>{end}</button>;
+ return <button type="button" className="phone-setting-row" onClick={onClick}>{Icon&&<Icon size={23}/>}<span><strong>{label}</strong>{detail&&<small>{detail}</small>}</span>{end!=null&&<span className="phone-setting-end">{end}</span>}</button>;
 }
 export function SettingsHero({icon:Icon,title,detail}:{icon:ComponentType<{size?:number}>;title:string;detail:string}){
  return <div className="phone-settings-hero"><span><Icon size={44}/></span><h3>{title}</h3><p>{detail}</p></div>;

@@ -75,6 +75,8 @@ Esta distribución es exclusiva de computadora. Nexus Messenger conserva sus pan
 
 ## ⚙️ Ajustes en celular
 
+La versión **v26.81.0** reorganiza Cuenta, incorpora recuperación de contraseña y verificación del correo y corrige la geometría compartida de flechas y botones de Ajustes. Consulta [el alcance y las comprobaciones](docs/CUENTA-Y-ALINEACION-AJUSTES.md).
+
 La vista de celular reúne Apariencia, Privacidad, Chats, Notificaciones, Almacenamiento y datos, Accesibilidad y Ayuda y comentarios en pantallas y diálogos adaptados al ancho del teléfono. Los colores, los iconos de pestaña y el horario de enfoque están disponibles sin suscripción.
 
 Las opciones de descarga usan el perfil de red cuando el navegador lo informa y la regla general en los demás casos. La vibración, el límite de datos de llamadas y el icono de pestaña dependen de las funciones admitidas por el navegador. «Liberar espacio» administra copias de archivos guardadas localmente. El historial permite exportar, archivar, vaciar o quitar conversaciones del historial propio.

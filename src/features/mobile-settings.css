@@ -98,7 +98,7 @@ html:root[data-nexus-surface=workspace][data-nexus-mode][data-nexus-palette] .mo
   color:var(--ps-muted);
   flex:none;
 }
-.phone-setting-row>svg:last-child { width:18px; margin:0; }
+.phone-setting-row>span+svg { width:18px; margin:0; }
 .phone-setting-value { flex:none; }
 .phone-setting-row:active,.phone-settings-text-action:active { background:var(--ps-line); }
 .mobile-settings .settings-scroll .phone-setting-section-title,.mobile-settings .settings-scroll>h3 {
