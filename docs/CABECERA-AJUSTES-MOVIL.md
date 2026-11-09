@@ -26,3 +26,5 @@ Matriz de esta entrega: (1) referencia oficial y recurso transparente, (2) tipos
 La mejora de favicon, el resto de categorías de Ajustes y las pantallas de información de contacto siguen en sus pendientes respectivos.
 
 En v26.80.1 la burbuja sin Info. personalizada alterna entre diez preguntas al abrir de nuevo la portada de Ajustes. No se repite una pregunta hasta recorrer la lista. La secuencia se mantiene en memoria por cuenta y no escribe en Firebase. Una Info. personalizada conserva su contenido y el botón sigue abriendo su editor.
+
+En v26.80.2, al desplazar la lista, foto, Info., nombre, dibujos y acciones superiores pierden opacidad y ganan desenfoque progresivamente. Una máscara suaviza el borde superior del contenido para evitar un recorte brusco. La flecha de regreso permanece disponible. Los controles desvanecidos dejan de recibir foco o clics y se recuperan al volver arriba. La documentación oficial de perfil consultada no especifica esta animación exacta; el criterio de esta interacción procede de la petición del propietario.

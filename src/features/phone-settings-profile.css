@@ -10,11 +10,11 @@
   pointer-events:none;
   background:url('/settings-profile-doodles.png') center var(--phone-settings-cover-scroll,0px)/540px auto repeat;
   filter:grayscale(1);
-  opacity:.1;
+  opacity:calc(.1 * var(--phone-settings-header-opacity,1));
   mask-image:linear-gradient(#000 calc(100% - 12px),transparent);
   -webkit-mask-image:linear-gradient(#000 calc(100% - 12px),transparent);
 }
-html[data-nexus-mode=light] .settings-center.mobile-settings[data-page=""]::before { filter:grayscale(1) invert(1); opacity:.075; }
+html[data-nexus-mode=light] .settings-center.mobile-settings[data-page=""]::before { filter:grayscale(1) invert(1); opacity:calc(.075 * var(--phone-settings-header-opacity,1)); }
 html:root[data-nexus-surface=workspace][data-nexus-mode][data-nexus-palette] .settings-center.mobile-settings[data-page=""] :is(.settings-heading,.settings-scroll) {
   position:relative;
   z-index:1;
@@ -323,3 +323,6 @@ html:root .settings-center.mobile-settings[data-page=profilePhoto] .settings-scr
 .phone-info-preview-card small { display:block; }
 
 body:has(.phone-info-editor) :is(.nexus-update-reopen,.nexus-update-notice:not(.release-download-panel)) { display:none!important; }
+
+.settings-center.mobile-settings[data-page=""] :is(.phone-settings-identity,.phone-settings-actions){opacity:var(--phone-settings-header-opacity,1);filter:blur(var(--phone-settings-header-blur,0px))}
+.settings-center.mobile-settings[data-page=""] .settings-scroll{mask-image:linear-gradient(to bottom,transparent,#000 var(--phone-settings-scroll-fade,0px));-webkit-mask-image:linear-gradient(to bottom,transparent,#000 var(--phone-settings-scroll-fade,0px))}
