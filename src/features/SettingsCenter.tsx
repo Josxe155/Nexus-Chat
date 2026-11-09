@@ -1,3 +1,4 @@
+import {usePhoneSettingsCover} from './usePhoneSettingsCover';
 import {ApplicationLockSettings} from './ApplicationLock';
 import AboutWeb from './AboutWeb';
 import PhoneSettingsHome from './PhoneSettingsHome';
@@ -56,6 +57,7 @@ export default function SettingsCenter({user,users,chats,desktop=false,onUserCha
   const timer=setTimeout(()=>setBioClock(Date.now()),Math.min(2147483647,expiry-Date.now()));
   return()=>clearTimeout(timer);
  },[user.bioExpiresAt,bioClock]);
+ usePhoneSettingsCover(phone&&!page,phoneScroll);
  const activeBio=user.bioExpiresAt&&user.bioExpiresAt<=Math.max(bioClock,Date.now())?'':user.bio;
  useEffect(()=>{if(phone)phoneScroll.current?.scrollTo(0,0);setExporting(false);setHistoryAction(null);},[phone,page]);
  useEffect(()=>{if(!photoFile){setPreview('');return;}const url=URL.createObjectURL(photoFile);setPreview(url);return()=>URL.revokeObjectURL(url);},[photoFile]);

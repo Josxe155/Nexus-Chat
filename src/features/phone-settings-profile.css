@@ -1,18 +1,30 @@
 .settings-center.mobile-settings { position:relative; }
-html:root[data-nexus-surface=workspace][data-nexus-mode][data-nexus-palette] .settings-center.mobile-settings[data-page=""] {
-  background:linear-gradient(transparent 52px,var(--ps-bg) 182px),
-    url('/chat-doodles.svg') center top/360px no-repeat,var(--ps-bg)!important;
+/* A separate decorative layer cannot be erased by the general settings surface. */
+.settings-center.mobile-settings[data-page=""] { isolation:isolate; }
+.settings-center.mobile-settings[data-page=""]::before {
+  content:'';
+  position:absolute;
+  inset:0 0 auto;
+  height:var(--phone-settings-cover-bottom,164px);
+  z-index:0;
+  pointer-events:none;
+  background:url('/settings-profile-doodles.png') center var(--phone-settings-cover-scroll,0px)/540px auto repeat;
+  filter:grayscale(1);
+  opacity:.1;
+  mask-image:linear-gradient(#000 calc(100% - 12px),transparent);
+  -webkit-mask-image:linear-gradient(#000 calc(100% - 12px),transparent);
 }
+html[data-nexus-mode=light] .settings-center.mobile-settings[data-page=""]::before { filter:grayscale(1) invert(1); opacity:.075; }
 html:root[data-nexus-surface=workspace][data-nexus-mode][data-nexus-palette] .settings-center.mobile-settings[data-page=""] :is(.settings-heading,.settings-scroll) {
+  position:relative;
+  z-index:1;
   background:transparent!important;
 }
 .settings-center.mobile-settings[data-page=""] .settings-heading {
   border:0;
   padding-right:5px;
 }
-.settings-center.mobile-settings[data-page=""] .settings-scroll {
-  padding-top:0!important;
-}
+.settings-center.mobile-settings[data-page=""] .settings-scroll { padding-top:0!important; }
 .phone-settings-actions {
   display:flex;
   align-items:center;

@@ -9,7 +9,7 @@ Este bloque registra trabajo pendiente solicitado después de v26.79.4. No descr
 | Orden | Trabajo pendiente | Comprobación para darlo por terminado | Estado |
 | --- | --- | --- | --- |
 | 1 | Mejorar el favicon y los iconos de marca, con fondo transparente. | Sustituir favicon.ico, el icono SVG y las variantes PNG de marca; comprobar transparencia real fuera del símbolo, bordes limpios, silueta legible a 16/32 píxeles, consistencia de color y contraste sobre fondos claros y oscuros. Revisar las referencias en la portada, dashboard y pantalla de carga. | Pendiente; inventario inicial realizado. |
-| 2 | Ajustar la pestaña de Ajustes. | Revisar distribución, tamaños, navegación, búsqueda y estados; comprobar que cada opción funciona, guarda sus cambios y vuelve al apartado correcto. | Pendiente. |
+| 2 | Ajustar la pestaña de Ajustes. | Revisar distribución, tamaños, navegación, búsqueda y estados; comprobar que cada opción funciona, guarda sus cambios y vuelve al apartado correcto. | En curso: fondo de cabecera móvil aplicado en v26.80.0; resto pendiente. |
 | 3 | Reorganizar categorías y subapartados de Ajustes. | Revisar nombres, orden y accesos, eliminar duplicados o entradas sin función y conservar las preferencias existentes. | Pendiente. |
 | 4 | Continuar la información de contacto y de grupos. | Revisar cabecera, datos, multimedia y acciones; comprobar que cada acción actúa sobre el contacto o grupo correcto, respeta permisos y conserva la navegación. | Pendiente. |
 | 5 | Completar la revisión visual y funcional del bloque. | Probar Android, iPhone, tablet y computadora; revisar claridad, coherencia, legibilidad, accesibilidad y regresiones de los recorridos anteriores. | Pendiente. |
@@ -26,7 +26,7 @@ La tarea requiere sustituir los recursos y verificar sus píxeles; cambiar únic
 
 ### Seguimiento de este bloque
 
-Avance inicial de implementación terminada y verificada: **celular 0/5 (0 %), tablet 0/5 (0 %) y computadora 0/5 (0 %)**. El inventario no cuenta como un rediseño completado. Se actualizarán los resultados por dispositivo al cerrar los trabajos de la tabla.
+Avance inicial de implementación terminada y verificada: **celular 0/5 (0 %), tablet 0/5 (0 %) y computadora 0/5 (0 %)**. El inventario no cuenta como un rediseño completado. En v26.80.0 se completó el fondo de la cabecera móvil, una parte del punto 2; ese punto amplio todavía no está cerrado. Se actualizarán los resultados por dispositivo al cerrar los trabajos de la tabla.
 
 El objetivo del 100 % se medirá sobre un alcance de funciones y pantallas definido y comprobado. Las limitaciones externas verificadas del navegador o sistema operativo se anotarán por separado y no entrarán en ese denominador. Los errores de Nexus, las funciones aún no implementadas y las conexiones o permisos pendientes seguirán figurando como pendientes; no se reclasificarán como limitaciones para dar el bloque por terminado.
 
