@@ -1,3 +1,4 @@
+import {redactAssistantData} from './assistantData';
 import {collection,doc,documentId,getDocFromServer,getDocsFromServer,getCountFromServer,query,orderBy,startAfter,limit,where,type Firestore,type QueryConstraint} from 'firebase/firestore';
 import {get,ref,query as realtimeQuery,orderByKey,startAfter as afterKey,limitToFirst,type Database} from 'firebase/database';
 import type {User} from 'firebase/auth';
@@ -15,14 +16,15 @@ export const dataMap={
  subcollections:['users/{uid}/private (profile, privacy, settings, contacts, phone-contacts, contactQr)','users/{uid}/details','users/{uid}/conversations','chats/{chatId}/messages','statuses/{id}/reactions'],
  realtime:['presence','calls','clientMedia','dashboardAdmins','moderatedUsers'],
  schemas:{officialNotices:{fields:{category:'Novedad | Aviso | Seguridad',title:'texto no vacío, hasta 100 caracteres',body:'texto no vacío, hasta 2000 caracteres',publishedAt:{$serverTimestamp:true}}},availability:{path:'publicConfig/availability',fields:{maintenance:'boolean',updatedAt:{$serverTimestamp:true}}},messages:'Conservar id, chatId, senderId y fecha original; para texto cambiar content y edited=true. Para archivos consultar mediaFiles antes que fragmentos clientMedia.'},
- instructions:'Las rutas son orientativas, no una lista cerrada. Consulta cualquier ruta necesaria. Los recuentos usan count_collection; las listas se paginan. No interpretes una página como el total. No se dispone de contraseñas de Authentication ni se pueden descifrar datos sin sus claves originales.',
+ instructions:'Las rutas de lectura son orientativas, no una lista cerrada. La escritura se limita a datos operativos y excluye cuentas, perfiles, identidad, moderación y seguridad. Consulta cualquier ruta necesaria. Los recuentos usan count_collection; las listas se paginan. No interpretes una página como el total. No se dispone de contraseñas de Authentication ni se pueden descifrar datos sin sus claves originales.',
 };
 export function createDashboardReader(db:Firestore,rtdb:Database,user:User){
  return async(name:string,args:Record<string,unknown>,signal:AbortSignal)=>{
   signal.throwIfAborted();
   if(!await verifyDashboardAccess(user,db))throw Error('Tu acceso de administración ya no está disponible.');
   const path=typeof args.path==='string'?args.path.replace(/^\/+|\/+$/g,''):'';
-  if(!path&&name!=='read_realtime')throw Error('Indica una ruta para consultar.');
+  if(name==='read_realtime'&&path.split('/')[0]==='clientMedia')throw Error('Consulta el catálogo de archivos para analizar su información; los fragmentos binarios quedan protegidos.');
+  if(!path)throw Error('Indica una ruta para consultar.');
   const constraints:QueryConstraint[]=[];
   if(typeof args.field==='string'&&args.field){let value:unknown=args.value;try{value=JSON.parse(String(value));}catch{}constraints.push(where(args.field,'==',value));}
   let result:unknown;
@@ -38,6 +40,6 @@ export function createDashboardReader(db:Firestore,rtdb:Database,user:User){
    const entries:{id:string;data:unknown}[]=[];snapshot.forEach(child=>{entries.push({id:child.key!,data:child.val()});});
    result={path,records:entries.slice(0,50),value:entries.length?undefined:snapshot.val(),after:entries.length>50?entries[49].id:null,complete:entries.length<=50};
   }else throw Error('Solo están disponibles operaciones de consulta.');
-  signal.throwIfAborted();return result;
+  signal.throwIfAborted();return redactAssistantData(result);
  };
 }

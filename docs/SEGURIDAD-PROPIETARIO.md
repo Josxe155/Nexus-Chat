@@ -19,4 +19,4 @@ Esta corrección también reconoce encabezados Markdown de uno a seis numerales,
 
 Matriz de esta corrección: (1) identidad real comprobada en Firebase, (2) pruebas unitarias, (3) tipos/documentación/compilación, (4) reglas y operaciones emuladas, (5) interfaz en tres tamaños, (6) política propietaria guardada y verificada en ambos servicios, (7) GitHub y Hosting/reglas publicados y comprobados, (8) recorrido completo en equipos físicos. Tras verificar la publicación, 7/8 equivalen a **87,5 % por tamaño**; no es avance global del proyecto. Los dispositivos físicos siguen pendientes.
 
-El trabajador administrativo de cuentas y publicaciones sigue en preparación aparte, pendiente de la aprobación específica de IAM. Esta corrección no crea esa identidad ni habilita sus roles. Su futura autorización también debe exigir esta política propietaria.
+El alcance se acotó posteriormente a la gestión operativa de datos. Se descartó habilitar el trabajador administrativo de cuentas y publicaciones o sus permisos IAM. La verificación propietaria se conserva. Consulta [el alcance vigente](ALCANCE-NEXUS-ASSISTANT.md).

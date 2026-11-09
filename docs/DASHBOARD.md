@@ -139,3 +139,7 @@ Verificación de esta retirada: tipos y documentación, 19 pruebas unitarias exi
 ### Identidad propietaria y encabezados · v26.79.4
 
 El dashboard y Nexus Assistant exigen UID y correo verificado coincidentes con la política propietaria guardada en Firebase. Otra cuenta no puede obtener acceso administrativo solo por tener una marca de administrador. La política no puede editarse desde los clientes. Se mantienen Google y contraseña para la identidad propietaria. También se muestran correctamente los encabezados `###`, títulos subrayados y separadores. Consulta [el alcance y la verificación](SEGURIDAD-PROPIETARIO.md).
+
+### Alcance operativo de la IA · v26.79.5
+
+Por decisión posterior del propietario, Nexus Assistant se limita a leer, analizar y gestionar datos operativos de Firestore y Realtime Database. No se habilita la preparación de gestión de Authentication, código o despliegues, y queda descartada su solicitud IAM. Se conservan la edición de mensajes, las operaciones admitidas con auditoría y la verificación exclusiva del propietario. Cuentas, perfiles, permisos, credenciales, archivos y conexiones activas quedan fuera de las escrituras del asistente. Consulta [el alcance y la verificación](ALCANCE-NEXUS-ASSISTANT.md).

@@ -127,7 +127,7 @@ test('reconstruye el dictado acumulado sin duplicar frases reenviadas por el nav
 test('protege destinos administrativos y aplica cambios sin modificar el registro original',async()=>{
  const {actionPath,applyActionPatch,sameRecord,validateActionData}=await import('../src/dashboard/assistantActionCore.ts');
  for(const path of ['dashboardAdmins/a','dashboardActions/a','assistantOperations/a','publicConfig/cleanup'])assert.throws(()=>actionPath(path,'firestore'));
- assert.equal(actionPath('users/a/private/profile','firestore'),'users/a/private/profile');
+ assert.equal(actionPath('chats/a/messages/b','firestore'),'chats/a/messages/b');
  const before={title:'Antes',nested:{one:1,two:2}};assert.deepEqual(applyActionPatch(before,{'nested.one':3,title:{$delete:true}}),{nested:{one:3,two:2}});assert.equal(before.nested.one,1);
  assert.equal(sameRecord({a:1,b:2},{b:2,a:1}),true);assert.equal(sameRecord({a:1},{a:2}),false);
  assert.throws(()=>validateActionData(JSON.parse('{"__proto__":{"polluted":true}}')));
@@ -178,4 +178,23 @@ test('reintenta un fallo de audio sin repetir fragmentos y cancela sin alertas',
   assert.equal(sources.length,1);assert.equal(workers[1].jobs.length,2);stop();assert.equal(closed,1);assert.equal(workers[1].terminated,true);assert.equal(errors,0);assert.equal(states.at(-1),'idle');
   workers[1].onmessage({data:new ArrayBuffer(100)});await flush();assert.equal(sources.length,1);
  }finally{Object.assign(globalThis,original);}
+});
+
+test('limita la escritura a datos operativos y permite órdenes naturales sin modificar permisos',async()=>{
+ const {actionPath,assertOperationalData,requestsImmediateAction}=await import('../src/dashboard/assistantActionCore.ts');
+ for(const path of ['users/person','users/person/private/profile','dashboardSecurity/owner','usernames/test','deletedAccounts/person','mediaFiles/file','calls/live','clientMedia/file','moderatedUsers/person','publicConfig/assistantAdmin'])assert.throws(()=>actionPath(path,path.startsWith('calls/')||path.startsWith('clientMedia/')||path.startsWith('moderatedUsers/')?'realtime':'firestore'));
+ for(const data of [{admins:['other']},{'permissions.write':true},{nested:{privateKey:'secret'}},{owner:'other'},{sealed:{}},{key:{$delete:true}}])assert.throws(()=>assertOperationalData(data));
+ assert.doesNotThrow(()=>assertOperationalData({content:'Mañana sí hay clase',edited:true}));
+ const plan:any={kind:'firestore',operation:'update'};
+ for(const prompt of ['Quiero que edites ese mensaje','¿Puedes actualizar el aviso?','Necesito que elimines este reporte'])assert.equal(requestsImmediateAction(prompt,plan,'execute'),true);
+ for(const prompt of ['Solo lee los datos','Prepara una propuesta','No elimines nada','Cambia el texto sin guardar'])assert.equal(requestsImmediateAction(prompt,plan,'execute'),false);
+ assert.equal(requestsImmediateAction('Crea un aviso',plan,'prepare'),false);
+ assert.equal(requestsImmediateAction('Crea un aviso con título "Prepara tus materiales"',plan,'execute'),true);
+ assert.equal(requestsImmediateAction('Limpia los mensajes',{...plan,kind:'cleanup'},'execute'),false);
+});
+
+test('oculta credenciales, claves y binarios sin cambiar el contenido útil de las consultas',async()=>{
+ const {redactAssistantData}=await import('../src/dashboard/assistantData.ts');
+ const before={content:'Mañana sí hay clase',senderId:'author',nested:{apiKey:'secret',refreshToken:'token',key:'private',name:'Visible'},bytes:new Uint8Array([1,2])};
+ const result=redactAssistantData(before);assert.equal(result.content,before.content);assert.equal(result.senderId,'author');assert.equal(result.nested.name,'Visible');assert.equal(result.nested.apiKey,'[Dato protegido]');assert.equal(result.nested.key,'[Dato protegido]');assert.equal(result.nested.refreshToken,'[Dato protegido]');assert.match(result.bytes,/binario protegido/);assert.equal(before.nested.apiKey,'secret');
 });

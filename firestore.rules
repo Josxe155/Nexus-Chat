@@ -351,8 +351,9 @@ service cloud.firestore {
      && (request.resource==null ? action.after==null : action.after==request.resource.data);
    }
    allow read: if operator();
-   allow write: if operator() && !(area in ['dashboardAdmins','dashboardActions','dashboardEdits','assistantOperations','dashboardSecurity'])
-    && request.path!=/databases/$(database)/documents/publicConfig/cleanup && assistantWrite();
+   allow write: if operator() && !(area in ['dashboardAdmins','dashboardActions','dashboardEdits','assistantOperations','dashboardSecurity','users','usernames','nexusNumbers','nexusNumberReservations','contactCodes','deletedAccounts','moderatedUsers','moderatedChats','assistantAdminJobs','assistantAdminAudit',"mediaFiles","clientMedia","calls","callRooms","signals","incoming","presence","presenceSessions","presenceLastSeen","presencePrivacy"])
+    && request.path!=/databases/$(database)/documents/publicConfig/cleanup
+    && request.path!=/databases/$(database)/documents/publicConfig/assistantAdmin && assistantWrite();
   }
 
  }

@@ -58,7 +58,7 @@ export default function DashboardAI({db,rtdb,user,snapshot}:{db:Firestore;rtdb:D
     if(readDeclarations.some(declaration=>declaration.name===name))return read(name,args,signal);
     const result=await actions.prepare(name,args,signal);
     const plan=plans.find(plan=>plan.id===(result as any).id);
-    if(plan&&requestsImmediateAction(prompt,plan)){
+    if(plan&&requestsImmediateAction(prompt,plan,args.execution)){
      const text=await actions.execute(plan,signal,commit);plan.executedAt=Date.now();executed.push(text);
      complete(executed.join('\n\n'));setCommitting(false);timer=setTimeout(()=>controller.abort('timeout'),600000);
      return {executed:true,id:plan.id,message:text};
