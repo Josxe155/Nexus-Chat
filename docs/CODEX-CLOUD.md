@@ -34,7 +34,13 @@ npx firebase-tools hosting:channel:deploy codex-v26-76-2 --project nexus-chat-56
 
 El canal no reemplaza el Hosting público. La opción final evita modificar automáticamente los dominios autorizados de Authentication; probar Google en el dominio temporal puede requerir autorizarlo. La vista previa utiliza los servicios de datos configurados en la aplicación: no es una base de datos de pruebas independiente. No se ejecutan limpiezas para comprobar Hosting.
 
-La comprobación de credenciales de esta sesión falló con `Failed to authenticate, have you run firebase login?`. No hay identidad administrativa de Google configurada. El despliegue temporal queda pendiente hasta resolver ese acceso; no se afirma que exista una URL de prueba.
+El primer intento quedó bloqueado por falta de autenticación. Después, el propietario completó el acceso oficial de Firebase CLI y se comprobó el acceso a `nexus-chat-nc`. La sesión se conserva únicamente en la configuración local de este entorno, fuera del repositorio; no configura por sí sola credenciales para otras sesiones de Cloud.
+
+El canal temporal se publicó y verificó en [la vista previa de v26.76.2](https://nexus-chat-nc--codex-v26-76-2-l4apcu3z.web.app), con caducidad el 16 de noviembre de 2026. El manifiesto, la portada, el dashboard y los iconos coinciden con los archivos compilados. Chromium comprobó el acceso visible al dashboard en anchos de 390, 820 y 1440 píxeles. Esta prueba no inició sesión dentro del dashboard ni ejercitó acciones administrativas.
+
+Antes de compilar se conservaron en el archivo local los servicios activos de la web anterior, junto con la configuración nueva del asistente del panel. Sus valores y las credenciales de Firebase no se incluyen en el repositorio ni en la entrega ZIP.
+
+El 9 de noviembre de 2026 se publicó también [el Hosting principal](https://nexus-chat-nc.web.app/) mediante `deploy --only hosting`, con autorización del propietario. La versión pública es **v26.76.2**, manifiesto `6595e4d0f3dac980`. Se verificaron por hash la portada, el dashboard, el favicon, el logo y los módulos de configuración y asistente. El dashboard público pasó las comprobaciones visuales de acceso y versión en los tres anchos anteriores. No se desplegaron reglas, índices ni cambios en las bases de datos.
 
 ## Verificación de v26.76.2
 
