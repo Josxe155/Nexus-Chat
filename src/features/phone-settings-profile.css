@@ -324,5 +324,7 @@ html:root .settings-center.mobile-settings[data-page=profilePhoto] .settings-scr
 
 body:has(.phone-info-editor) :is(.nexus-update-reopen,.nexus-update-notice:not(.release-download-panel)) { display:none!important; }
 
-.settings-center.mobile-settings[data-page=""] :is(.phone-settings-identity,.phone-settings-actions){opacity:var(--phone-settings-header-opacity,1);filter:blur(var(--phone-settings-header-blur,0px))}
+.settings-center.mobile-settings[data-page=""] .phone-settings-identity{opacity:var(--phone-settings-header-opacity,1)}
 .settings-center.mobile-settings[data-page=""] .settings-scroll{mask-image:linear-gradient(to bottom,transparent,#000 var(--phone-settings-scroll-fade,0px));-webkit-mask-image:linear-gradient(to bottom,transparent,#000 var(--phone-settings-scroll-fade,0px))}
+
+.settings-center.mobile-settings[data-page=""] .phone-settings-actions{opacity:1;filter:none}
