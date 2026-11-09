@@ -10,3 +10,7 @@
 .rich-message ul{list-style:disc}.rich-message ol{list-style:decimal}
 .rich-message li{white-space:pre-wrap;padding-inline-start:2px}
 .rich-message blockquote{margin:6px 0;padding-inline-start:12px;border-inline-start:3px solid #80808070;white-space:pre-wrap}
+.rich-message .rich-heading{display:block;font-weight:700;line-height:1.3;margin:.65em 0 .35em;white-space:pre-wrap;overflow-wrap:anywhere}
+.rich-message .rich-heading-1{font-size:1.65em}.rich-message .rich-heading-2{font-size:1.45em}.rich-message .rich-heading-3{font-size:1.25em}
+.rich-message .rich-heading-4{font-size:1.15em}.rich-message .rich-heading-5{font-size:1.05em}.rich-message .rich-heading-6{font-size:1em}
+.rich-message .rich-rule{display:block;border:0;border-top:1px solid currentColor;opacity:.25;margin:.8em 0}

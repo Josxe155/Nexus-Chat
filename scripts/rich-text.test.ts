@@ -32,3 +32,13 @@ test('separa las comillas y la puntuación de los enlaces',()=>{
  assert.equal(parseInline('javascript:alert(1)').some(node=>node.kind==='link'),false);
  assert.equal(plain(parseInline('<img src=x onerror="alert(1)">')),'<img src=x onerror="alert(1)">');
 });
+
+test('reconoce títulos con numerales y subrayados sin alterar etiquetas ni texto literal',async()=>{
+ const {parseHeading,isRule}=await import('../src/features/richTextParser.ts');
+ assert.deepEqual(parseHeading('### Un **título**'),{level:3,text:'Un **título**',consumed:0});
+ assert.deepEqual(parseHeading('  ## Título ##'),{level:2,text:'Título',consumed:0});
+ assert.deepEqual(parseHeading('Título','---'),{level:2,text:'Título',consumed:1});
+ assert.deepEqual(parseHeading('Título','==='),{level:1,text:'Título',consumed:1});
+ for(const line of ['#etiqueta','####### Fuera de nivel','    ### Código','Texto ### literal','> ### Cita'])assert.equal(parseHeading(line),null);
+ assert.equal(isRule('---'),true);assert.equal(isRule('* * *'),true);assert.equal(isRule('---texto'),false);
+});

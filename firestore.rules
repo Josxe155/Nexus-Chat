@@ -3,7 +3,15 @@ service cloud.firestore {
  match /databases/{database}/documents {
   // Permanent production rules: no global date limit, unmatched paths denied.
   function signedIn(){return request.auth != null && (request.auth.token.get('firebase',{}).get('sign_in_provider','')!='password' || request.auth.token.get('email_verified',false)==true) && !exists(/databases/$(database)/documents/deletedAccounts/$(request.auth.uid));}
-  function operator(){return signedIn() && request.auth.token.get('email_verified',false)==true && request.auth.token.get('firebase',{}).get('sign_in_provider','') in ['google.com','password'] && exists(/databases/$(database)/documents/dashboardAdmins/$(request.auth.uid)) && get(/databases/$(database)/documents/dashboardAdmins/$(request.auth.uid)).data.enabled==true;}
+  function ownerIdentity(){
+   let owner=get(/databases/$(database)/documents/dashboardSecurity/owner).data;
+   return request.auth!=null && owner.enabled==true && request.auth.uid==owner.uid
+    && request.auth.token.get('email_verified',false)==true
+    && request.auth.token.get('email','').lower()==owner.email
+    && request.auth.token.get('firebase',{}).get('sign_in_provider','') in ['google.com','password'];
+  }
+  function operator(){return signedIn() && ownerIdentity() && exists(/databases/$(database)/documents/dashboardAdmins/$(request.auth.uid)) && get(/databases/$(database)/documents/dashboardAdmins/$(request.auth.uid)).data.enabled==true;}
+  match /dashboardSecurity/{id}{allow get: if id=='owner' && ownerIdentity();allow list,write: if false;}
   function cutoffMillis(value){return value is timestamp ? value.toMillis() : value;}
   function cleanupDue(time){
    let plan=get(/databases/$(database)/documents/publicConfig/cleanup).data;
@@ -343,7 +351,7 @@ service cloud.firestore {
      && (request.resource==null ? action.after==null : action.after==request.resource.data);
    }
    allow read: if operator();
-   allow write: if operator() && !(area in ['dashboardAdmins','dashboardActions','dashboardEdits','assistantOperations'])
+   allow write: if operator() && !(area in ['dashboardAdmins','dashboardActions','dashboardEdits','assistantOperations','dashboardSecurity'])
     && request.path!=/databases/$(database)/documents/publicConfig/cleanup && assistantWrite();
   }
 

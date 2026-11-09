@@ -1,5 +1,5 @@
 import React from 'react';
-import {parseInline,type InlineNode} from './richTextParser';
+import {parseInline,parseHeading,isRule,type InlineNode} from './richTextParser';
 import './rich-text.css';
 function render(nodes:InlineNode[]):React.ReactNode[]{
  return nodes.map((node,index)=>{
@@ -28,10 +28,13 @@ export default function RichText({text}:{text:string}){
    if(end<lines.length){nodes.push(<pre key={'code'+index}><code>{lines.slice(index+1,end).join('\n')}</code></pre>);index=end;continue;}
    nodes.push(<span className="rich-text-line" key={'literal'+index}>{lines.slice(index).join('\n')}</span>);break;
   }
+  if(isRule(line)){flushLines();nodes.push(<span key={'rule'+index} className="rich-rule" role="separator"/>);continue;}
   const list=/^(?:([-*]) |(\d+)\. )(.*)$/.exec(line);
   if(list){flushLines();const ordered=!!list[2];if(bullets.length&&ordered!==numbered)flush();numbered=ordered;bullets.push(list[3]);continue;}
   flush();
   if(line.startsWith('> ')){flushLines();nodes.push(<blockquote key={index}>{inline(line.slice(2))}</blockquote>);continue;}
+  const heading=parseHeading(line,lines[index+1]);
+  if(heading){flushLines();nodes.push(<span key={'heading'+index} className={'rich-heading rich-heading-'+heading.level} role="heading" aria-level={heading.level}>{inline(heading.text)}</span>);index+=heading.consumed;continue;}
   plainLines.push(line);
  }
  flushLines();flush();return <span className="rich-message">{nodes}</span>;

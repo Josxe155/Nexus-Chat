@@ -42,3 +42,12 @@ export function parseInline(text:string,depth=0):InlineNode[]{
  }
  flush();return nodes;
 }
+
+export function parseHeading(line:string,next?:string):{level:number;text:string;consumed:number}|null{
+ const atx=/^ {0,3}(#{1,6})(?:[\t ]+(.*)|[\t ]*)$/.exec(line);
+ if(atx)return {level:atx[1].length,text:(atx[2]||'').replace(/[\t ]+#+[\t ]*$/,'').trim(),consumed:0};
+ const underline=next&&/^ {0,3}(=+|-+)[\t ]*$/.exec(next);
+ if(underline&&line.trim()&&!/^\s*(?:>|[-*+] |\d+\. |`)/.test(line))return {level:underline[1][0]==='='?1:2,text:line.trim(),consumed:1};
+ return null;
+}
+export const isRule=(line:string)=>/^ {0,3}(?:(?:-\s*){3,}|(?:\*\s*){3,}|(?:_\s*){3,})$/.test(line);

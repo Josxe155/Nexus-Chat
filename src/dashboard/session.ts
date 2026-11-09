@@ -1,3 +1,4 @@
+import {matchesDashboardOwner} from './ownerPolicy';
 import {useEffect,useRef,useState} from 'react';
 import {initializeApp,getApps} from 'firebase/app';
 import {getAuth,onIdTokenChanged,signInWithPopup,GoogleAuthProvider,signInWithEmailAndPassword,setPersistence,browserSessionPersistence,browserLocalPersistence,signOut,type User} from 'firebase/auth';
@@ -9,11 +10,12 @@ import {auth as primaryAuth,db as primaryDb,rtdb as primaryRtdb} from '../fireba
 const secondaryApp=getApps().find(a=>a.name==='nexus-dashboard')||initializeApp(config,'nexus-dashboard');
 const secondaryAuth=getAuth(secondaryApp),secondaryDb=getFirestore(secondaryApp),secondaryRtdb=getDatabase(secondaryApp);
 
-export async function verifyDashboardAccess(user:User,db:Firestore,provider?:'google.com'|'password'){
- const token=await user.getIdTokenResult();
+export async function verifyDashboardAccess(user:User,db:Firestore,provider?:'google.com'|'password',refresh=true){
+ const token=await user.getIdTokenResult(refresh);
  const method=token.signInProvider;
  if(token.claims.email_verified!==true||!['google.com','password'].includes(method||'')||(provider&&method!==provider))return false;
- return (await getDocFromServer(doc(db,'dashboardAdmins',user.uid))).data()?.enabled===true;
+ const [owner,role]=await Promise.all([getDocFromServer(doc(db,'dashboardSecurity','owner')),getDocFromServer(doc(db,'dashboardAdmins',user.uid))]);
+ return role.data()?.enabled===true&&matchesDashboardOwner(user.uid,token.claims.email,token.claims.email_verified,method,owner.data());
 }
 
 export async function loginGoogle(){
@@ -43,6 +45,7 @@ const pending:Candidate={user:null,allowed:false,checking:true,failed:false};
 
 export function useDashboardSession(){
  const [candidates,setCandidates]=useState<[Candidate,Candidate]>([pending,pending]);
+ const candidatesRef=useRef(candidates);candidatesRef.current=candidates;
  const [attempt,setAttempt]=useState(0);
  const retry=()=>setAttempt(value=>value+1);
  const allowedRef=useRef(false);
@@ -58,18 +61,19 @@ export function useDashboardSession(){
     setCandidates(previous=>index===0?[result,previous[1]]:[previous[0],result]);
    };
    if(!user){update({user:null,allowed:false,checking:false,failed:false});return;}
-   update({user,allowed:false,checking:true,failed:false});
+   const previous=candidatesRef.current[index];
+   update({user,allowed:previous.allowed&&previous.user?.uid===user.uid,checking:true,failed:false});
    let timer:ReturnType<typeof setTimeout>|undefined;
    try{
     const allowed=await Promise.race([
-     verifyDashboardAccess(user,db,index===1?'password':undefined),
+     verifyDashboardAccess(user,db,index===1?'password':undefined,false),
      new Promise<never>((_,reject)=>{timer=setTimeout(()=>reject(Error('Tiempo de espera agotado')),12000);}),
     ]);
     if(!live||revisions[index]!==current)return;
     update({user,allowed,checking:false,failed:false});
-    if(allowed)clearRoleListeners[index]=onSnapshot(doc(db,'dashboardAdmins',user.uid),{includeMetadataChanges:true},snapshot=>{
+    if(allowed){const stops=[onSnapshot(doc(db,'dashboardSecurity','owner'),{includeMetadataChanges:true},snapshot=>{if(!snapshot.metadata.fromCache&&!matchesDashboardOwner(user.uid,user.email,user.emailVerified,index===1?'password':user.providerData.find(item=>['google.com','password'].includes(item.providerId))?.providerId,snapshot.data()))update({user,allowed:false,checking:false,failed:false});},()=>update({user,allowed:false,checking:false,failed:true})),onSnapshot(doc(db,'dashboardAdmins',user.uid),{includeMetadataChanges:true},snapshot=>{
      if(!snapshot.metadata.fromCache&&snapshot.data()?.enabled!==true)update({user,allowed:false,checking:false,failed:false});
-    },()=>update({user,allowed:false,checking:false,failed:true}));
+    },()=>update({user,allowed:false,checking:false,failed:true}))];clearRoleListeners[index]=()=>stops.forEach(stop=>stop());}
    }catch{update({user,allowed:false,checking:false,failed:true});}
    finally{clearTimeout(timer);}
   }

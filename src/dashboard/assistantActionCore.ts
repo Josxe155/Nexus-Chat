@@ -1,5 +1,5 @@
 export type AssistantAction={id:string;kind:'firestore'|'realtime'|'cleanup'|'schedule';path:string;operation:'create'|'update'|'delete'|'cleanup';data:Record<string,any>;before:unknown;createdAt:number;actor:string;executedAt?:number};
-const protectedRoots=new Set(['dashboardAdmins','dashboardActions','dashboardEdits','assistantOperations','assistantLastAction']);
+const protectedRoots=new Set(['dashboardAdmins','dashboardActions','dashboardEdits','assistantOperations','assistantLastAction','dashboardSecurity']);
 export function actionPath(raw:unknown,kind:'firestore'|'realtime'){
  if(typeof raw!=='string')throw Error('Falta el destino de la acción.');
  const path=raw.replace(/^\/+|\/+$/g,''),parts=path.split('/');

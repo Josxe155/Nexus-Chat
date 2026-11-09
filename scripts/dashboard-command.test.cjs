@@ -12,12 +12,12 @@ const fs=require('node:fs'),path=require('node:path'),assert=require('node:asser
  try{
   await env.clearFirestore();
   await env.withSecurityRulesDisabled(async c=>{
-   const db=c.firestore();await setDoc(doc(db,'dashboardAdmins/admin'),{enabled:true});
+   const db=c.firestore();await setDoc(doc(db,'dashboardAdmins/admin'),{enabled:true});await setDoc(doc(db,'dashboardSecurity/owner'),{uid:'admin',email:'owner@example.org',enabled:true});
    await setDoc(doc(db,'users/command-author'),{nombre:'Alexander Alvarado',username:'alex-command'});
    await setDoc(doc(db,'chats/command-chat'),{title:'Aula de prueba',participants:['command-author'],lastMessage:{id:'target',senderId:'command-author',timestamp:1000,content:'Mañana no hay clases'}});
    await setDoc(doc(db,'chats/command-chat/messages/target'),{type:'text',senderId:'command-author',content:'Mañana no hay clases',timestamp:1000,expiresAt:0});
   });
-  const db=env.authenticatedContext('admin',{email_verified:true,firebase:{sign_in_provider:'google.com'}}).firestore();
+  const db=env.authenticatedContext('admin',{email:'owner@example.org',email_verified:true,firebase:{sign_in_provider:'google.com'}}).firestore();
   const command={author:'Alexander Alvarado',before:'Mañana no hay clases',after:'Mañana si hay clase',chat:'command-chat'};
   const result=await editMessageByCommand(db,{uid:'admin'},command,new AbortController().signal);
   assert.match(result,/actualizado/);
