@@ -1,5 +1,7 @@
 import {useEffect,useRef,useState} from 'react';
 import {Mic,Square,Volume2} from 'lucide-react';
+import {collectDictation} from '../features/dictationResults';
+import {playSpanish} from '../features/spanishSpeech';
 
 type RecognitionResult={isFinal:boolean;0:{transcript:string}};
 type Recognition={
@@ -14,6 +16,7 @@ const recognitionConstructor=()=> (window as SpeechWindow).SpeechRecognition||(w
 
 export function DictateQuestion({disabled,onText,compact=false}:{disabled:boolean;onText:(text:string)=>void;compact?:boolean}){
  const active=useRef<Recognition|null>(null);
+ const latestText=useRef(onText);latestText.current=onText;
  const [listening,setListening]=useState(false),[interim,setInterim]=useState(''),[error,setError]=useState('');
  function stop(){
   const recognition=active.current;
@@ -33,15 +36,12 @@ export function DictateQuestion({disabled,onText,compact=false}:{disabled:boolea
   const recognition=new Constructor();
   recognition.lang='es-EC';recognition.continuous=true;recognition.interimResults=true;
   active.current=recognition;
+  const collect=collectDictation();
   recognition.onresult=event=>{
    if(active.current!==recognition)return;
-   const final:string[]=[],draft:string[]=[];
-   for(let i=event.resultIndex;i<event.results.length;i++){
-    const result=event.results[i];
-    (result.isFinal?final:draft).push(result[0].transcript);
-   }
-   if(final.length)onText(final.join(' ').trim());
-   setInterim(draft.join(' ').trim());
+   const result=collect(event.resultIndex,event.results);
+   if(result.text)latestText.current(result.text);
+   setInterim(result.interim);
   };
   recognition.onerror=event=>{
    if(active.current!==recognition)return;
@@ -62,57 +62,19 @@ export function DictateQuestion({disabled,onText,compact=false}:{disabled:boolea
  </div>;
 }
 
-function voiceSegments(text:string){
- const clean=text.replace(/https?:\/\/\S+/g,'enlace').replace(/[\p{Extended_Pictographic}#*`_]/gu,'').replace(/\s+/g,' ').trim();
- return clean.match(/.{1,180}(?:[.!?](?=\s|$)|\s|$)|.{1,180}/g)?.map(part=>part.trim()).filter(Boolean)||[];
-}
-
 export function SpeakAnswer({text,compact=false}:{text:string;compact?:boolean}){
- const [voices,setVoices]=useState<SpeechSynthesisVoice[]>([]),[playing,setPlaying]=useState(false),[error,setError]=useState('');
- const speech=useRef<SpeechSynthesisUtterance|null>(null);
- const generation=useRef(0);
- function stop(){
-  generation.current++;
-  if(speech.current){speech.current.onend=null;speech.current.onerror=null;window.speechSynthesis.cancel();speech.current=null;}
- }
- useEffect(()=>{
-  const engine=window.speechSynthesis;
-  if(!engine)return;
-  const update=()=>setVoices(engine.getVoices());
-  update();engine.addEventListener('voiceschanged',update);
-  return()=>{stop();engine.removeEventListener('voiceschanged',update);};
- },[]);
+ const [state,setState]=useState<'idle'|'preparing'|'playing'>('idle'),[error,setError]=useState('');
+ const cancel=useRef<(()=>void)|null>(null);
+ useEffect(()=>()=>{cancel.current?.();cancel.current=null;},[text]);
  function toggle(){
-  if(playing){stop();setPlaying(false);return;}
-  const engine=window.speechSynthesis;
-  if(!engine){setError('La lectura en voz alta no está disponible en este navegador.');return;}
-  const spanish=engine.getVoices().filter(voice=>/^es(?:-|$)/i.test(voice.lang));
-  const voice=spanish.find(value=>/google/i.test(value.name+' '+value.voiceURI)&&/es-(EC|US|MX)/i.test(value.lang))
-   ||spanish.find(value=>/es-(EC|US|MX)/i.test(value.lang))||spanish[0];
-  if(!voice){setError('Este navegador no ofrece una voz en español.');return;}
-  setError('');
-  const parts=voiceSegments(text),current=++generation.current;
-  if(!parts.length)return;
-  setPlaying(true);
-  function speak(index:number){
-   if(current!==generation.current)return;
-   if(!parts[index]){speech.current=null;setPlaying(false);return;}
-   const utterance=new SpeechSynthesisUtterance(parts[index]);
-   utterance.voice=voice!;utterance.lang=voice!.lang;
-   speech.current=utterance;
-   utterance.onend=()=>speak(index+1);
-   const failed=()=>{if(current===generation.current){stop();setPlaying(false);setError('No se pudo reproducir la respuesta.');}};
-   utterance.onerror=failed;
-   try{engine.speak(utterance);}catch{failed();}
-  }
-  speak(0);
+  if(state!=='idle'){cancel.current?.();cancel.current=null;return;}
+  setError('');cancel.current=playSpanish(text,setState,()=>setError('No se pudo reproducir la respuesta. Vuelve a intentarlo.'));
  }
- const hasSpanish=voices.some(voice=>/^es(?:-|$)/i.test(voice.lang));
  return <div className="dashboard-voice-control">
-  <button type="button" className={compact?'dashboard-ai-composer-icon dashboard-ai-speaker':'secondary icon-action'} aria-label={playing?'Detener lectura':'Escuchar respuesta'} title={playing?'Detener lectura':'Escuchar respuesta'} disabled={!text} onClick={toggle}>
-   {playing?<Square size={15}/>:<Volume2 size={17}/>} {!compact&&(playing?'Detener lectura':'Escuchar respuesta')}
+  <button type="button" className={compact?'dashboard-ai-composer-icon dashboard-ai-speaker':'secondary icon-action'} aria-label={state!=='idle'?'Detener lectura':'Escuchar respuesta'} title={state!=='idle'?'Detener lectura':'Escuchar respuesta'} disabled={!text} onClick={toggle}>
+   {state!=='idle'?<Square size={15}/>:<Volume2 size={17}/>} {!compact&&(state!=='idle'?'Detener lectura':'Escuchar respuesta')}
   </button>
-  {text&&!playing&&!error&&voices.length>0&&!hasSpanish&&<small>Requiere una voz en español.</small>}
+  {state==='preparing'&&<span role="status">Preparando audio…</span>}
   {error&&<span role="alert">{error}</span>}
  </div>;
 }

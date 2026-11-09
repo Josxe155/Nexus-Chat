@@ -77,3 +77,25 @@ test('consulta herramientas de lectura y conserva las firmas entre pasos',async(
  const result=await requestDashboardAnswer('Cuenta las cuentas','{}',signal(),settings,{declarations:[{name:'count_collection'}],execute:async(name,args)=>{assert.equal(name,'count_collection');assert.equal(args.path,'users');reads++;return {count:8};}});
  assert.equal(result.text,'Hay 8 cuentas.');assert.equal(reads,1);assert.equal(requests,2);
 });
+
+test('el dictado entrega una sola vez cada resultado final y conserva repeticiones intencionadas',async()=>{
+ const {collectDictation}=await import('../src/features/dictationResults.ts');const collect=collectDictation();
+ const result=(transcript:string,isFinal=true)=>({isFinal,0:{transcript}});
+ assert.equal(collect(0,[result('Hola')]).text,'Hola');
+ assert.equal(collect(0,[result('Hola')]).text,'');
+ assert.equal(collect(0,[result('Hola'),result('Hola')]).text,'Hola');
+ assert.equal(collect(1,[result('Hola'),result('Hola')]).text,'');
+ assert.equal(collect(2,[result('Hola'),result('Hola'),result('mañana',false)]).interim,'mañana');
+ assert.equal(collect(2,[result('Hola'),result('Hola'),result('mañana')]).text,'mañana');
+ assert.equal(collectDictation()(0,[result('Hola')]).text,'Hola');
+});
+
+test('interpreta el comando de edición exacto y rechaza mensajes alterados o caducados',async()=>{
+ const {parseMessageEditCommand,assertEditableMessage}=await import('../src/dashboard/messageEditCommand.ts');
+ const command=parseMessageEditCommand('edita el mensaje de Alexander Alvarado en el que dice "Mañana no hay clases" y cámbialo por "Mañana si hay clase"');
+ assert.deepEqual(command,{author:'Alexander Alvarado',before:'Mañana no hay clases',after:'Mañana si hay clase'});
+ assert.equal(parseMessageEditCommand('resume los mensajes'),null);
+ const value={senderId:'author',content:command!.before,type:'text'};
+ assert.doesNotThrow(()=>assertEditableMessage(value,command!,'author',1000));
+ for(const changed of [{...value,content:'Otro texto'},{...value,senderId:'other'},{...value,deletedAt:1},{...value,expiresAt:999},{...value,sealed:{}},{...value,type:'poll'}])assert.throws(()=>assertEditableMessage(changed,command!,'author',1000));
+});

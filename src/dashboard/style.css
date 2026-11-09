@@ -161,3 +161,14 @@ footer span{color:var(--accent)}
 .dashboard-ai-user-message{width:fit-content;max-width:85%;margin-inline-start:auto;padding:8px 13px;border-radius:15px;background:#21463c;color:#e9fff7;white-space:pre-wrap;overflow-wrap:anywhere}
 .dashboard-ai-turn .report-preview p{overflow-wrap:anywhere}
 .dashboard-ai-composer .dashboard-voice-control:nth-of-type(2) :is(span,small){grid-row:3}
+
+.dashboard-chat{display:flex;flex-direction:column;min-height:560px;height:min(780px,calc(100dvh - 200px));border:1px solid var(--line);border-radius:24px;overflow:hidden;background:#0b171d}
+.dashboard-chat-header{display:flex;align-items:center;gap:12px;padding:18px 22px;border-bottom:1px solid var(--line);background:#14252d}
+.dashboard-chat-header h2{margin:0;font-size:1.15rem}.dashboard-chat-header small{color:var(--muted)}
+.dashboard-chat-disclosure{margin:0;padding:10px 22px;font-size:.76rem;color:var(--muted);border-bottom:1px solid #ffffff0a}
+.dashboard-chat .dashboard-ai-transcript{flex:1;min-height:0;overflow-y:auto;padding:20px;overscroll-behavior:contain}
+.dashboard-chat-welcome{display:grid;place-content:center;text-align:center;min-height:260px;color:var(--muted);gap:8px}.dashboard-chat-welcome>svg{margin:auto;color:var(--accent)}.dashboard-chat-welcome h3{color:#edf8f5;font-size:1.55rem;margin:8px 0}.dashboard-chat-welcome p{margin:0}
+.dashboard-chat .report-preview{width:fit-content;max-width:92%;margin:12px 0 24px;padding:14px 18px;background:#172a34;border:0;border-radius:4px 18px 18px;line-height:1.6;overflow-wrap:anywhere}.dashboard-chat .report-preview>strong{display:block;font-size:.75rem;color:var(--accent);margin-bottom:8px}.dashboard-chat .report-preview p{white-space:pre-wrap;margin:5px 0}
+.dashboard-chat .dashboard-ai-user-message{margin-top:0;border-radius:18px 4px 18px 18px;padding:12px 16px}
+.dashboard-chat .dashboard-ai-composer{position:static;flex-shrink:0;margin:8px 14px 14px;box-shadow:none}.dashboard-chat>.feedback,.dashboard-chat>[role=status]{margin:6px 20px}
+@media(max-width:600px){.dashboard-chat{height:calc(100dvh - 180px);min-height:480px;border-radius:18px}.dashboard-chat-header{padding:14px 16px}.dashboard-chat-disclosure{padding:8px 16px}.dashboard-chat .dashboard-ai-transcript{padding:16px 12px}.dashboard-chat .dashboard-ai-composer{margin:6px 8px 10px}.dashboard-chat .report-preview{max-width:96%}}

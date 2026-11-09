@@ -50,15 +50,15 @@ Nexus AI reconoce órdenes como «genera una imagen de…», crea la imagen, per
 - Los recuentos y archivos CSV contienen cantidades, no textos de chats ni identidades de usuarios. No se modificó la autorización del panel.
 
 
-## Modo IA · v26.77.0
+## Modo IA · v26.78.0
 
 Modo IA utiliza Gemini mediante `generateContent`, con herramientas de consulta automática. La interfaz es una conversación única: no requiere elegir una sección, una cuenta ni preparar una vista previa. Al enviar, la pregunta y los datos necesarios se comparten con el servicio de IA; el panel informa de ello antes de escribir.
 
-El administrador autorizado tiene lectura general de Firestore y Realtime Database. La autorización requiere correo verificado, acceso por Google o contraseña y la marca administrativa en cada base. No se conceden nuevos permisos a los usuarios ordinarios ni se añaden herramientas de escritura o borrado al modelo. Cada consulta vuelve a comprobar la autorización.
+El administrador autorizado tiene lectura general de Firestore y Realtime Database. La autorización requiere correo verificado, acceso por Google o contraseña y la marca administrativa en cada base. No se conceden nuevos permisos a los usuarios ordinarios. Cada consulta y cada comando vuelven a comprobar la autorización. Las respuestas del modelo no ejecutan escrituras: el programa interpreta los comandos explícitos de edición.
 
 El asistente puede leer documentos, recorrer colecciones y subcolecciones por páginas, contar registros y consultar rutas de Realtime Database. La paginación evita descargar toda la base de una vez y permite continuar con el cursor. Las contraseñas de Authentication no están disponibles; los datos cifrados antiguos requieren sus claves originales. La consulta tiene los límites técnicos de tiempo, contexto y cuota del servicio; el modelo debe indicar datos ausentes y resultados parciales.
 
-Se mantienen los controles de dictado y lectura en español y el historial de la conversación mientras el componente permanece abierto. Las claves y las credenciales se conservan únicamente en la configuración local excluida de Git.
+El dictado procesa una sola vez cada resultado final del reconocimiento, aunque el navegador repita eventos. La lectura usa meSpeak/eSpeak con la voz española incluida y Web Audio; no requiere voces españolas del sistema. El historial se mantiene mientras el componente permanece abierto. Las claves y las credenciales se conservan únicamente en la configuración local excluida de Git.
 
 ### Pruebas de acceso
 
@@ -73,3 +73,24 @@ La prueba carga las reglas reales en los emuladores, prepara datos ficticios y c
 En v26.77.0 se verificaron también seis pruebas automatizadas del cliente de IA, una consulta real a Gemini usando una herramienta con datos ficticios y el envío directo de una pregunta en Chromium a 390, 820 y 1440 píxeles. No hay selector de secciones ni paso de preparación. Falta una comprobación completa con una sesión administradora real del dashboard y dispositivos físicos.
 
 La matriz de esta entrega tiene ocho comprobaciones: tipos, documentación, pruebas del cliente, consulta real a Gemini, reglas en emuladores, conversación adaptable, archivos publicados y uso completo con sesión administradora en equipo físico. Una vez verificados los archivos publicados, se completan siete de ocho: 87,5 % por tamaño de celular, tablet y computadora. El porcentaje corresponde a esta entrega, no al proyecto completo.
+
+
+### Comandos de edición · v26.78.0
+
+Modo IA presenta mensajes en burbujas, desplazamiento del historial y una barra de escritura, dictado y lectura; no incluye menús de opciones ni selectores de secciones. Los comandos se escriben en la misma conversación. Ejemplo:
+
+```text
+edita el mensaje de Alexander Alvarado en el que dice "Mañana no hay clases" y cámbialo por "Mañana si hay clase"
+```
+
+El comando busca una cuenta por nombre completo, usuario o identificador y exige coincidencia exacta del texto. Solo modifica un mensaje cuando la cuenta y el mensaje son inequívocos. Si aparecen varios chats, se puede añadir `en el chat "ID"` al final. Si quedan varias coincidencias en ese chat, no modifica ninguna. No se editan mensajes cifrados antiguos, eliminados, caducados ni otros tipos de contenido. No se ejecutan instrucciones de escritura procedentes de registros consultados o de respuestas del modelo.
+
+La escritura se realiza mediante una transacción con autorización administrativa. Comprueba otra vez el autor y el texto, conserva identificadores y fechas originales, marca el mensaje como editado y actualiza la vista previa si corresponde al último mensaje. Crea un registro inmutable en `dashboardEdits` con autor de la acción, mensaje, texto anterior, texto nuevo y fecha. Las reglas exigen este registro para la edición administrativa. Los usuarios conservan sus permisos habituales de edición de mensajes propios. La cancelación se deshabilita durante el guardado: una operación enviada no puede deshacerse cancelando la consulta.
+
+Las pruebas `npm run test:dashboard-access` y `npm run test:dashboard-command` se ejecutan de forma secuencial con los emuladores configurados. Preparan únicamente datos ficticios en `demo-nexus`. Comprueban edición administrativa, conservación de autor y fecha, actualización del resumen, auditoría, ambigüedad, reintento, cancelación y permisos ordinarios.
+
+La duplicación de dictado fuera del Modo IA queda pendiente de reproducción porque no se identificó el apartado. No se considera resuelta mediante esta entrega.
+
+La matriz de v26.78.0 comprende tipos, documentación, pruebas unitarias, comandos y permisos en emuladores, audio español generado en navegador sin voces instaladas, chat y dictado en tres anchos, archivos publicados y prueba completa con cuenta administradora en equipo físico. Siete de ocho comprobaciones, una vez publicados y verificados los archivos, equivalen a 87,5 % por tamaño. No es un porcentaje del proyecto completo.
+
+Referencias consultadas para esta revisión: [edición de mensajes de WhatsApp](https://blog.whatsapp.com/now-you-can-edit-your-whatsapp-messages?lang=en) y [resultados del reconocimiento de voz](https://developer.mozilla.org/en-US/docs/Web/API/SpeechRecognitionEvent/results). La edición administrativa de Nexus es una función propia del panel y no reproduce los permisos de edición de WhatsApp.

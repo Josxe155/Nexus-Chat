@@ -219,6 +219,18 @@ service cloud.firestore {
     allow delete: if member(chatId) && resource.data.senderId==request.auth.uid;
    }
    match /messages/{mid} {
+    allow update: if operator() && resource.data.type=='text' && !('sealed' in resource.data)
+     && resource.data.get('deletedAt',0)==0 && (resource.data.get('expiresAt',0)==0 || resource.data.expiresAt>request.time.toMillis())
+     && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['content','edited','adminEditedBy','adminEditedAt','adminEditId'])
+     && request.resource.data.content is string && request.resource.data.content.size()>0 && request.resource.data.content.size()<=20000
+     && request.resource.data.edited==true && request.resource.data.adminEditedBy==request.auth.uid && request.resource.data.adminEditedAt==request.time
+     && request.resource.data.adminEditId is string
+     && getAfter(/databases/$(database)/documents/dashboardEdits/$(request.resource.data.adminEditId)).data.actor==request.auth.uid
+     && getAfter(/databases/$(database)/documents/dashboardEdits/$(request.resource.data.adminEditId)).data.chatId==chatId
+     && getAfter(/databases/$(database)/documents/dashboardEdits/$(request.resource.data.adminEditId)).data.messageId==mid
+     && getAfter(/databases/$(database)/documents/dashboardEdits/$(request.resource.data.adminEditId)).data.before==resource.data.content
+     && getAfter(/databases/$(database)/documents/dashboardEdits/$(request.resource.data.adminEditId)).data.after==request.resource.data.content
+     && getAfter(/databases/$(database)/documents/dashboardEdits/$(request.resource.data.adminEditId)).data.at==request.time;
     allow read: if operator();allow delete: if cleanupDue(resource.data.timestamp);
     allow get: if member(chatId) && !exists(/databases/$(database)/documents/chats/$(chatId)/messages/$(mid));
     allow read: if member(chatId) && resource.data.timestamp >= room(chatId).get('historyStartsAt',{}).get(request.auth.uid,0);
@@ -290,6 +302,18 @@ service cloud.firestore {
     && request.resource.data.maintenance is bool && request.resource.data.updatedAt==request.time;
   }
   match /publicConfig/cleanup {allow read: if signedIn();allow create,update: if operator() && request.resource.data.keys().hasOnly(['enabled','execution','firstDueAt','nextDueAt','warningDays','status','leaseUntil','runId','lastCompletedAt','counts','manualCutoff']) && request.resource.data.enabled is bool && request.resource.data.execution=='browser' && request.resource.data.nextDueAt is number && request.resource.data.warningDays==3 && request.resource.data.status in ['scheduled','running','error'] && (!('manualCutoff' in request.resource.data) || (cutoffMillis(request.resource.data.manualCutoff)>0 && cutoffMillis(request.resource.data.manualCutoff)<=request.time.toMillis() && request.resource.data.status=='running' && request.resource.data.leaseUntil is number && request.resource.data.leaseUntil>request.time.toMillis() && request.resource.data.leaseUntil<=request.time.toMillis()+360000));allow delete: if false;}
+  match /dashboardEdits/{id} {
+   allow read: if operator();
+   allow create: if operator() && request.resource.data.keys().hasOnly(['actor','chatId','messageId','senderId','before','after','at'])
+    && request.resource.data.actor==request.auth.uid && request.resource.data.at==request.time
+    && request.resource.data.chatId is string && request.resource.data.messageId is string
+    && request.resource.data.before is string && request.resource.data.after is string
+    && get(/databases/$(database)/documents/chats/$(request.resource.data.chatId)/messages/$(request.resource.data.messageId)).data.content==request.resource.data.before
+    && get(/databases/$(database)/documents/chats/$(request.resource.data.chatId)/messages/$(request.resource.data.messageId)).data.senderId==request.resource.data.senderId
+    && getAfter(/databases/$(database)/documents/chats/$(request.resource.data.chatId)/messages/$(request.resource.data.messageId)).data.adminEditId==id
+    && getAfter(/databases/$(database)/documents/chats/$(request.resource.data.chatId)/messages/$(request.resource.data.messageId)).data.content==request.resource.data.after;
+   allow update,delete: if false;
+  }
   match /{document=**}{allow read: if operator();allow write: if false;}
  }
 }

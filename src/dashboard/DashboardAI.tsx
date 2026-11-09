@@ -8,35 +8,52 @@ import {DictateQuestion,SpeakAnswer} from './dashboardSpeech';
 import {verifyDashboardAccess} from './session';
 import type {OverviewSnapshot} from './Overview';
 import {version} from '../webVersion.json';
+import {parseMessageEditCommand} from './messageEditCommand';
+import {editMessageByCommand} from './editMessage';
+import RichText from '../features/RichText';
 
 export default function DashboardAI({db,rtdb,user,snapshot}:{db:Firestore;rtdb:Database;user:User;snapshot?:OverviewSnapshot}){
  const [question,setQuestion]=useState(''),[error,setError]=useState(''),[notice,setNotice]=useState('');
- const [turns,setTurns]=useState<{question:string;answer:string}[]>([]),[busy,setBusy]=useState(false);
+ const [turns,setTurns]=useState<{question:string;answer:string}[]>([]),[busy,setBusy]=useState(false),[committing,setCommitting]=useState(false);
  const request=useRef<AbortController|null>(null);
  const answer=turns.at(-1)?.answer||'';
+ const bottom=useRef<HTMLDivElement|null>(null);
+ useEffect(()=>{bottom.current?.scrollIntoView({block:'nearest',behavior:matchMedia('(prefers-reduced-motion:reduce)').matches?'instant':'smooth'});},[turns,busy]);
  useEffect(()=>()=>{request.current?.abort();request.current=null;},[]);
  async function ask(){
   if(request.current||!question.trim())return;
   const prompt=question.trim(),controller=new AbortController();request.current=controller;
   const timer=setTimeout(()=>controller.abort('timeout'),180000);
+  const turnIndex=turns.length;
+  const complete=(text:string)=>setTurns(previous=>previous.map((turn,index)=>index===turnIndex?{...turn,answer:text}:turn));
+  setTurns(previous=>[...previous,{question:prompt,answer:''}]);setQuestion('');
   setBusy(true);setError('');setNotice('Consultando Nexus…');
   try{
    if(!await verifyDashboardAccess(user,db))throw Error('Tu acceso de administración ya no está disponible.');
+   const command=parseMessageEditCommand(prompt);
+   if(command){
+    setNotice('Buscando el mensaje solicitado…');
+    const text=await editMessageByCommand(db,user,command,controller.signal,()=>{clearTimeout(timer);setCommitting(true);setNotice('Guardando la edición…');});
+    complete(text);setNotice('');return;
+   }
+   if(/^(edita|modifica|cambia)\s+el\s+mensaje/i.test(prompt))throw Error('Indica el autor, el texto actual y el texto nuevo entre comillas para editar un mensaje.');
    const {askDashboardAI}=await import('./askDashboardAI');
    const context=JSON.stringify({version:'v'+version,fecha:new Date().toISOString(),mapa:dataMap,resumen:snapshot??null,conversacion:turns});
    const result=await askDashboardAI(prompt,context,controller.signal,{declarations:readDeclarations,execute:createDashboardReader(db,rtdb,user),onRead:()=>setNotice('Consultando los datos necesarios…')});
-   if(!controller.signal.aborted){setTurns(previous=>[...previous,{question:prompt,answer:result.text}]);setQuestion('');setNotice(result.truncated?'La respuesta quedó incompleta. Puedes pedir que continúe.':'');}
+   if(!controller.signal.aborted){complete(result.text);setNotice(result.truncated?'La respuesta quedó incompleta. Puedes pedir que continúe.':'');}
   }catch(error){if(request.current===controller){setError(controller.signal.reason==='timeout'?'La consulta tardó demasiado. Puedes volver a intentarlo.':controller.signal.aborted?'Consulta cancelada.':error instanceof Error?error.message:'No se pudo completar la consulta.');setNotice('');}}
-  finally{clearTimeout(timer);if(request.current===controller){request.current=null;setBusy(false);}}
+  finally{clearTimeout(timer);if(request.current===controller){request.current=null;setBusy(false);setCommitting(false);}}
  }
- return <section className="panel-card dashboard-ai">
-  <header className="dashboard-ai-header"><div><span className="badge"><Sparkles size={15}/> ASISTENTE DEL PANEL</span><h2>Modo IA</h2></div></header>
-  <p>Pregunta sobre Nexus Chat. El asistente consultará la información necesaria con tu acceso de administración. Los datos consultados se comparten con el servicio de IA para responderte.</p>
+ return <section className="dashboard-ai dashboard-chat">
+  <header className="dashboard-chat-header"><Sparkles size={20}/><div><h2>Modo IA</h2><small>Tu asistente de administración</small></div></header>
+  <p className="dashboard-chat-disclosure">Las consultas se procesan con los datos necesarios de Nexus. Puedes solicitar la edición de un mensaje indicando su autor y el texto exacto.</p>
   {notice&&<p role="status">{notice}</p>}
-  {busy&&<button type="button" className="secondary" onClick={()=>request.current?.abort()}>Cancelar consulta</button>}
+  {busy&&<button type="button" className="secondary" disabled={committing} onClick={()=>request.current?.abort()}>Cancelar consulta</button>}
   {error&&<p className="feedback error" role="alert">{error}</p>}
-  <div className="dashboard-ai-transcript" aria-label="Conversación de Modo IA" aria-live="polite">
-   {turns.map((turn,index)=><article key={index} className="dashboard-ai-turn"><p className="dashboard-ai-user-message">{turn.question}</p><div className="report-preview" aria-label="Respuesta del Modo IA"><strong>Modo IA</strong><p>{turn.answer}</p></div></article>)}
+  <div className="dashboard-ai-transcript" role="log" aria-label="Conversación de Modo IA" aria-live="polite">
+   {!turns.length&&<div className="dashboard-chat-welcome"><Sparkles size={36}/><h3>¿En qué te ayudo?</h3><p>Escribe tu consulta o un comando.</p></div>}
+   {turns.map((turn,index)=><article key={index} className="dashboard-ai-turn"><p className="dashboard-ai-user-message">{turn.question}</p>{turn.answer&&<div className="report-preview" aria-label="Respuesta del Modo IA"><strong>Modo IA</strong><RichText text={turn.answer}/></div>}</article>)}
+   <div ref={bottom}/>
   </div>
   <form className="dashboard-ai-composer" aria-label="Escribir una consulta" onSubmit={event=>{event.preventDefault();void ask();}}>
    <SpeakAnswer key={answer} text={answer} compact/>

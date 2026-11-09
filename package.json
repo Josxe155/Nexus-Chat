@@ -15,7 +15,8 @@
     "postinstall": "node scripts/setup-services.cjs",
     "check:docs": "node scripts/check-docs.cjs",
     "test:dashboard-ai": "node --import tsx scripts/dashboard-ai.test.ts",
-    "test:dashboard-access": "node scripts/dashboard-read-access.test.cjs"
+    "test:dashboard-access": "node scripts/dashboard-read-access.test.cjs",
+    "test:dashboard-command": "node scripts/dashboard-command.test.cjs"
   },
   "dependencies": {
     "firebase": "^12.13.0",
