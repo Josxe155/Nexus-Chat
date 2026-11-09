@@ -29,8 +29,10 @@ Matriz de esta entrega (no del proyecto completo):
 | Acciones de correo y rechazo de sesión ajena con servicios simulados | Verificado | Verificado | Verificado |
 | Copia de número y bloqueo inicial de eliminación | Verificado | Verificado | Verificado |
 | Regresión de cabecera: cuatro botones y desvanecimiento desde el primer píxel; otras vistas conservadas | Verificado | Verificado | Verificado |
-| Publicación y manifiesto de versión | Pendiente | Pendiente | Pendiente |
+| Publicación y manifiesto de versión | Verificado | Verificado | Verificado |
 | Recepción real de los correos de recuperación/verificación | Pendiente | Pendiente | Pendiente |
 | Prueba manual en Android, iPhone, tablet y computadora físicos | Pendiente | Pendiente | Pendiente |
 
-Avance verificado antes de publicar: celular 6/9 (67 %), tablet 6/9 (67 %), computadora 6/9 (67 %). Las funciones no implementadas indicadas arriba y la revisión de todos los subapartados de Ajustes permanecen en el inventario general; esta entrega no certifica equivalencia total con WhatsApp ni revisión de cada pantalla.
+Avance verificado tras publicar: celular 7/9 (78 %), tablet 7/9 (78 %), computadora 7/9 (78 %). Las funciones no implementadas indicadas arriba y la revisión de todos los subapartados de Ajustes permanecen en el inventario general; esta entrega no certifica equivalencia total con WhatsApp ni revisión de cada pantalla.
+
+Publicación comprobada en https://nexus-chat-nc.web.app: v26.81.0, identificador `314515d5aefc851e`. Se compararon el manifiesto y los dos recursos principales de la aplicación con la compilación local mediante SHA-256. El acceso público al dashboard muestra la versión correcta sin desbordamiento a 390, 820 y 1440 píxeles. Las comprobaciones del código en GitHub [pasaron](https://github.com/Josxe155/Nexus-Chat/actions/runs/42698396261).
