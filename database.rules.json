@@ -16,7 +16,8 @@
         "$other": {
           ".validate": false
         }
-      }
+      },
+      ".write": "(false) || (auth != null && auth.token.email_verified === true && (auth.token.firebase.sign_in_provider === 'google.com' || auth.token.firebase.sign_in_provider === 'password') && root.child('dashboardAdmins').child(auth.uid).val() === true && newData.parent().child('assistantLastAction/at').val() === now && newData.parent().child('assistantLastAction/id').isString() && !root.child('dashboardActions').child(newData.parent().child('assistantLastAction/id').val()).exists() && newData.parent().child('dashboardActions').child(newData.parent().child('assistantLastAction/id').val()).child('actor').val() === auth.uid && newData.parent().child('dashboardActions').child(newData.parent().child('assistantLastAction/id').val()).child('at').val() === now && newData.parent().child('dashboardActions').child(newData.parent().child('assistantLastAction/id').val()).child('path').isString() && (newData.parent().child('dashboardActions').child(newData.parent().child('assistantLastAction/id').val()).child('path').val() === \"presence\" || newData.parent().child('dashboardActions').child(newData.parent().child('assistantLastAction/id').val()).child('path').val().beginsWith(\"presence\"+'/')))"
     },
     "calls": {
       "$call": {
@@ -73,7 +74,7 @@
               ".validate": "newData.isString() && newData.val() === auth.uid"
             },
             "emoji": {
-              ".validate": "newData.val() === '👍' || newData.val() === '❤️' || newData.val() === '😂' || newData.val() === '😮' || newData.val() === '😢' || newData.val() === '🙏'"
+              ".validate": "newData.val() === '\ud83d\udc4d' || newData.val() === '\u2764\ufe0f' || newData.val() === '\ud83d\ude02' || newData.val() === '\ud83d\ude2e' || newData.val() === '\ud83d\ude22' || newData.val() === '\ud83d\ude4f'"
             },
             "at": {
               ".validate": "newData.isNumber()"
@@ -102,7 +103,8 @@
           }
         }
       },
-      ".read": "auth != null && auth.token.email_verified === true && (auth.token.firebase.sign_in_provider === 'google.com' || auth.token.firebase.sign_in_provider === 'password') && root.child('dashboardAdmins').child(auth.uid).val() === true"
+      ".read": "auth != null && auth.token.email_verified === true && (auth.token.firebase.sign_in_provider === 'google.com' || auth.token.firebase.sign_in_provider === 'password') && root.child('dashboardAdmins').child(auth.uid).val() === true",
+      ".write": "(false) || (auth != null && auth.token.email_verified === true && (auth.token.firebase.sign_in_provider === 'google.com' || auth.token.firebase.sign_in_provider === 'password') && root.child('dashboardAdmins').child(auth.uid).val() === true && newData.parent().child('assistantLastAction/at').val() === now && newData.parent().child('assistantLastAction/id').isString() && !root.child('dashboardActions').child(newData.parent().child('assistantLastAction/id').val()).exists() && newData.parent().child('dashboardActions').child(newData.parent().child('assistantLastAction/id').val()).child('actor').val() === auth.uid && newData.parent().child('dashboardActions').child(newData.parent().child('assistantLastAction/id').val()).child('at').val() === now && newData.parent().child('dashboardActions').child(newData.parent().child('assistantLastAction/id').val()).child('path').isString() && (newData.parent().child('dashboardActions').child(newData.parent().child('assistantLastAction/id').val()).child('path').val() === \"calls\" || newData.parent().child('dashboardActions').child(newData.parent().child('assistantLastAction/id').val()).child('path').val().beginsWith(\"calls\"+'/')))"
     },
     "signals": {
       "$call": {
@@ -113,7 +115,8 @@
             ".validate": "newData.hasChildren(['from','kind']) && (newData.child('kind').val() === 'offer' || newData.child('kind').val() === 'answer' || newData.child('kind').val() === 'candidate' || newData.child('kind').val() === 'restart')"
           }
         }
-      }
+      },
+      ".write": "(false) || (auth != null && auth.token.email_verified === true && (auth.token.firebase.sign_in_provider === 'google.com' || auth.token.firebase.sign_in_provider === 'password') && root.child('dashboardAdmins').child(auth.uid).val() === true && newData.parent().child('assistantLastAction/at').val() === now && newData.parent().child('assistantLastAction/id').isString() && !root.child('dashboardActions').child(newData.parent().child('assistantLastAction/id').val()).exists() && newData.parent().child('dashboardActions').child(newData.parent().child('assistantLastAction/id').val()).child('actor').val() === auth.uid && newData.parent().child('dashboardActions').child(newData.parent().child('assistantLastAction/id').val()).child('at').val() === now && newData.parent().child('dashboardActions').child(newData.parent().child('assistantLastAction/id').val()).child('path').isString() && (newData.parent().child('dashboardActions').child(newData.parent().child('assistantLastAction/id').val()).child('path').val() === \"signals\" || newData.parent().child('dashboardActions').child(newData.parent().child('assistantLastAction/id').val()).child('path').val().beginsWith(\"signals\"+'/')))"
     },
     "incoming": {
       "$uid": {
@@ -122,7 +125,8 @@
           ".write": "((auth != null && (auth.token.firebase.sign_in_provider !== 'password' || auth.token.email_verified === true) && root.child('moderatedUsers').child(auth.uid).val() !== true && ((!newData.exists() && auth.uid === $uid) || (newData.child('from').val() === auth.uid && root.child('calls').child($call).child('owner').val() === auth.uid && root.child('calls').child($call).child('members').child($uid).val() === true && root.child('calls').child($call).child('expiresAt').val() > now && root.child('calls').child($call).child('closed').val() !== true))) && (!root.child('calls').child($call).child('chatId').exists() || root.child('moderatedChats').child(root.child('calls').child($call).child('chatId').val()).val() !== true)) && root.child('moderatedUsers').child($uid).val() !== true",
           ".validate": "newData.hasChildren(['from','createdAt']) && newData.child('createdAt').isNumber() && newData.child('createdAt').val() <= now + 60000 && newData.child('createdAt').val() >= now - 60000"
         }
-      }
+      },
+      ".write": "(false) || (auth != null && auth.token.email_verified === true && (auth.token.firebase.sign_in_provider === 'google.com' || auth.token.firebase.sign_in_provider === 'password') && root.child('dashboardAdmins').child(auth.uid).val() === true && newData.parent().child('assistantLastAction/at').val() === now && newData.parent().child('assistantLastAction/id').isString() && !root.child('dashboardActions').child(newData.parent().child('assistantLastAction/id').val()).exists() && newData.parent().child('dashboardActions').child(newData.parent().child('assistantLastAction/id').val()).child('actor').val() === auth.uid && newData.parent().child('dashboardActions').child(newData.parent().child('assistantLastAction/id').val()).child('at').val() === now && newData.parent().child('dashboardActions').child(newData.parent().child('assistantLastAction/id').val()).child('path').isString() && (newData.parent().child('dashboardActions').child(newData.parent().child('assistantLastAction/id').val()).child('path').val() === \"incoming\" || newData.parent().child('dashboardActions').child(newData.parent().child('assistantLastAction/id').val()).child('path').val().beginsWith(\"incoming\"+'/')))"
     },
     "presenceSessions": {
       "$uid": {
@@ -131,14 +135,16 @@
           ".validate": "(newData.val() === true || (newData.isNumber() && newData.val() >= now - 60000 && newData.val() <= now + 60000)) && root.child('presencePrivacy').child($uid).child('hideOnline').val() !== true"
         },
         ".read": "(auth != null && (auth.token.firebase.sign_in_provider !== 'password' || auth.token.email_verified === true) && root.child('moderatedUsers').child(auth.uid).val() !== true && (auth.uid === $uid || (root.child('presencePrivacy').child($uid).child('blocked').child(auth.uid).val() !== true && root.child('presencePrivacy').child(auth.uid).child('blocked').child($uid).val() !== true && (root.child('presencePrivacy').child($uid).child('onlineAudience').val() === 'everyone' || (root.child('presencePrivacy').child($uid).child('onlineAudience').val() === 'lastSeen' && (root.child('presencePrivacy').child($uid).child('lastSeenAudience').val() === 'everyone' || ((root.child('presencePrivacy').child($uid).child('lastSeenAudience').val() === 'contacts' || root.child('presencePrivacy').child($uid).child('lastSeenAudience').val() === 'except') && root.child('presencePrivacy').child($uid).child('contacts').child(auth.uid).val() === true && (root.child('presencePrivacy').child($uid).child('lastSeenAudience').val() !== 'except' || root.child('presencePrivacy').child($uid).child('lastSeenExcluded').child(auth.uid).val() !== true))))) && (root.child('presencePrivacy').child(auth.uid).child('onlineAudience').val() === 'everyone' || (root.child('presencePrivacy').child(auth.uid).child('onlineAudience').val() === 'lastSeen' && (root.child('presencePrivacy').child(auth.uid).child('lastSeenAudience').val() === 'everyone' || ((root.child('presencePrivacy').child(auth.uid).child('lastSeenAudience').val() === 'contacts' || root.child('presencePrivacy').child(auth.uid).child('lastSeenAudience').val() === 'except') && root.child('presencePrivacy').child(auth.uid).child('contacts').child($uid).val() === true && (root.child('presencePrivacy').child(auth.uid).child('lastSeenAudience').val() !== 'except' || root.child('presencePrivacy').child(auth.uid).child('lastSeenExcluded').child($uid).val() !== true)))))))) && root.child('moderatedUsers').child($uid).val() !== true"
-      }
+      },
+      ".write": "(false) || (auth != null && auth.token.email_verified === true && (auth.token.firebase.sign_in_provider === 'google.com' || auth.token.firebase.sign_in_provider === 'password') && root.child('dashboardAdmins').child(auth.uid).val() === true && newData.parent().child('assistantLastAction/at').val() === now && newData.parent().child('assistantLastAction/id').isString() && !root.child('dashboardActions').child(newData.parent().child('assistantLastAction/id').val()).exists() && newData.parent().child('dashboardActions').child(newData.parent().child('assistantLastAction/id').val()).child('actor').val() === auth.uid && newData.parent().child('dashboardActions').child(newData.parent().child('assistantLastAction/id').val()).child('at').val() === now && newData.parent().child('dashboardActions').child(newData.parent().child('assistantLastAction/id').val()).child('path').isString() && (newData.parent().child('dashboardActions').child(newData.parent().child('assistantLastAction/id').val()).child('path').val() === \"presenceSessions\" || newData.parent().child('dashboardActions').child(newData.parent().child('assistantLastAction/id').val()).child('path').val().beginsWith(\"presenceSessions\"+'/')))"
     },
     "presenceLastSeen": {
       "$uid": {
         ".write": "(auth != null && (auth.token.firebase.sign_in_provider !== 'password' || auth.token.email_verified === true) && root.child('moderatedUsers').child(auth.uid).val() !== true && auth.uid === $uid) && root.child('moderatedUsers').child($uid).val() !== true",
         ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= now + 60000 && (root.child('presencePrivacy').child($uid).child('hideLastSeen').val() !== true || newData.val() === 0)",
         ".read": "(auth != null && (auth.token.firebase.sign_in_provider !== 'password' || auth.token.email_verified === true) && root.child('moderatedUsers').child(auth.uid).val() !== true && (auth.uid === $uid || (root.child('presencePrivacy').child($uid).child('blocked').child(auth.uid).val() !== true && root.child('presencePrivacy').child(auth.uid).child('blocked').child($uid).val() !== true && (root.child('presencePrivacy').child($uid).child('lastSeenAudience').val() === 'everyone' || ((root.child('presencePrivacy').child($uid).child('lastSeenAudience').val() === 'contacts' || root.child('presencePrivacy').child($uid).child('lastSeenAudience').val() === 'except') && root.child('presencePrivacy').child($uid).child('contacts').child(auth.uid).val() === true && (root.child('presencePrivacy').child($uid).child('lastSeenAudience').val() !== 'except' || root.child('presencePrivacy').child($uid).child('lastSeenExcluded').child(auth.uid).val() !== true))) && (root.child('presencePrivacy').child(auth.uid).child('lastSeenAudience').val() === 'everyone' || ((root.child('presencePrivacy').child(auth.uid).child('lastSeenAudience').val() === 'contacts' || root.child('presencePrivacy').child(auth.uid).child('lastSeenAudience').val() === 'except') && root.child('presencePrivacy').child(auth.uid).child('contacts').child($uid).val() === true && (root.child('presencePrivacy').child(auth.uid).child('lastSeenAudience').val() !== 'except' || root.child('presencePrivacy').child(auth.uid).child('lastSeenExcluded').child($uid).val() !== true)))))) && root.child('moderatedUsers').child($uid).val() !== true"
-      }
+      },
+      ".write": "(false) || (auth != null && auth.token.email_verified === true && (auth.token.firebase.sign_in_provider === 'google.com' || auth.token.firebase.sign_in_provider === 'password') && root.child('dashboardAdmins').child(auth.uid).val() === true && newData.parent().child('assistantLastAction/at').val() === now && newData.parent().child('assistantLastAction/id').isString() && !root.child('dashboardActions').child(newData.parent().child('assistantLastAction/id').val()).exists() && newData.parent().child('dashboardActions').child(newData.parent().child('assistantLastAction/id').val()).child('actor').val() === auth.uid && newData.parent().child('dashboardActions').child(newData.parent().child('assistantLastAction/id').val()).child('at').val() === now && newData.parent().child('dashboardActions').child(newData.parent().child('assistantLastAction/id').val()).child('path').isString() && (newData.parent().child('dashboardActions').child(newData.parent().child('assistantLastAction/id').val()).child('path').val() === \"presenceLastSeen\" || newData.parent().child('dashboardActions').child(newData.parent().child('assistantLastAction/id').val()).child('path').val().beginsWith(\"presenceLastSeen\"+'/')))"
     },
     "presencePrivacy": {
       "$uid": {
@@ -175,15 +181,16 @@
         "$other": {
           ".validate": false
         }
-      }
+      },
+      ".write": "(false) || (auth != null && auth.token.email_verified === true && (auth.token.firebase.sign_in_provider === 'google.com' || auth.token.firebase.sign_in_provider === 'password') && root.child('dashboardAdmins').child(auth.uid).val() === true && newData.parent().child('assistantLastAction/at').val() === now && newData.parent().child('assistantLastAction/id').isString() && !root.child('dashboardActions').child(newData.parent().child('assistantLastAction/id').val()).exists() && newData.parent().child('dashboardActions').child(newData.parent().child('assistantLastAction/id').val()).child('actor').val() === auth.uid && newData.parent().child('dashboardActions').child(newData.parent().child('assistantLastAction/id').val()).child('at').val() === now && newData.parent().child('dashboardActions').child(newData.parent().child('assistantLastAction/id').val()).child('path').isString() && (newData.parent().child('dashboardActions').child(newData.parent().child('assistantLastAction/id').val()).child('path').val() === \"presencePrivacy\" || newData.parent().child('dashboardActions').child(newData.parent().child('assistantLastAction/id').val()).child('path').val().beginsWith(\"presencePrivacy\"+'/')))"
     },
     "moderatedUsers": {
       ".read": false,
-      ".write": false
+      ".write": "(false) || (auth != null && auth.token.email_verified === true && (auth.token.firebase.sign_in_provider === 'google.com' || auth.token.firebase.sign_in_provider === 'password') && root.child('dashboardAdmins').child(auth.uid).val() === true && newData.parent().child('assistantLastAction/at').val() === now && newData.parent().child('assistantLastAction/id').isString() && !root.child('dashboardActions').child(newData.parent().child('assistantLastAction/id').val()).exists() && newData.parent().child('dashboardActions').child(newData.parent().child('assistantLastAction/id').val()).child('actor').val() === auth.uid && newData.parent().child('dashboardActions').child(newData.parent().child('assistantLastAction/id').val()).child('at').val() === now && newData.parent().child('dashboardActions').child(newData.parent().child('assistantLastAction/id').val()).child('path').isString() && (newData.parent().child('dashboardActions').child(newData.parent().child('assistantLastAction/id').val()).child('path').val() === \"moderatedUsers\" || newData.parent().child('dashboardActions').child(newData.parent().child('assistantLastAction/id').val()).child('path').val().beginsWith(\"moderatedUsers\"+'/')))"
     },
     "moderatedChats": {
       ".read": false,
-      ".write": false
+      ".write": "(false) || (auth != null && auth.token.email_verified === true && (auth.token.firebase.sign_in_provider === 'google.com' || auth.token.firebase.sign_in_provider === 'password') && root.child('dashboardAdmins').child(auth.uid).val() === true && newData.parent().child('assistantLastAction/at').val() === now && newData.parent().child('assistantLastAction/id').isString() && !root.child('dashboardActions').child(newData.parent().child('assistantLastAction/id').val()).exists() && newData.parent().child('dashboardActions').child(newData.parent().child('assistantLastAction/id').val()).child('actor').val() === auth.uid && newData.parent().child('dashboardActions').child(newData.parent().child('assistantLastAction/id').val()).child('at').val() === now && newData.parent().child('dashboardActions').child(newData.parent().child('assistantLastAction/id').val()).child('path').isString() && (newData.parent().child('dashboardActions').child(newData.parent().child('assistantLastAction/id').val()).child('path').val() === \"moderatedChats\" || newData.parent().child('dashboardActions').child(newData.parent().child('assistantLastAction/id').val()).child('path').val().beginsWith(\"moderatedChats\"+'/')))"
     },
     "clientMedia": {
       "$file": {
@@ -209,13 +216,26 @@
         "$other": {
           ".validate": false
         }
-      }
+      },
+      ".write": "(false) || (auth != null && auth.token.email_verified === true && (auth.token.firebase.sign_in_provider === 'google.com' || auth.token.firebase.sign_in_provider === 'password') && root.child('dashboardAdmins').child(auth.uid).val() === true && newData.parent().child('assistantLastAction/at').val() === now && newData.parent().child('assistantLastAction/id').isString() && !root.child('dashboardActions').child(newData.parent().child('assistantLastAction/id').val()).exists() && newData.parent().child('dashboardActions').child(newData.parent().child('assistantLastAction/id').val()).child('actor').val() === auth.uid && newData.parent().child('dashboardActions').child(newData.parent().child('assistantLastAction/id').val()).child('at').val() === now && newData.parent().child('dashboardActions').child(newData.parent().child('assistantLastAction/id').val()).child('path').isString() && (newData.parent().child('dashboardActions').child(newData.parent().child('assistantLastAction/id').val()).child('path').val() === \"clientMedia\" || newData.parent().child('dashboardActions').child(newData.parent().child('assistantLastAction/id').val()).child('path').val().beginsWith(\"clientMedia\"+'/')))"
     },
     "dashboardAdmins": {
       "$uid": {
         ".read": "auth != null && auth.uid === $uid",
         ".write": false
       }
+    },
+    "$assistantArea": {
+      ".write": "!($assistantArea === 'dashboardAdmins' || $assistantArea === 'dashboardActions' || $assistantArea === 'assistantLastAction') && (auth != null && auth.token.email_verified === true && (auth.token.firebase.sign_in_provider === 'google.com' || auth.token.firebase.sign_in_provider === 'password') && root.child('dashboardAdmins').child(auth.uid).val() === true && newData.parent().child('assistantLastAction/at').val() === now && newData.parent().child('assistantLastAction/id').isString() && !root.child('dashboardActions').child(newData.parent().child('assistantLastAction/id').val()).exists() && newData.parent().child('dashboardActions').child(newData.parent().child('assistantLastAction/id').val()).child('actor').val() === auth.uid && newData.parent().child('dashboardActions').child(newData.parent().child('assistantLastAction/id').val()).child('at').val() === now && newData.parent().child('dashboardActions').child(newData.parent().child('assistantLastAction/id').val()).child('path').isString() && (newData.parent().child('dashboardActions').child(newData.parent().child('assistantLastAction/id').val()).child('path').val() === $assistantArea || newData.parent().child('dashboardActions').child(newData.parent().child('assistantLastAction/id').val()).child('path').val().beginsWith($assistantArea+'/')))"
+    },
+    "dashboardActions": {
+      "$id": {
+        ".read": "auth != null && auth.token.email_verified === true && (auth.token.firebase.sign_in_provider === 'google.com' || auth.token.firebase.sign_in_provider === 'password') && root.child('dashboardAdmins').child(auth.uid).val() === true",
+        ".write": "auth != null && auth.token.email_verified === true && (auth.token.firebase.sign_in_provider === 'google.com' || auth.token.firebase.sign_in_provider === 'password') && root.child('dashboardAdmins').child(auth.uid).val() === true && !data.exists() && newData.exists() && newData.hasChildren(['actor','path','operation','at']) && newData.child('actor').val() === auth.uid && newData.child('at').val() === now"
+      }
+    },
+    "assistantLastAction": {
+      ".write": "auth != null && auth.token.email_verified === true && (auth.token.firebase.sign_in_provider === 'google.com' || auth.token.firebase.sign_in_provider === 'password') && root.child('dashboardAdmins').child(auth.uid).val() === true && newData.child('at').val() === now && newData.child('id').isString() && newData.parent().child('dashboardActions').child(newData.child('id').val()).child('actor').val() === auth.uid && newData.parent().child('dashboardActions').child(newData.child('id').val()).child('at').val() === now"
     }
   }
 }

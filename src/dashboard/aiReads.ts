@@ -11,9 +11,10 @@ export const readDeclarations=[
  {name:'read_realtime',description:'Lee datos de Realtime Database por ruta; devuelve páginas de 50 claves. Sigue after para continuar.',parameters:{type:'OBJECT',properties:{path:string,after:string},required:['path']}},
 ];
 export const dataMap={
- firestore:['users','chats','communities','statuses','mediaFiles','callRooms','messageReports','communityReports','officialNotices','publicConfig','dashboardVisits','nexusNumbers','nexusNumberReservations','contactCodes','dashboardAdmins','usernames'],
+ firestore:['users','chats','communities','statuses','mediaFiles','callRooms','messageReports','communityReports','officialNotices','publicConfig','dashboardVisits','nexusNumbers','nexusNumberReservations','contactCodes','dashboardAdmins','usernames','dashboardActions','dashboardEdits'],
  subcollections:['users/{uid}/private (profile, privacy, settings, contacts, phone-contacts, contactQr)','users/{uid}/details','users/{uid}/conversations','chats/{chatId}/messages','statuses/{id}/reactions'],
  realtime:['presence','calls','clientMedia','dashboardAdmins','moderatedUsers'],
+ schemas:{officialNotices:{fields:{category:'Novedad | Aviso | Seguridad',title:'texto no vacío, hasta 100 caracteres',body:'texto no vacío, hasta 2000 caracteres',publishedAt:{$serverTimestamp:true}}},availability:{path:'publicConfig/availability',fields:{maintenance:'boolean',updatedAt:{$serverTimestamp:true}}},messages:'Conservar id, chatId, senderId y fecha original; para texto cambiar content y edited=true. Para archivos consultar mediaFiles antes que fragmentos clientMedia.'},
  instructions:'Las rutas son orientativas, no una lista cerrada. Consulta cualquier ruta necesaria. Los recuentos usan count_collection; las listas se paginan. No interpretes una página como el total. No se dispone de contraseñas de Authentication ni se pueden descifrar datos sin sus claves originales.',
 };
 export function createDashboardReader(db:Firestore,rtdb:Database,user:User){

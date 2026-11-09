@@ -314,6 +314,38 @@ service cloud.firestore {
     && getAfter(/databases/$(database)/documents/chats/$(request.resource.data.chatId)/messages/$(request.resource.data.messageId)).data.content==request.resource.data.after;
    allow update,delete: if false;
   }
-  match /{document=**}{allow read: if operator();allow write: if false;}
+  match /dashboardActions/{id} {
+   allow read: if operator();
+   allow create: if operator() && request.resource.data.keys().hasOnly(['actor','target','operation','before','after','at'])
+    && request.resource.data.actor==request.auth.uid && request.resource.data.at==request.time
+    && request.resource.data.operation in ['create','update','delete']
+    && request.resource.data.target is path
+    && (exists(request.resource.data.target) ? request.resource.data.before==get(request.resource.data.target).data : request.resource.data.before==null)
+    && (existsAfter(request.resource.data.target) ? request.resource.data.after==getAfter(request.resource.data.target).data : request.resource.data.after==null);
+   allow update,delete: if false;
+  }
+  match /assistantOperations/{pointer=**} {
+   allow read: if operator();
+   allow create,update: if operator() && request.resource.data.keys().hasOnly(['actor','id','at'])
+    && request.resource.data.actor==request.auth.uid && request.resource.data.at==request.time
+    && getAfter(/databases/$(database)/documents/dashboardActions/$(request.resource.data.id)).data.actor==request.auth.uid
+    && getAfter(/databases/$(database)/documents/dashboardActions/$(request.resource.data.id)).data.at==request.time;
+   allow delete: if false;
+  }
+  match /{area}/{target=**} {
+   function assistantWrite(){
+    let pointer=getAfter(/databases/$(database)/documents/assistantOperations/$(area)/$(target)/latest).data;
+    let action=getAfter(/databases/$(database)/documents/dashboardActions/$(pointer.id)).data;
+    return pointer.actor==request.auth.uid && pointer.at==request.time
+     && action.actor==request.auth.uid && action.at==request.time && action.target==request.path
+     && action.operation==request.method
+     && (resource==null ? action.before==null : action.before==resource.data)
+     && (request.resource==null ? action.after==null : action.after==request.resource.data);
+   }
+   allow read: if operator();
+   allow write: if operator() && !(area in ['dashboardAdmins','dashboardActions','dashboardEdits','assistantOperations'])
+    && request.path!=/databases/$(database)/documents/publicConfig/cleanup && assistantWrite();
+  }
+
  }
 }

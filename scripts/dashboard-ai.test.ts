@@ -20,7 +20,7 @@ test('envía solo la muestra revisada y no solicita herramientas',async()=>{
   assert.equal((options.headers as Record<string,string>)['x-goog-api-key'],'test-placeholder');
   const body=JSON.parse(options.body as string);
   assert.deepEqual(JSON.parse(body.contents[0].parts[0].text),{pregunta:'Resume la actividad',registros:{cuentas:8}});
-  assert.match(body.systemInstruction.parts[0].text,/solo lectura/);
+  assert.match(body.systemInstruction.parts[0].text,/Nexus Assistant/);
   assert.equal(body.tools,undefined);
   return new Response(JSON.stringify({candidates:[{finishReason:'STOP',content:{parts:[{text:'privado',thought:true},{text:'Hay 8 cuentas.'}]}}]}));
  };
@@ -83,10 +83,10 @@ test('el dictado entrega una sola vez cada resultado final y conserva repeticion
  const result=(transcript:string,isFinal=true)=>({isFinal,0:{transcript}});
  assert.equal(collect(0,[result('Hola')]).text,'Hola');
  assert.equal(collect(0,[result('Hola')]).text,'');
- assert.equal(collect(0,[result('Hola'),result('Hola')]).text,'Hola');
+ assert.equal(collect(0,[result('Hola'),result('Hola')]).text,'Hola Hola');
  assert.equal(collect(1,[result('Hola'),result('Hola')]).text,'');
  assert.equal(collect(2,[result('Hola'),result('Hola'),result('mañana',false)]).interim,'mañana');
- assert.equal(collect(2,[result('Hola'),result('Hola'),result('mañana')]).text,'mañana');
+ assert.equal(collect(2,[result('Hola'),result('Hola'),result('mañana')]).text,'Hola Hola mañana');
  assert.equal(collectDictation()(0,[result('Hola')]).text,'Hola');
 });
 
@@ -98,4 +98,30 @@ test('interpreta el comando de edición exacto y rechaza mensajes alterados o ca
  const value={senderId:'author',content:command!.before,type:'text'};
  assert.doesNotThrow(()=>assertEditableMessage(value,command!,'author',1000));
  for(const changed of [{...value,content:'Otro texto'},{...value,senderId:'other'},{...value,deletedAt:1},{...value,expiresAt:999},{...value,sealed:{}},{...value,type:'poll'}])assert.throws(()=>assertEditableMessage(changed,command!,'author',1000));
+});
+
+test('reconstruye el dictado acumulado sin duplicar frases reenviadas por el navegador',async()=>{
+ const {collectDictation}=await import('../src/features/dictationResults.ts');const collect=collectDictation();const final=(text:string)=>({isFinal:true,0:{transcript:text}});
+ assert.equal(collect(0,[final('Hola Nexus')]).transcript,'Hola Nexus');
+ assert.equal(collect(1,[final('Hola Nexus'),final('Hola Nexus')]).transcript,'Hola Nexus');
+ assert.equal(collect(2,[final('Hola Nexus'),final('Hola Nexus'),final('Hola Nexus quiero revisar los mensajes')]).transcript,'Hola Nexus quiero revisar los mensajes');
+ assert.equal(collect(0,[final('Hola Nexus quiero revisar los mensajes')]).changed,false);
+ const short=collectDictation();short(0,[final('Hola')]);assert.equal(short(1,[final('Hola'),final('Hola Nexus')]).transcript,'Hola Nexus');
+});
+
+test('protege destinos administrativos y aplica cambios sin modificar el registro original',async()=>{
+ const {actionPath,applyActionPatch,sameRecord,validateActionData}=await import('../src/dashboard/assistantActionCore.ts');
+ for(const path of ['dashboardAdmins/a','dashboardActions/a','assistantOperations/a','publicConfig/cleanup'])assert.throws(()=>actionPath(path,'firestore'));
+ assert.equal(actionPath('users/a/private/profile','firestore'),'users/a/private/profile');
+ const before={title:'Antes',nested:{one:1,two:2}};assert.deepEqual(applyActionPatch(before,{'nested.one':3,title:{$delete:true}}),{nested:{one:3,two:2}});assert.equal(before.nested.one,1);
+ assert.equal(sameRecord({a:1,b:2},{b:2,a:1}),true);assert.equal(sameRecord({a:1},{a:2}),false);
+ assert.throws(()=>validateActionData(JSON.parse('{"__proto__":{"polluted":true}}')));
+});
+
+test('ejecuta órdenes directas y deja como propuestas las consultas y la limpieza',async()=>{
+ const {requestsImmediateAction}=await import('../src/dashboard/assistantActionCore.ts');
+ const plan:any={kind:'firestore',operation:'update'};
+ for(const prompt of ['edita el mensaje de Alexander','crea un aviso','Por favor, actualiza la configuración','elimina este documento'])assert.equal(requestsImmediateAction(prompt,plan),true);
+ for(const prompt of ['prepara un aviso','¿Qué cambiarías?','consulta mis mensajes'])assert.equal(requestsImmediateAction(prompt,plan),false);
+ assert.equal(requestsImmediateAction('ejecuta la limpieza',{...plan,kind:'cleanup'}),false);
 });

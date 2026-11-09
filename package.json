@@ -17,7 +17,8 @@
     "test:dashboard-ai": "node --import tsx scripts/dashboard-ai.test.ts",
     "test:dashboard-access": "node scripts/dashboard-read-access.test.cjs",
     "test:dashboard-command": "node scripts/dashboard-command.test.cjs",
-    "test:rich-text": "node --import tsx scripts/rich-text.test.ts"
+    "test:rich-text": "node --import tsx scripts/rich-text.test.ts",
+    "test:dashboard-actions": "node scripts/dashboard-actions.test.cjs"
   },
   "dependencies": {
     "firebase": "^12.13.0",

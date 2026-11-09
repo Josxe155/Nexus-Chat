@@ -1,3 +1,4 @@
+import {clearAssistantHistories} from './assistantHistory';
 import {useEffect,useMemo,useRef,useState} from 'react';
 import {createRoot} from 'react-dom/client';
 import {ArrowUpRight,Bell,CalendarClock,FileText,Flag,LayoutDashboard,LogOut,ShieldCheck,Sparkles,Wifi,WifiOff} from 'lucide-react';
@@ -21,7 +22,7 @@ const navigation=[
  ['avisos','Avisos oficiales',Bell],
  ['mantenimiento','Mantenimiento',CalendarClock],
  ['informes','Informes',FileText],
- ['modo-ia','Modo IA',Sparkles],
+ ['modo-ia','Nexus Assistant',Sparkles],
 ] as const;
 type Page=typeof navigation[number][0];
 type Plan={enabled?:boolean;nextDueAt?:number;lastCompletedAt?:number;status?:string;leaseUntil?:number;execution?:string};
@@ -193,14 +194,15 @@ function Workspace({user,db,rtdb,onLogout}:{user:User;db:Firestore;rtdb:Database
        finally{setCheckingVersion(false);}
       }}>{checkingVersion?'Comprobando versión…':'Comprobar versión'}</button>
      </section>
-     <section className="panel-card"><span className="badge">ESTE NAVEGADOR</span><h2>Caché de actualizaciones</h2>
-      <p>Libera las descargas de versiones guardadas en este equipo.</p>
+     <section className="panel-card"><span className="badge">ESTE NAVEGADOR</span><h2>Caché e historial local</h2>
+      <p>Libera las descargas de versiones y borra el historial local de Nexus Assistant en este equipo.</p>
       <button className="secondary" disabled={action.busy} onClick={()=>void action.run(async()=>{
-       if(!confirm('¿Eliminar solo la caché de actualizaciones de este navegador?'))return;
+       if(!confirm('¿Eliminar la caché de actualizaciones y el historial local de Nexus Assistant de este navegador?'))return;
        if(!('caches' in window))throw Error('Este navegador no permite administrar la caché.');
        const keys=(await caches.keys()).filter(key=>key.startsWith('nexus-update-'));
        await Promise.all(keys.map(key=>caches.delete(key)));
-       action.setMessage(keys.length?'Caché de actualizaciones liberada.':'No hay descargas de versiones guardadas.');
+       await clearAssistantHistories();
+       action.setMessage('Caché e historial local de Nexus Assistant eliminados.');
       })}>Liberar caché local</button>
      </section>
     </div>

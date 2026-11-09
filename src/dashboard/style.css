@@ -172,3 +172,7 @@ footer span{color:var(--accent)}
 .dashboard-chat .dashboard-ai-user-message{margin-top:0;border-radius:18px 4px 18px 18px;padding:12px 16px}
 .dashboard-chat .dashboard-ai-composer{position:static;flex-shrink:0;margin:8px 14px 14px;box-shadow:none}.dashboard-chat>.feedback,.dashboard-chat>[role=status]{margin:6px 20px}
 @media(max-width:600px){.dashboard-chat{height:calc(100dvh - 180px);min-height:480px;border-radius:18px}.dashboard-chat-header{padding:14px 16px}.dashboard-chat-disclosure{padding:8px 16px}.dashboard-chat .dashboard-ai-transcript{padding:16px 12px}.dashboard-chat .dashboard-ai-composer{margin:6px 8px 10px}.dashboard-chat .report-preview{max-width:96%}}
+
+.dashboard-chat .dashboard-ai-composer{position:relative}
+.assistant-transient{position:absolute!important;left:8px;right:8px;bottom:calc(100% + 8px);z-index:5;grid-area:auto!important;display:block;padding:12px 15px!important;border:1px solid #ff9f9f66;border-radius:12px;background:#472b30;color:#fff1f1!important;box-shadow:0 6px 24px #0005;font-size:.85rem;line-height:1.45;overflow-wrap:anywhere;pointer-events:none}
+.assistant-working{font-size:.85rem;color:var(--muted);padding:0 8px}
