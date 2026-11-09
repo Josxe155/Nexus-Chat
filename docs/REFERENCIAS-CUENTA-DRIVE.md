@@ -76,8 +76,10 @@ Matriz de 11 comprobaciones, independiente de la lista general del proyecto:
 | Menú de usuario, cierre y acciones pendientes desactivadas | Verificado | Verificado | Verificado |
 | Cierre de sesión, destinos y protección de recorridos incompletos | Verificado | Verificado | Verificado |
 | Regresión de la cabecera con sus cuatro botones | Verificado | Verificado | Verificado |
-| Publicación y manifiesto de versión | Pendiente | Pendiente | Pendiente |
+| Publicación y manifiesto de versión | Verificado | Verificado | Verificado |
 | Cambios de contraseña y correos reales en Firebase | Pendiente | Pendiente | Pendiente |
 | Revisión física en Android, iPhone, tablet y computadora | Pendiente | Pendiente | Pendiente |
 
-Avance verificado antes de las comprobaciones finales: **celular 8/11 (73 %), tablet 8/11 (73 %), computadora 8/11 (73 %)**. Este porcentaje no mide igualdad visual con WhatsApp ni considera terminadas las funciones pendientes del inventario.
+Avance verificado después de publicar: **celular 9/11 (82 %), tablet 9/11 (82 %), computadora 9/11 (82 %)**. Este porcentaje no mide igualdad visual con WhatsApp ni considera terminadas las funciones pendientes del inventario.
+
+La publicación se comprobó en https://nexus-chat-nc.web.app con versión `26.82.0` e identificador `83e515b4f48f4ffb`. El manifiesto y los dos recursos principales coinciden mediante SHA-256 con la compilación local. El acceso público del dashboard muestra la versión correcta y no desborda a 390, 820 y 1440 píxeles. Las [comprobaciones del código en GitHub](https://github.com/Josxe155/Nexus-Chat/actions/runs/42703758803) pasaron. También se comprobó que una sesión ajena o antigua no puede guardar una contraseña y que los errores desaparecen a los tres segundos.
