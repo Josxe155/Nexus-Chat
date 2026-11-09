@@ -64,3 +64,16 @@ test('prepara la clave local sin perder los otros servicios ni imprimir credenci
   assert.doesNotMatch(result.stdout+result.stderr,/existing-placeholder|new-placeholder|obsolete-placeholder/);
  }finally{rmSync(root,{recursive:true,force:true});}
 });
+
+test('consulta herramientas de lectura y conserva las firmas entre pasos',async()=>{
+ let requests=0,reads=0;
+ globalThis.fetch=async(_url,options)=>{
+  const body=JSON.parse(options.body as string);requests++;
+  if(requests===1){assert.equal(body.tools[0].functionDeclarations[0].name,'count_collection');return new Response(JSON.stringify({candidates:[{finishReason:'STOP',content:{role:'model',parts:[{thoughtSignature:'opaque-signature',functionCall:{name:'count_collection',args:{path:'users'},id:'call-1'}}]}}]}));}
+  assert.equal(body.contents[1].parts[0].thoughtSignature,'opaque-signature');
+  assert.equal(body.contents[2].parts[0].functionResponse.response.result.count,8);
+  return new Response(JSON.stringify({candidates:[{finishReason:'STOP',content:{parts:[{text:'Hay 8 cuentas.'}]}}]}));
+ };
+ const result=await requestDashboardAnswer('Cuenta las cuentas','{}',signal(),settings,{declarations:[{name:'count_collection'}],execute:async(name,args)=>{assert.equal(name,'count_collection');assert.equal(args.path,'users');reads++;return {count:8};}});
+ assert.equal(result.text,'Hay 8 cuentas.');assert.equal(reads,1);assert.equal(requests,2);
+});

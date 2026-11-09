@@ -14,7 +14,8 @@
     "setup": "node scripts/setup-services.cjs",
     "postinstall": "node scripts/setup-services.cjs",
     "check:docs": "node scripts/check-docs.cjs",
-    "test:dashboard-ai": "node --import tsx scripts/dashboard-ai.test.ts"
+    "test:dashboard-ai": "node --import tsx scripts/dashboard-ai.test.ts",
+    "test:dashboard-access": "node scripts/dashboard-read-access.test.cjs"
   },
   "dependencies": {
     "firebase": "^12.13.0",
@@ -27,6 +28,7 @@
     "tesseract.js": "^6.0.1"
   },
   "devDependencies": {
+    "@firebase/rules-unit-testing": "^5.0.2",
     "@tailwindcss/vite": "^4.1.14",
     "@types/node": "^22.14.0",
     "@types/qrcode": "^1.5.6",

@@ -50,10 +50,26 @@ Nexus AI reconoce órdenes como «genera una imagen de…», crea la imagen, per
 - Los recuentos y archivos CSV contienen cantidades, no textos de chats ni identidades de usuarios. No se modificó la autorización del panel.
 
 
-## Modo IA · v26.76.2
+## Modo IA · v26.77.0
 
-El panel consulta Gemini mediante `generateContent`, con el modelo configurable en `geminiModel`. La configuración probada utiliza `gemini-3.1-flash-lite`. La clave se guarda únicamente en `src/public-services.json`, excluido de Git. `npm run setup` importa `GEMINI_API_KEY` desde el entorno y conserva la configuración existente de los otros servicios. Se retira el campo anterior `huggingFaceKey`. Las claves de esta arquitectura son accesibles al navegador al compilar; no se incluyen credenciales administrativas de Google.
+Modo IA utiliza Gemini mediante `generateContent`, con herramientas de consulta automática. La interfaz es una conversación única: no requiere elegir una sección, una cuenta ni preparar una vista previa. Al enviar, la pregunta y los datos necesarios se comparten con el servicio de IA; el panel informa de ello antes de escribir.
 
-La sesión administradora y la vista previa siguen siendo obligatorias. Solo se envían la pregunta y la muestra revisada; el modelo no recibe herramientas de escritura ni acceso directo a Firebase. Los mensajes eliminados, caducados, de vista única o cifrados antiguos se excluyen del contexto de chats. El asistente general de Nexus mantiene su alternativa con OpenRouter.
+El administrador autorizado tiene lectura general de Firestore y Realtime Database. La autorización requiere correo verificado, acceso por Google o contraseña y la marca administrativa en cada base. No se conceden nuevos permisos a los usuarios ordinarios ni se añaden herramientas de escritura o borrado al modelo. Cada consulta vuelve a comprobar la autorización.
 
-Los controles de dictado y lectura mantienen textos neutros. La lectura admite voces en español del sistema. Su disponibilidad real y la del dictado dependen del navegador y de los permisos. Las pruebas automatizadas de voz usan simulaciones; no certifican el micrófono ni la reproducción en un teléfono físico.
+El asistente puede leer documentos, recorrer colecciones y subcolecciones por páginas, contar registros y consultar rutas de Realtime Database. La paginación evita descargar toda la base de una vez y permite continuar con el cursor. Las contraseñas de Authentication no están disponibles; los datos cifrados antiguos requieren sus claves originales. La consulta tiene los límites técnicos de tiempo, contexto y cuota del servicio; el modelo debe indicar datos ausentes y resultados parciales.
+
+Se mantienen los controles de dictado y lectura en español y el historial de la conversación mientras el componente permanece abierto. Las claves y las credenciales se conservan únicamente en la configuración local excluida de Git.
+
+### Pruebas de acceso
+
+Con Java 21, las dependencias de desarrollo y ambos emuladores locales disponibles:
+
+```sh
+npx firebase-tools emulators:exec --config firebase.emulators.json --project demo-nexus 'npm run test:dashboard-access'
+```
+
+La prueba carga las reglas reales en los emuladores, prepara datos ficticios y comprueba Google, contraseña, usuario ordinario, administrador desactivado, correo sin verificar, proveedor anónimo y sesión sin autenticar. El administrador puede consultar la ruta de prueba y nadie puede escribirla. No utiliza las bases de datos de producción. Si el iniciador de emuladores no funciona en un entorno, se pueden iniciar los dos emuladores por separado en los puertos configurados y ejecutar `npm run test:dashboard-access`.
+
+En v26.77.0 se verificaron también seis pruebas automatizadas del cliente de IA, una consulta real a Gemini usando una herramienta con datos ficticios y el envío directo de una pregunta en Chromium a 390, 820 y 1440 píxeles. No hay selector de secciones ni paso de preparación. Falta una comprobación completa con una sesión administradora real del dashboard y dispositivos físicos.
+
+La matriz de esta entrega tiene ocho comprobaciones: tipos, documentación, pruebas del cliente, consulta real a Gemini, reglas en emuladores, conversación adaptable, archivos publicados y uso completo con sesión administradora en equipo físico. Una vez verificados los archivos publicados, se completan siete de ocho: 87,5 % por tamaño de celular, tablet y computadora. El porcentaje corresponde a esta entrega, no al proyecto completo.

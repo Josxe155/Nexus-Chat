@@ -290,6 +290,6 @@ service cloud.firestore {
     && request.resource.data.maintenance is bool && request.resource.data.updatedAt==request.time;
   }
   match /publicConfig/cleanup {allow read: if signedIn();allow create,update: if operator() && request.resource.data.keys().hasOnly(['enabled','execution','firstDueAt','nextDueAt','warningDays','status','leaseUntil','runId','lastCompletedAt','counts','manualCutoff']) && request.resource.data.enabled is bool && request.resource.data.execution=='browser' && request.resource.data.nextDueAt is number && request.resource.data.warningDays==3 && request.resource.data.status in ['scheduled','running','error'] && (!('manualCutoff' in request.resource.data) || (cutoffMillis(request.resource.data.manualCutoff)>0 && cutoffMillis(request.resource.data.manualCutoff)<=request.time.toMillis() && request.resource.data.status=='running' && request.resource.data.leaseUntil is number && request.resource.data.leaseUntil>request.time.toMillis() && request.resource.data.leaseUntil<=request.time.toMillis()+360000));allow delete: if false;}
-  match /{document=**}{allow read,write: if false;}
+  match /{document=**}{allow read: if operator();allow write: if false;}
  }
 }

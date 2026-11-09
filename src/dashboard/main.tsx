@@ -141,7 +141,7 @@ function Workspace({user,db,rtdb,onLogout}:{user:User;db:Firestore;rtdb:Database
    <div hidden={page!=='resumen'}><Overview db={db} rtdb={rtdb} onData={setSnapshot}/></div>
    {page==='reportes'&&<MessageReports db={db}/>}
    {page==='avisos'&&<OfficialNotices db={db}/>}
-   {page==='modo-ia'&&<DashboardAI db={db} user={user} snapshot={snapshot}/>}
+   {page==='modo-ia'&&<DashboardAI db={db} rtdb={rtdb} user={user} snapshot={snapshot}/>}
    {page==='informes'&&<DashboardReport snapshot={snapshot} plan={ready?{enabled:!!plan.enabled,dueAt:hasDate?plan.nextDueAt:undefined}:undefined}/>}
    {page==='mantenimiento'&&<div className="grid">
     <section className="cleanup panel-card"><span className="badge">CONTENIDO Y ESPACIO</span><h2>Limpieza mensual</h2>
