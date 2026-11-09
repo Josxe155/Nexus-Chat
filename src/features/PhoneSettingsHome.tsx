@@ -1,3 +1,5 @@
+import {useState} from 'react';
+import {nextProfileQuestion} from './profileQuestions';
 import {Accessibility, Bell, CalendarDays, ChevronDown, HardDrive, HelpCircle, Info, KeyRound, List, Lock, MessageSquare, Palette, UserPlus} from 'lucide-react';
 import type {UserProfile} from '../types';
 import {SettingsRow} from './MobileSettingsControls';
@@ -24,11 +26,12 @@ function searchKey(value: string) {
 export default function PhoneSettingsHome({user, photo, bio, search, go}: {
   user: UserProfile; photo: string; bio: string; search?: string; go: (id: string) => void;
 }) {
+  const [question]=useState(()=>nextProfileQuestion(user.uid));
   const terms = searchKey(search?.trim() || '').split(/\s+/);
   const results = sections.filter(([,label, detail]) => terms.every(term => searchKey(label+' '+detail).includes(term)));
   return <>
     {search===undefined&&<div className="phone-settings-identity">
-      <button className="phone-settings-info-bubble" type="button" onClick={()=>go('info')}>{bio||'Comparte qué estás pensando'}</button>
+      <button className="phone-settings-info-bubble" type="button" onClick={()=>go('info')}>{bio?.trim()?bio:question}</button>
       <button className="phone-settings-identity-profile" type="button" aria-label="Abrir perfil" onClick={()=>go('profile')}>
         <img src={photo} alt=""/>
         <strong>{user.nombre}<ChevronDown size={18} aria-hidden="true"/></strong>

@@ -24,3 +24,5 @@ Chromium comprobó Android emulado de 393×873, iPhone emulado de 390×844, celu
 Matriz de esta entrega: (1) referencia oficial y recurso transparente, (2) tipos y compilación, (3) apariencia móvil oscura/clara y límite del fondo, (4) navegación de la cabecera, (5) regresión de tablet y computadora, (6) comprobaciones de GitHub, (7) Hosting y archivos publicados verificados, (8) recorrido en dispositivos físicos. Tras verificar la publicación se completan 7/8, **87,5 % por tamaño**. Es la verificación de esta entrega, no del proyecto completo; falta el recorrido físico.
 
 La mejora de favicon, el resto de categorías de Ajustes y las pantallas de información de contacto siguen en sus pendientes respectivos.
+
+En v26.80.1 la burbuja sin Info. personalizada alterna entre diez preguntas al abrir de nuevo la portada de Ajustes. No se repite una pregunta hasta recorrer la lista. La secuencia se mantiene en memoria por cuenta y no escribe en Firebase. Una Info. personalizada conserva su contenido y el botón sigue abriendo su editor.
