@@ -1,4 +1,4 @@
-# Contactos y bloqueo — v26.86.0
+# Contactos y bloqueo — v26.87.0
 
 ## Alcance y correspondencia
 
@@ -15,8 +15,8 @@ Los nombres, fotos, correos y cantidades de las capturas no se incorporan a la p
 | 223011 | Selector de miembros: frecuentes reales, búsqueda, selección, teclado de números/texto y avance | Implementado |
 | 223020 | Grupo: foto opcional, nombre, duración, permisos y miembros con Añadir | Implementado; el interior de Permisos está pendiente de referencia |
 | 223026 | Validación del nombre del grupo y confirmación Aceptar | Implementado |
-| 223048 | Nuevo contacto: alias, apellido, usuario, país, número y cuenta de destino | Implementado con resolución de números Nexus; sincronización telefónica pendiente |
-| 223055 | Lector QR de contacto | Se conserva en Ajustes de celular. No se añade acceso QR en Contactos ni Nuevo contacto, respetando la indicación anterior del propietario |
+| 223048 | Nuevo contacto: alias, apellido, usuario, país, número y cuenta de destino | Implementado con resolución de números Nexus; sincronización telefónica sustituida por sincronización opcional con Google, autorizada posteriormente por el propietario |
+| 223055 | Lector QR de contacto | Disponible en Ajustes, junto a Nuevo contacto y en la cabecera del formulario; los dos accesos nuevos abren el escáner, conforme a la corrección del propietario |
 | 223103 | Introducción de comunidad y Comenzar | Implementado; ejemplos de comunidades pendientes de referencia |
 | 223108 | Foto, nombre de 100 caracteres, descripción de 2048, contadores y creación de comunidad | Implementado |
 | 223118 | Evento: portada, nombre, descripción, inicio, fin opcional, lugar, recordatorio y organizador | Implementado como calendario; edición de portada, enlace de llamada y gestión de invitados pendientes |
@@ -24,7 +24,7 @@ Los nombres, fotos, correos y cantidades de las capturas no se incorporan a la p
 | 223220 | Confirmación: eliminar, archivar, cancelar y retirar copias locales | Implementado para el navegador; no modifica la galería del dispositivo |
 | 223233 | Aviso de desbloqueo y recuperación de la escritura | Implementado |
 
-El QR se conserva en su lugar anterior. Las opciones sin recorrido de referencia se presentan desactivadas cuando la captura incluye su acceso. No se inventan sus submenús.
+El QR conserva su acceso de Ajustes y añade los dos accesos de las capturas, siguiendo la indicación actual del propietario. Las opciones sin recorrido de referencia se presentan desactivadas cuando la captura incluye su acceso. No se inventan sus submenús.
 
 ## Funciones y conservación
 

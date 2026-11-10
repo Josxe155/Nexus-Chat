@@ -83,15 +83,15 @@ export function ContactCodeLink({uid, onContact}: {uid: string; onContact: (uid:
   return <ContactCodeConfirmation token={token} uid={uid} onContact={onContact} onClose={()=>setToken(null)}/>;
 }
 
-export default function PhoneContactCode({user, photo, onBack, onContact}: {
-  user: UserProfile; photo: string; onBack: () => void; onContact: (uid: string) => Promise<void>;
+export default function PhoneContactCode({user, photo, onBack, onContact, initialScan=false}: {
+  user: UserProfile; photo: string; initialScan?: boolean; onBack: () => void; onContact: (uid: string) => Promise<void>;
 }) {
   const [token, setToken] = useState('');
   const [rendered, setRendered] = useState<{token:string;qr:string;card?:string}>();
   const qr = rendered?.token===token ? rendered?.qr : undefined;
   const shareCard = rendered?.token===token ? rendered?.card : undefined;
   const [sharing, setSharing] = useState(false);
-  const [scan, setScan] = useState(false);
+  const [scan, setScan] = useState(initialScan);
   const [menu, setMenu] = useState(false);
   const [reset, setReset] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -168,7 +168,7 @@ export default function PhoneContactCode({user, photo, onBack, onContact}: {
 
   return <section className="settings-center mobile-settings phone-qr-page" aria-label="Código QR">
     <header className="settings-heading">
-      <button type="button" aria-label="Volver a configuración" onClick={onBack}><ArrowLeft/></button>
+      <button type="button" aria-label="Volver del código QR" onClick={onBack}><ArrowLeft/></button>
       <h2>Código QR</h2>
       {!scan&&<div className="phone-settings-actions" ref={menuRef}>
         <button type="button" aria-label="Compartir código QR" disabled={!shareCard||sharing||busy} onClick={()=>void share()}><Share2 size={21}/></button>

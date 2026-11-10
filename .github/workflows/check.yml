@@ -21,6 +21,7 @@ jobs:
       - run: npm run test:account-references
       - run: npm run test:cleanup
       - run: npm run test:contact-menu
+      - run: npm run test:google-contacts
       - run: npm run test:contacts
       - run: npm run test:rich-text
       - run: npm run build:hosting

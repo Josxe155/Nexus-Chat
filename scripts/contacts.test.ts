@@ -1,3 +1,4 @@
+import {matchingCountries,countryFlag} from '../src/features/contactCountries.ts';
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {build} from 'esbuild';
@@ -61,4 +62,15 @@ test('reabrir un chat determinista no lo sobrescribe y rechaza participantes aje
 test('crear un chat inexistente escribe una sola vez y una carrera reutiliza la conversación',async()=>{
  const chat={id:'new',participants:['owner','target'],createdAt:22};const first=await fixture('directContactChat');await first.api.ensureDirectContactChat('owner',chat);assert.equal(first.writes.length,1);assert.equal(first.writes[0].data.createdAt,22);
  const records:Record<string,any>={};const race=await fixture('directContactChat',records);race.context.__db.setDoc=async()=>{records['chats/new']={...chat,createdAt:11};throw Object.assign(Error('already created'),{code:'permission-denied'})};await race.api.ensureDirectContactChat('owner',chat);assert.equal(race.writes.length,0);assert.equal(records['chats/new'].createdAt,11);
+});
+
+test('países: búsqueda sin tildes, ISO, prefijos compartidos y banderas',()=>{
+ assert.equal(matchingCountries('mexico')[0][0],'MX');
+ assert.equal(matchingCountries('+593')[0][0],'EC');
+ assert.equal(matchingCountries('00593')[0][0],'EC');
+ assert.equal(matchingCountries('EC')[0][0],'EC');
+ assert.equal(matchingCountries('zzzz').length,0);
+ assert.ok(matchingCountries('+1').some(([id])=>id==='US'));
+ assert.ok(matchingCountries('+1').some(([id])=>id==='CA'));
+ assert.equal(countryFlag('EC'),'🇪🇨');
 });

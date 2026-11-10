@@ -1,4 +1,4 @@
-# Nuevo contacto — v26.85.0
+# Nuevo contacto — v26.87.0
 
 ## Referencia y alcance
 
@@ -12,7 +12,7 @@ Fuentes oficiales consultadas:
 - [UIT: estándar E.164](https://www.itu.int/rec/T-REC-E.164-202602-I/en).
 - [MDN: Contact Picker API](https://developer.mozilla.org/en-US/docs/Web/API/Contact_Picker_API). El selector permite leer contactos elegidos; no proporciona escritura de la agenda.
 
-No se declara equivalencia visual con una captura inexistente de este nuevo formulario. Se conserva la presentación de Nexus y se aplica la referencia verbal. El QR continúa en los ajustes de celular; no se añade como método visible en Nuevo contacto.
+El formulario de celular sigue la captura 223048 y el lector la 223055 del archivo de referencias de Contactos. La entrega v26.87.0 incorpora QR junto a Nuevo contacto y en su cabecera. Se respeta la indicación posterior del propietario, que reemplaza la restricción anterior de mostrar QR solo en Ajustes. El selector incluye bandera, nombre, prefijo y búsqueda por nombre/código según su referencia verbal.
 
 ## Recorrido implementado
 
@@ -28,13 +28,20 @@ No se declara equivalencia visual con una captura inexistente de este nuevo form
 
 ## Sincronización y pendientes
 
-«Sincronizar con» muestra el correo real de la sesión, cuando está disponible: el destino es la cuenta Nexus del usuario. No implica sincronización con Google Contacts. «Sincronizar contacto con el teléfono» permanece desactivado: el número interno de Nexus no acredita una línea real y el navegador no ofrece escritura general en la agenda. No se inventa una integración nativa ni se publica el número como teléfono real.
+Se eliminó «Sincronizar contacto con el teléfono» y su aviso. La cuenta visible indica «Guardar en tu cuenta de Nexus Chat»; el correo identifica la sesión, sin afirmar sincronización con agendas externas. Los números buscados siguen siendo los asignados por Nexus. No se envían SMS.
 
-Pendiente: referencia y diseño para líneas reales verificadas, integración autorizada con una agenda externa y pruebas de extremo a extremo con cuentas de prueba reales en Firebase. No se han creado ni modificado contactos de personas reales para comprobar esta entrega.
+Google Contacts dispone de [People API](https://developers.google.com/people/api/rest/v1/people/createContact), con autorización OAuth del usuario. Se integra en v26.87.0 como sincronización opcional al guardar o editar un contacto. [Detalles y configuración](GOOGLE-CONTACTOS.md).
+
+El QR abre el lector existente, permite elegir una imagen y alternar con Mi código. Cancelar conserva el borrador del contacto. Solo acepta enlaces de contacto del origen de Nexus, rechaza códigos propios y requiere confirmación antes de abrir el chat. La apertura añade el contacto privado también si ya había conversación; conserva el alias existente. No utiliza datos de las referencias como contactos de ejemplo.
+
+Fuentes de esta corrección: [escanear QR](https://faq.whatsapp.com/1079327266110265/), [compartir QR](https://faq.whatsapp.com/1097692684282332/) y [formato internacional](https://faq.whatsapp.com/640432094208718/), consultadas el 10 de noviembre de 2026.
+
+Pendientes: validación física de cámara en Android/iPhone y consentimiento/prueba real en Google. No hay importación masiva ni sincronización en segundo plano de la agenda externa.
+
 
 ## Verificación
 
-- 12 pruebas automatizadas de normalización, bifurcación, alias, errores, sesión, resolución, privacidad, transacción y reutilización/creación concurrente de chats. Firebase está simulado en estas pruebas.
+- 13 pruebas automatizadas de normalización, bifurcación, alias, errores, sesión, resolución, privacidad, transacción y reutilización/creación concurrente de chats. Firebase está simulado en estas pruebas.
 - Chromium: formulario real y estilos de producción con servicios simulados; 320/390/820/1440 px, cada uno en claro y oscuro (8/8 configuraciones), sin desbordamiento horizontal.
 - Seis recorridos de comportamiento: inexistente y aviso de tres segundos, número inválido sin consulta, usuario sin número, usuario contradictorio, doble envío y fallo al guardar.
 - Regresión: TypeScript, documentación, 30 pruebas anteriores de Assistant/acceso de propietario/cuenta/texto enriquecido y compilación de Hosting.

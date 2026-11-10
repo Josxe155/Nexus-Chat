@@ -17,7 +17,7 @@ import EmailVerificationGate from './features/EmailVerificationGate';
 import {admitAccount} from './features/admission';
 import ModerationNotices,{useRemovedAccount} from './features/ModerationNotices';
 import {ContactCodeLink} from './features/PhoneContactCode';
-import GroupInvite from './features/GroupInvite';import {useContactNames} from './features/contacts';
+import GroupInvite from './features/GroupInvite';import {saveContact,useContactNames} from './features/contacts';
 import StartupScreen from './components/StartupScreen';
 import {apiFetch} from './features/api';
 import {PersonalContext,usePersonalState,visibleMessage,visibleChat,clearForMe,restoreConversation} from './features/PersonalState';
@@ -227,6 +227,11 @@ export default function App() {
     try {
       const target=await getDoc(doc(db,'users',otherUserId));
       if(!target.exists()||target.data().moderationRemoved)throw Error('Este contacto ya no está registrado en Nexus Chat.');
+      if(!contactSaved&&otherUserId!==currentUser.uid&&!normalizePrivacy(currentUser.privacy).contactIds.includes(otherUserId)){
+        const person={...target.data(),uid:otherUserId} as UserProfile;
+        const name=contactNames[otherUserId]||{first:String(person.nombre||person.username||'Contacto').slice(0,80),last:''};
+        setCurrentUser(await saveContact(currentUser,person,name));
+      }
       // Find whether a chat room involving both participants already exists
       const participants=[...new Set([currentUser.uid,otherUserId])];
       const existingChat=chats.find(chat=>(!chat.kind||chat.kind==='direct')&&chat.participants.length===participants.length&&participants.every(uid=>chat.participants.includes(uid)));
@@ -261,7 +266,6 @@ export default function App() {
 
       newChatObject.disappearingMs=getPreferences(currentUser.uid).chat.defaultDurationMs;
       await ensureDirectContactChat(currentUser.uid,newChatObject);
-      const options=normalizePrivacy(currentUser.privacy);if(!contactSaved&&!options.contactIds.includes(otherUserId))setCurrentUser(await savePrivacy(currentUser,{...options,contactIds:[...options.contactIds,otherUserId]}));
       if(auth.currentUser?.uid!==currentUser.uid)throw Error('La sesión cambió. Vuelve a iniciar sesión.');
       await restoreConversation(currentUser.uid,newChatId);
       handleSelectChat(newChatId);
@@ -402,7 +406,7 @@ export default function App() {
   }
 
   return (
-    <ContactChatContext.Provider value={uid=>handleCreateChat(uid,true)}><PersonalContext.Provider value={personal}><RealtimeProvider user={currentUser} users={visibleUsers} knownIds={[...new Set(chats.filter(c=>c.kind!=='channel').flatMap(c=>c.participants))]}><WorkspaceLayout theme={theme} showChat={mobileView === 'chat'} sidebar={
+    <ContactChatContext.Provider value={(uid,contactSaved=true)=>handleCreateChat(uid,contactSaved)}><PersonalContext.Provider value={personal}><RealtimeProvider user={currentUser} users={visibleUsers} knownIds={[...new Set(chats.filter(c=>c.kind!=='channel').flatMap(c=>c.participants))]}><WorkspaceLayout theme={theme} showChat={mobileView === 'chat'} sidebar={
       <Sidebar latestMessages={latestMessages} currentUser={currentUser} chats={visibleChats} activeChatId={activeChatId} users={visibleUsers} theme={theme}
         onUserChange={setCurrentUser} onOpenHub={()=>setShowHub(true)} onToggleTheme={handleToggleTheme} onChatSelect={handleSelectChat} onCreateChat={handleCreateChat}
         onUpdateProfile={handleUpdateProfile} onTogglePin={handleTogglePin} onToggleArchive={handleToggleArchive}

@@ -73,6 +73,8 @@ Capturas de la aplicación con **datos ficticios de demostración**. No incluyen
 
 Esta distribución es exclusiva de computadora. Nexus Messenger conserva sus pantallas móviles. Se usan los datos reales del chat y del proveedor; no se inventan nombres de paquetes de stickers.
 
+La versión **v26.87.0** añade la sincronización opcional de contactos Nexus con Google People API desde el navegador: consentimiento de la cuenta, creación/actualización sin números telefónicos ficticios y conservación de los datos ajenos del contacto. [Funcionamiento, configuración y verificación](docs/GOOGLE-CONTACTOS.md). Incluye los accesos QR de Contactos/Nuevo contacto, el selector de país con bandera y búsqueda y la retirada de la sincronización telefónica. [Recorrido y fuentes](docs/NUEVO-CONTACTO.md).
+
 La versión **v26.86.0** aplica las referencias de Contactos en celular, incorpora los formularios de grupo/comunidad/evento y corrige el chat bloqueado, sus avisos privados y las acciones de eliminar, archivar y desbloquear. Consulta [la correspondencia de las 15 capturas, los límites y los pendientes](docs/REFERENCIAS-CONTACTOS-Y-BLOQUEO.md).
 
 La corrección **v26.85.2** repara los bloqueos residuales de limpieza inmediata, renueva las ejecuciones activas y conserva mensajes guardados y sus archivos. También corrige avisos e historial local del dashboard. Consulta [las correcciones y pruebas](docs/DASHBOARD-LIMPIEZA.md).
