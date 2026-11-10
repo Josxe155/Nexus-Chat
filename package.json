@@ -21,7 +21,9 @@
     "test:dashboard-actions": "node scripts/dashboard-actions.test.cjs",
     "test:dashboard-owner": "node --import tsx scripts/dashboard-owner.test.ts",
     "test:account-references": "node --import tsx scripts/account-references.test.ts",
-    "test:contacts": "node --import tsx scripts/contacts.test.ts"
+    "test:contacts": "node --import tsx scripts/contacts.test.ts",
+    "test:cleanup": "node --import tsx scripts/cleanup.test.ts",
+    "test:cleanup:emulators": "node scripts/cleanup-emulator.test.cjs"
   },
   "dependencies": {
     "firebase": "^12.13.0",

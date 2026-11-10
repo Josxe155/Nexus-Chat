@@ -20,7 +20,7 @@ export function saveAssistantHistory(uid:string,turns:StoredTurn[]){
 export async function clearAssistantHistories(){
  for(const key of Object.keys(localStorage))if(key.startsWith('nexus-dashboard-assistant:'))localStorage.removeItem(key);
  document.cookie=cookieName+'=; Path=/; Max-Age=0; SameSite=Strict';
- if('caches' in window)await caches.delete(cacheName).catch(()=>{});window.dispatchEvent(new Event('nexus:assistant-history-cleared'));
+ if(window.caches&&typeof window.caches.delete==='function')await caches.delete(cacheName).catch(()=>{});window.dispatchEvent(new Event('nexus:assistant-history-cleared'));
 }
 export function assistantContextHistory(turns:StoredTurn[]){
  const selected:StoredTurn[]=[];let size=0;

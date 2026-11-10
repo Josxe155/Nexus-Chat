@@ -6,6 +6,7 @@ export default function MaintenanceMode({db}:{db:Firestore}){
  const [active,setActive]=useState<boolean>();
  const [busy,setBusy]=useState(false),[retry,setRetry]=useState(0),[error,setError]=useState('');
  const [message,setMessage]=useState('');
+ useEffect(()=>{if(busy||(!message&&!error))return;const timer=setTimeout(()=>{setMessage('');setError('');},3000);return()=>clearTimeout(timer);},[busy,message,error]);
  useEffect(()=>{
   setError('');
   return onSnapshot(doc(db,'publicConfig','availability'),{includeMetadataChanges:true},snapshot=>{

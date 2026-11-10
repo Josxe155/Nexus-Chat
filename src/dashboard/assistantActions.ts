@@ -1,3 +1,4 @@
+import {cleanupLease} from './cleanupState';
 import {redactAssistantData} from './assistantData';
 import {doc,getDocFromServer,runTransaction,serverTimestamp,deleteField,type Firestore} from 'firebase/firestore';
 import {ref,get,update,serverTimestamp as realtimeTimestamp,type Database} from 'firebase/database';
@@ -31,10 +32,10 @@ export function createAssistantActions(db:Firestore,rtdb:Database,user:User,onPl
   if(name==='navigate_dashboard'){const page=String(args.page);if(!['resumen','reportes','avisos','mantenimiento','informes','modo-ia'].includes(page))throw Error('Esa pantalla no existe.');location.hash=page;return {opened:page};}
   if(name==='prepare_cleanup_schedule'){
    const path='publicConfig/cleanup',before=(await getDocFromServer(doc(db,path))).data()??null;
-   if(before?.leaseUntil>Date.now())throw Error('Hay una limpieza en curso. Espera a que termine.');
+   if(cleanupLease(before,Date.now()).active)throw Error('Hay una limpieza en curso. Espera a que termine.');
    const enabled=args.enabled===true,nextDueAt=typeof args.nextDueAt==='number'?args.nextDueAt:before?.nextDueAt||createActions({db,rtdb}).nextMonth(Date.now());
    if(enabled&&(!Number.isFinite(nextDueAt)||nextDueAt<=Date.now()))throw Error('La fecha de limpieza debe ser futura.');
-   const data={enabled,execution:'browser',nextDueAt,warningDays:3,status:'scheduled',leaseUntil:0};
+   const data={enabled,execution:'browser',nextDueAt,warningDays:3,status:'scheduled',leaseUntil:0,...(before?{manualCutoff:{$delete:true},runId:{$delete:true}}:{})};
    const plan:AssistantAction={id:crypto.randomUUID(),actor:user.uid,createdAt:Date.now(),kind:'schedule',path,operation:before?'update':'create',data,before:normalizeRecord(before)};onPlan(plan);return {prepared:true,id:plan.id,path,data,confirmation:'CONFIRMAR '+plan.id};
   }
   const kind=name==='prepare_firestore_action'?'firestore':name==='prepare_realtime_action'?'realtime':name==='prepare_manual_cleanup'?'cleanup':null;

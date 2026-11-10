@@ -1,3 +1,5 @@
+import useServerClock from '../features/useServerClock';
+import {cleanupLease,dashboardErrorMessage} from './cleanupState';
 import {clearAssistantHistories} from './assistantHistory';
 import {useEffect,useMemo,useRef,useState} from 'react';
 import {createRoot} from 'react-dom/client';
@@ -39,7 +41,7 @@ function useAction(){
   lock.current=true;
   setBusy(true);setMessage('');setError('');
   try{await action();}
-  catch(error){setError(error instanceof Error?error.message:'No se pudo completar la acción.');}
+  catch(error){setError(dashboardErrorMessage(error));}
   finally{lock.current=false;setBusy(false);}
  }
  return {busy,message,error,setMessage,run};
@@ -77,16 +79,16 @@ function Workspace({user,db,rtdb,onLogout}:{user:User;db:Firestore;rtdb:Database
  const [page,setPage]=useState(currentPage),[snapshot,setSnapshot]=useState<OverviewSnapshot>();
  const [plan,setPlan]=useState<Plan>(),[planError,setPlanError]=useState(''),[retry,setRetry]=useState(0);
  const [preview,setPreview]=useState<{counts:Awaited<ReturnType<typeof engine.inspect>>} & ({kind:'estimate';cutoff:number}|{kind:'deleted'})>();
- const [confirmation,setConfirmation]=useState(''),[manualConfirmation,setManualConfirmation]=useState(''),[auto,setAuto]=useState(false),[now,setNow]=useState(Date.now());
+ const [confirmation,setConfirmation]=useState(''),[manualConfirmation,setManualConfirmation]=useState(''),[auto,setAuto]=useState(false);
+ const now=useServerClock(1000,rtdb);
  const [online,setOnline]=useState(()=>navigator.onLine),[published,setPublished]=useState(''),[versionError,setVersionError]=useState(''),[checkingVersion,setCheckingVersion]=useState(false);
  const attempted=useRef<number | undefined>(undefined);
 
  useEffect(()=>{
   const syncPage=()=>setPage(currentPage());
   const syncConnection=()=>setOnline(navigator.onLine);
-  const timer=setInterval(()=>setNow(Date.now()),30000);
   window.addEventListener('hashchange',syncPage);window.addEventListener('online',syncConnection);window.addEventListener('offline',syncConnection);
-  return()=>{clearInterval(timer);window.removeEventListener('hashchange',syncPage);window.removeEventListener('online',syncConnection);window.removeEventListener('offline',syncConnection);};
+  return()=>{window.removeEventListener('hashchange',syncPage);window.removeEventListener('online',syncConnection);window.removeEventListener('offline',syncConnection);};
  },[]);
  useEffect(()=>{
   setPlanError('');
@@ -94,8 +96,8 @@ function Workspace({user,db,rtdb,onLogout}:{user:User;db:Firestore;rtdb:Database
  },[planRef,retry]);
  const hasDate=validDate(plan?.nextDueAt);
  const due=hasDate&&(plan?.enabled||plan!.nextDueAt!>now)?plan!.nextDueAt!:engine.nextMonth(now);
- const leased=plan?.status==='running'&&(plan.leaseUntil??0)>now;
- const ready=!!plan&&!planError;
+ const lease=cleanupLease(plan,now),leased=lease.active;
+ const ready=!!plan&&!planError&&online;
  const run=(manual=false)=>action.run(async()=>{
   setPreview(undefined);
   try{
@@ -117,7 +119,7 @@ function Workspace({user,db,rtdb,onLogout}:{user:User;db:Firestore;rtdb:Database
   if(!confirm('¿Activar la limpieza mensual para la fecha mostrada?'))return;
   await runTransaction(db,async transaction=>{
    const current=(await transaction.get(planRef)).data();
-   if(current?.enabled||Number(current?.leaseUntil)>Date.now())throw Error('El plan ya está activo o en ejecución.');
+   if(current?.enabled||cleanupLease(current,now).active)throw Error('El plan ya está activo o en ejecución.');
    transaction.set(planRef,{enabled:true,execution:'browser',firstDueAt:new Date(due).toISOString(),nextDueAt:due,warningDays:3,status:'scheduled',leaseUntil:0,manualCutoff:deleteField()},{merge:true});
   });
   action.setMessage('Plan mensual guardado.');
@@ -148,9 +150,11 @@ function Workspace({user,db,rtdb,onLogout}:{user:User;db:Firestore;rtdb:Database
    {page==='mantenimiento'&&<div className="grid">
     <section className="cleanup panel-card"><span className="badge">CONTENIDO Y ESPACIO</span><h2>Limpieza mensual</h2>
      <p>Revisa y programa la limpieza de mensajes, archivos de chats y estados. Se conservan las cuentas, contactos, grupos y perfiles.</p>
-     {!ready&&<p role={planError?'alert':'status'}>{planError||'Comprobando el plan…'} {planError&&<button className="secondary" onClick={()=>setRetry(n=>n+1)}>Reintentar</button>}</p>}
+     {online&&!ready&&<p role={planError?'alert':'status'}>{planError||'Comprobando el plan…'} {planError&&<button className="secondary" onClick={()=>setRetry(n=>n+1)}>Reintentar</button>}</p>}
      {ready&&plan.enabled&&!hasDate&&<p className="notice" role="alert">La fecha del plan no es válida. Páusalo y actívalo con una nueva fecha.</p>}
-     {leased&&<p className="notice" role="status">Hay una limpieza en curso.</p>}
+     {leased&&<p className="notice" role="status">Hay una limpieza en curso. Su bloqueo se renueva mientras trabaja; sin actividad caduca en {Math.ceil(lease.remaining/1000)} s.</p>}
+     {ready&&lease.recoverable&&<p className="notice">La ejecución anterior se interrumpió. Puedes volver a iniciar la limpieza con la confirmación habitual.</p>}
+     {!online&&<p className="notice" role="alert">Necesitas conexión para consultar el plan y ejecutar la limpieza.</p>}
      {ready&&<div className="schedule"><small>{plan.enabled&&hasDate?'Próxima fecha':'Fecha propuesta'} · Ecuador</small><strong>{dateLabel(due)}</strong>
       {validDate(plan.lastCompletedAt)&&<small>Última ejecución · {dateLabel(plan.lastCompletedAt)}</small>}</div>}
      <div className="actions">
@@ -158,7 +162,7 @@ function Workspace({user,db,rtdb,onLogout}:{user:User;db:Firestore;rtdb:Database
       <button className="secondary" disabled={action.busy||!ready||!plan?.enabled||leased} onClick={()=>void action.run(async()=>{
        await runTransaction(db,async transaction=>{
         const current=(await transaction.get(planRef)).data();
-        if(Number(current?.leaseUntil)>Date.now())throw Error('Hay una limpieza en curso.');
+        if(cleanupLease(current,now).active)throw Error('Hay una limpieza en curso.');
         transaction.update(planRef,{enabled:false,manualCutoff:deleteField()});
        });setAuto(false);action.setMessage('Plan pausado.');
       })}>Pausar plan</button>
@@ -166,7 +170,7 @@ function Workspace({user,db,rtdb,onLogout}:{user:User;db:Firestore;rtdb:Database
      <label className="toggle"><input type="checkbox" checked={auto} disabled={action.busy||!ready||!plan?.enabled||!hasDate} onChange={e=>{attempted.current=undefined;setAuto(e.target.checked);}}/>Ejecutar al llegar la fecha mientras este panel esté abierto</label>
      <p className="notice">La ejecución automática requiere mantener el panel abierto y la sesión iniciada. El aviso a los usuarios se muestra tres días antes.</p>
      <button className="secondary" disabled={action.busy||!ready} onClick={()=>void action.run(async()=>{setPreview(undefined);const counts=await engine.inspect(due,false,action.setMessage);setPreview({kind:'estimate',counts,cutoff:due});action.setMessage('');})}>Revisar qué se eliminaría</button>
-     {preview&&<div className="result" role="status"><h3>{preview.kind==='estimate'?'Vista previa de la limpieza':preview.counts.messages||preview.counts.statuses||preview.counts.files?'Contenido eliminado':'No se encontró contenido elegible'}</h3>{preview.kind==='estimate'&&<small>Estimación hasta {dateLabel(preview.cutoff)} · Ecuador</small>}<p>{preview.counts.messages} mensajes · {preview.counts.statuses} estados · {preview.counts.files} archivos · {(preview.counts.bytes/1048576).toFixed(2)} MB</p><small>{preview.counts.protectedFiles} archivos excluidos por protección o carga reciente.</small>{preview.kind==='deleted'&&<p>Realtime Database · {preview.counts.realtimeFiles} archivos encontrados y retirados. Firestore · {preview.counts.files} fichas de archivos retiradas.</p>}</div>}
+     {preview&&<div className="result" role="status"><h3>{preview.kind==='estimate'?'Vista previa de la limpieza':preview.counts.messages||preview.counts.statuses||preview.counts.files?'Contenido eliminado':'No se encontró contenido elegible'}</h3>{preview.kind==='estimate'&&<small>Estimación hasta {dateLabel(preview.cutoff)} · Ecuador</small>}<p>{preview.counts.messages} mensajes · {preview.counts.statuses} estados · {preview.counts.files} archivos · {(preview.counts.bytes/1048576).toFixed(2)} MB</p><small>{preview.counts.protectedFiles} archivos excluidos por protección o carga reciente. {preview.counts.protectedMessages||0} mensajes conservados protegidos.</small>{preview.kind==='deleted'&&<p>Realtime Database · {preview.counts.realtimeFiles} archivos encontrados y retirados. Firestore · {preview.counts.files} fichas de archivos retiradas.</p>}</div>}
      <div className="danger"><h3>Ejecución manual</h3><p>El borrado es irreversible y está disponible cuando llegue la fecha del plan.</p>
       <label htmlFor="cleanup-confirmation">Escribe BORRAR CONTENIDO</label><input id="cleanup-confirmation" aria-label="Confirmación de limpieza" value={confirmation} onChange={e=>setConfirmation(e.target.value)} autoComplete="off"/>
       <button disabled={action.busy||!ready||!plan?.enabled||!hasDate||leased||due>now||confirmation!=='BORRAR CONTENIDO'} onClick={()=>void run()}>Ejecutar limpieza pendiente</button>
@@ -199,9 +203,10 @@ function Workspace({user,db,rtdb,onLogout}:{user:User;db:Firestore;rtdb:Database
       <p>Libera las descargas de versiones y borra el historial local de Nexus Assistant en este equipo.</p>
       <button className="secondary" disabled={action.busy} onClick={()=>void action.run(async()=>{
        if(!confirm('¿Eliminar la caché de actualizaciones y el historial local de Nexus Assistant de este navegador?'))return;
-       if(!('caches' in window))throw Error('Este navegador no permite administrar la caché.');
-       const keys=(await caches.keys()).filter(key=>key.startsWith('nexus-update-'));
-       await Promise.all(keys.map(key=>caches.delete(key)));
+       if(window.caches&&typeof window.caches.keys==='function'){
+        const keys=(await caches.keys()).filter(key=>key.startsWith('nexus-update-'));
+        await Promise.all(keys.map(key=>caches.delete(key)));
+       }
        await clearAssistantHistories();
        action.setMessage('Caché e historial local de Nexus Assistant eliminados.');
       })}>Liberar caché local</button>

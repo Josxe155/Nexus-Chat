@@ -7,6 +7,7 @@ export default function OfficialNotices({db}:{db:Firestore}){
  const [notices,setNotices]=useState<OfficialNotice[]|null>(null),[busy,setBusy]=useState(false),[feedback,setFeedback]=useState(''),[error,setError]=useState('');
  const [loadFailed,setLoadFailed]=useState(false),[retry,setRetry]=useState(0);
  const working=useRef(false);
+ useEffect(()=>{if(busy||(!feedback&&!error))return;const timer=setTimeout(()=>{setFeedback('');setError('');},3000);return()=>clearTimeout(timer);},[busy,feedback,error]);
  useEffect(()=>{
   setLoadFailed(false);
   return subscribeToOfficialNotices(db,setNotices,()=>setLoadFailed(true));

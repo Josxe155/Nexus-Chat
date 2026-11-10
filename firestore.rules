@@ -16,7 +16,8 @@ service cloud.firestore {
   function cleanupDue(time){
    let plan=get(/databases/$(database)/documents/publicConfig/cleanup).data;
    let cutoff=cutoffMillis(plan.get('manualCutoff',0));
-   return operator() && plan.execution=='browser' && ((
+   return operator() && plan.execution=='browser' && plan.status=='running'
+    && plan.leaseUntil is number && plan.leaseUntil>request.time.toMillis() && ((
      plan.enabled==true && plan.nextDueAt<=request.time.toMillis() && time<plan.nextDueAt
    ) || (
      plan.status=='running' && plan.leaseUntil>request.time.toMillis()
@@ -239,7 +240,7 @@ service cloud.firestore {
      && getAfter(/databases/$(database)/documents/dashboardEdits/$(request.resource.data.adminEditId)).data.before==resource.data.content
      && getAfter(/databases/$(database)/documents/dashboardEdits/$(request.resource.data.adminEditId)).data.after==request.resource.data.content
      && getAfter(/databases/$(database)/documents/dashboardEdits/$(request.resource.data.adminEditId)).data.at==request.time;
-    allow read: if operator();allow delete: if cleanupDue(resource.data.timestamp);
+    allow read: if operator();allow delete: if cleanupDue(resource.data.timestamp) && resource.data.get('keptBy','')=='';
     allow get: if member(chatId) && !exists(/databases/$(database)/documents/chats/$(chatId)/messages/$(mid));
     allow read: if member(chatId) && resource.data.timestamp >= room(chatId).get('historyStartsAt',{}).get(request.auth.uid,0);
     allow create: if member(chatId) && maySend(room(chatId)) && notBlocked(room(chatId)) && request.resource.data.id==mid && request.resource.data.chatId==chatId && request.resource.data.senderId==request.auth.uid
