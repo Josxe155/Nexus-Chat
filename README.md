@@ -73,6 +73,8 @@ Capturas de la aplicación con **datos ficticios de demostración**. No incluyen
 
 Esta distribución es exclusiva de computadora. Nexus Messenger conserva sus pantallas móviles. Se usan los datos reales del chat y del proveedor; no se inventan nombres de paquetes de stickers.
 
+La versión **v26.84.0** reorganiza Info. de contacto en celular y conecta conservados, silencio, duración, almacenamiento local y grupos compartidos. Consulta [el alcance y los pendientes](docs/INFO-CONTACTO-REFERENCIAS.md).
+
 ## ⚙️ Ajustes en celular
 
 **v26.82.0** sustituye los subapartados de Cuenta con las referencias recibidas: informes separados, contraseña, correo, nombre de usuario y cierre de sesión. Los recorridos sin referencia y la activación de Drive siguen pendientes. Consulta [la correspondencia, funciones y verificación](docs/REFERENCIAS-CUENTA-DRIVE.md).

@@ -143,3 +143,7 @@ Las pruebas de interfaz usan datos aislados, cámaras simuladas y varias resoluc
 ## Referencias de Cuenta y Drive recibidas el 9 de noviembre
 
 La [correspondencia de las 15 capturas y la imagen de informes](REFERENCIAS-CUENTA-DRIVE.md) recoge las pantallas incorporadas y los recorridos pendientes. Drive dispone de módulos preparados con pruebas simuladas; su API sigue deshabilitada y no existe una acción de copia activa. Faltan referencias de copia/restauración, consentimiento y verificación real. También permanecen pendientes llaves de acceso, segundo factor, dispositivos de confianza, cambio de teléfono, formularios de cambio de correo/usuario, eliminación de usuario y clave de contacto.
+
+## Info. de contacto — v26.84.0
+
+Consulta [las funciones y recorridos pendientes](INFO-CONTACTO-REFERENCIAS.md). Siguen pendientes eliminación de caché con confirmación referenciada, tonos/vibraciones por contacto, visibilidad multimedia, ocultación y restricciones completas, traducción y formularios de grupos. La verificación del cifrado depende de un sistema real; no se simula.

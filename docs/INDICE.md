@@ -46,3 +46,5 @@ El [README principal](../README.md) describe las funciones y el modelo de seguri
 - [Cuenta y alineación de Ajustes](CUENTA-Y-ALINEACION-AJUSTES.md): funciones de cuenta, menú y verificación de v26.81.0.
 
 - [Referencias de Cuenta y Drive](REFERENCIAS-CUENTA-DRIVE.md): correspondencia de las capturas, pantallas incorporadas y pendientes de integración.
+
+- [Info. de contacto: referencias](INFO-CONTACTO-REFERENCIAS.md): alcance móvil, funciones conectadas y pendientes de v26.84.0.
