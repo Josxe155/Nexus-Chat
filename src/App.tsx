@@ -1,3 +1,6 @@
+import {useChannelNotifications} from './features/channelNotifications';
+import ChannelAccess from './features/ChannelAccess';
+import {setChannelReaction,useFollowedChannels} from './features/channels';
 import {ensureDirectContactChat} from './features/directContactChat';
 import {ContactChatContext} from './features/ContactChatContext';
 import {useAutomaticAccountReports} from './features/accountReports';
@@ -85,7 +88,9 @@ export default function App() {
   useEffect(()=>{if(currentUser)void recordVisit(currentUser.uid).catch(()=>{});},[currentUser?.uid]);
   // Global lists
   const [users, setUsers] = useState<UserProfile[]>([]);
-  const [chats, setChats] = useState<Chat[]>([]);
+  const [ownedChats, setChats] = useState<Chat[]>([]);
+  const followedChannels=useFollowedChannels(currentUser?.uid);
+  const chats=[...new Map([...ownedChats,...followedChannels].map(chat=>[chat.id,chat])).values()];
   const [chatsLoaded,setChatsLoaded]=useState(false);const [usersLoaded,setUsersLoaded]=useState(false),[startupProgress,setStartupProgress]=useState<StartupProgress|null>(null);
   useEffect(()=>{if(currentUser&&chatsLoaded)voiceAllowedChats(currentUser.uid,new Set(chats.map(chat=>chat.id)));},[currentUser?.uid,chatsLoaded,chats.map(chat=>chat.id).join('|')]);
   const [pinnedIds,setPinnedIds]=useState<string[]>([]);
@@ -99,7 +104,8 @@ export default function App() {
   const [activeChatId, setActiveChatId] = useState<string | null>(null);
   const personal=usePersonalState(currentUser?.uid);const pendingMessages=useOutbox(currentUser?.uid);
   const latestMessages=useDeliveryReceipts(currentUser,chats);
-  const mutedChatIds=Object.entries(personal.conversations).filter(([,state])=>(state.mutedUntil||0)>Date.now()).map(([id])=>id);
+  const mutedChatIds=Object.entries(personal.conversations).filter(([id,state])=>(state.mutedUntil||0)>Date.now()||chats.some(chat=>chat.id===id&&chat.kind==='channel')&&(state.channelAdminMutedUntil||0)>Date.now()).map(([id])=>id);
+  useChannelNotifications(currentUser?.uid,chats,personal.conversations);
   usePushSession(currentUser?.uid,currentUser?.privacy?.blockedIds,mutedChatIds);
   const [expiryRevision,setExpiryRevision]=useState(0);
 
@@ -291,6 +297,7 @@ export default function App() {
   const handleReactMessage = async (messageId: string, emoji: string) => {
     if (!currentUser || !activeChatId) return;
     try {
+      const room=chats.find(chat=>chat.id===activeChatId);if(room?.kind==='channel'&&room.channelVersion===2){await setChannelReaction(currentUser.uid,activeChatId,messageId,emoji);return;}
       const mRef = doc(db, 'chats', activeChatId, 'messages', messageId);
       const mDoc = await getDoc(mRef);
       if (mDoc.exists()) {
@@ -418,6 +425,6 @@ export default function App() {
         onOpenContact={handleCreateChat} onSendMessage={handleSendMessage} onReactMessage={handleReactMessage} onEditMessage={handleEditMessage}
         onDeleteMessage={handleDeleteMessage} onClearChatHistory={handleClearChatHistory} setTypingStatus={handleSetTypingStatus} />
         : <div className="workspace-empty"><span className="empty-mark"><img src="/nexus-icon.svg?v=4" width="76" height="76" alt=""/></span><span className="eyebrow">TU ESPACIO, TUS CONVERSACIONES</span><h1>Un hola puede<br />ser el comienzo.</h1><p>Elige una conversación o busca un contacto<br />para empezar a compartir.</p><div className="desktop-welcome-actions"><button onClick={()=>{handleCreateChat(currentUser.uid).then(()=>setTimeout(()=>document.querySelector<HTMLButtonElement>('[title="Adjuntar archivo"]')?.click(),100));}}><span><FileText size={23}/></span>Enviar documento</button><button onClick={()=>window.dispatchEvent(new CustomEvent('nexus:navigate',{detail:'contacts'}))}><span><UserPlus size={23}/></span>Añadir contacto</button><button onClick={()=>navigator.clipboard.writeText(location.origin).catch(()=>{})}><span><Mail size={23}/></span>Invitar a un amigo</button><button className="nexus-ai-entry" onClick={()=>window.dispatchEvent(new CustomEvent('nexus:navigate',{detail:'assistant'}))}><span className="nexus-ai-mark"><Sparkles size={23}/></span>Pregúntale a Nexus AI</button></div><span className="empty-footnote">Sin tarjeta SIM. Solo internet.</span></div>}
-    </WorkspaceLayout><MaintenanceNotice uid={currentUser.uid}/><PermissionReview/><GroupInvite uid={currentUser.uid}/><ContactCodeLink key={currentUser.uid} uid={currentUser.uid} onContact={handleCreateChat}/><ModerationNotices uid={currentUser.uid}/><NotificationToast/>{showHub&&<WorkspaceHub user={currentUser} users={users} chats={chats} onSelect={handleSelectChat} onClose={()=>setShowHub(false)} onUserChange={setCurrentUser}/>}</RealtimeProvider></PersonalContext.Provider></ContactChatContext.Provider>
+    </WorkspaceLayout><ChannelAccess key={currentUser.uid} uid={currentUser.uid} chats={chats} onSelect={id=>{setActiveChatId(id);setMobileView('chat');}}/><MaintenanceNotice uid={currentUser.uid}/><PermissionReview/><GroupInvite uid={currentUser.uid}/><ContactCodeLink key={currentUser.uid} uid={currentUser.uid} onContact={handleCreateChat}/><ModerationNotices uid={currentUser.uid}/><NotificationToast/>{showHub&&<WorkspaceHub user={currentUser} users={users} chats={chats} onSelect={handleSelectChat} onClose={()=>setShowHub(false)} onUserChange={setCurrentUser}/>}</RealtimeProvider></PersonalContext.Provider></ContactChatContext.Provider>
   );
 }

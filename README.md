@@ -47,7 +47,7 @@ Nexus Chat reúne conversaciones, archivos, estados, comunidades y llamadas en u
 
 | 📎 Archivos y audio | 🟢 Estados y comunidad | 🤖 Nexus AI |
 | :--- | :--- | :--- |
-| Fotos, videos, documentos, notas de voz y visualización de archivos. | Estados, comunidades y controles de privacidad. La categoría de canales está retirada. | Asistente con Groq y OpenRouter; creación de imágenes con Pollinations. |
+| Fotos, videos, documentos, notas de voz y visualización de archivos. | Estados, comunidades y controles de privacidad. Canales públicos con roles y seguimiento independiente. | Asistente con Groq y OpenRouter; creación de imágenes con Pollinations. |
 
 > [!NOTE]
 > Es un proyecto en desarrollo. Las funciones dependen de los permisos del navegador, la conexión y las cuotas de los proveedores. El alcance y las diferencias pendientes se describen en [PENDIENTES-WHATSAPP.md](docs/PENDIENTES-WHATSAPP.md).
@@ -72,6 +72,8 @@ Capturas de la aplicación con **datos ficticios de demostración**. No incluyen
 | Seleccionar abre una revisión con comentario y miniatura; se envía al pulsar la flecha. | Los favoritos guardados se encuentran en la pestaña visible Favoritos de este navegador. | Responder, destacar, fijar cuando hay permiso, eliminar y reenviar. El sticker se amplía desde el chat al abrirlo. Añadir o quitar favoritos vuelve al chat con una transición, sin mensajes de confirmación; respeta movimiento reducido. |
 
 Esta distribución es exclusiva de computadora. Nexus Messenger conserva sus pantallas móviles. Se usan los datos reales del chat y del proveedor; no se inventan nombres de paquetes de stickers.
+
+La versión **v26.88.0** actualiza Novedades, canales, estados, llamadas, búsqueda y archivados de celular según las 55 capturas recibidas; ajusta los tonos oscuros y añade permisos transaccionales para canales. [Correspondencia de referencias, comprobaciones y pendientes](docs/REFERENCIAS-NOVEDADES-2026-11-10.md). Los chats restringidos protegen la vista en este navegador y no sustituyen las reglas de acceso a los datos.
 
 La versión **v26.87.0** añade la sincronización opcional de contactos Nexus con Google People API desde el navegador: consentimiento de la cuenta, creación/actualización sin números telefónicos ficticios y conservación de los datos ajenos del contacto. [Funcionamiento, configuración y verificación](docs/GOOGLE-CONTACTOS.md). Incluye los accesos QR de Contactos/Nuevo contacto, el selector de país con bandera y búsqueda y la retirada de la sincronización telefónica. [Recorrido y fuentes](docs/NUEVO-CONTACTO.md).
 
@@ -225,7 +227,7 @@ Consulta el procedimiento completo en [INSTRUCCIONES-FIREBASE-HOSTING.md](docs/I
 | Aspecto | Estado actual |
 | :--- | :--- |
 | Transporte | HTTPS para la web y las conexiones con Firebase. |
-| Acceso a conversaciones | Reglas de Firebase que restringen el acceso a sus participantes. |
+| Acceso a conversaciones | Reglas de Firebase para participantes, seguidores de canales y administración autorizada. |
 | Mensajes y archivos nuevos | **Sin cifrado de extremo a extremo. Firebase puede acceder a su contenido.** |
 | Historial cifrado anterior | Se conserva su lector y la importación/exportación de copias. Requiere sus claves originales. |
 | Cámara y micrófono | Requieren permisos y un contexto seguro del navegador. |

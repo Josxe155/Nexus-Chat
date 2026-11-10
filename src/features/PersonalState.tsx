@@ -2,7 +2,7 @@ import {dataErrorMessage} from './dataErrors';
 import React,{createContext,useContext,useEffect,useState} from 'react';
 import {collection,doc,onSnapshot,setDoc,writeBatch,runTransaction} from 'firebase/firestore';
 import {db} from '../firebase';import type {Chat,Message} from '../types';
-export type ConversationState={clearedAt?:number;deletedAt?:number;mutedUntil?:number;unread?:boolean;favorite?:boolean};
+export type ConversationState={clearedAt?:number;deletedAt?:number;mutedUntil?:number;channelAdminMutedUntil?:number;channelFollowerMutedUntil?:number;unread?:boolean;favorite?:boolean};
 export type MessageFlag={chatId:string;messageId:string;hidden?:boolean;starred?:boolean;updatedAt:number};
 export const flagId=(chatId:string,messageId:string)=>chatId+'~'+messageId;
 type Personal={conversations:Record<string,ConversationState>;flags:Record<string,MessageFlag>;loaded:boolean;error?:string};

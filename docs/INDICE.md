@@ -6,6 +6,7 @@ El [README principal](../README.md) describe las funciones y el modelo de seguri
 
 | Documento | Contenido |
 | --- | --- |
+| [Novedades y listas, 10 de noviembre](REFERENCIAS-NOVEDADES-2026-11-10.md) | 55 referencias, colores, canales, pruebas y diferencias pendientes de v26.88.0. |
 | [ACCESO POR TELEFONO](ACCESO-POR-TELEFONO.md) | Guía o revisión del proyecto. |
 | [ACTUALIZACION MESSENGER](ACTUALIZACION-MESSENGER.md) | Guía o revisión del proyecto. |
 | [ACTUALIZACION NEXUS](ACTUALIZACION-NEXUS.md) | Guía o revisión del proyecto. |

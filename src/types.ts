@@ -59,6 +59,7 @@ export interface Message {
   timestamp: number;
   serverSentAt?: any;
   status: "sent" | "delivered" | "read";
+  reactionCounts?:Record<string,number>;
   reactions?: ReactionMap;
   replyTo?: MessageReplyContext;
   edited?: boolean;
@@ -78,6 +79,11 @@ export interface Message {
 }
 
 export interface Chat {
+  channelVersion?:2;
+  channelDeletedAt?:number;
+  channelReactionMode?:'all'|'preset'|'none';
+  followerCount?:number;
+
   e2ee?:'v1';
   moderationRemoved?: boolean;
   description?:string;
