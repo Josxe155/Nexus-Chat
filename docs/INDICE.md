@@ -48,3 +48,5 @@ El [README principal](../README.md) describe las funciones y el modelo de seguri
 - [Referencias de Cuenta y Drive](REFERENCIAS-CUENTA-DRIVE.md): correspondencia de las capturas, pantallas incorporadas y pendientes de integración.
 
 - [Info. de contacto: referencias](INFO-CONTACTO-REFERENCIAS.md): alcance móvil, funciones conectadas y pendientes de v26.84.0.
+
+- [Revisión general de superficies](REVISION-GENERAL-SUPERFICIES.md): franjas de grabación/emojis, paletas y alcance de pruebas de v26.84.1.

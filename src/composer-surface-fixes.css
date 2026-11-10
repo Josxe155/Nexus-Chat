@@ -1,0 +1,23 @@
+/* Fill the dock, including padding and safe area, while a panel is open. */
+html:root[data-nexus-surface=workspace][data-nexus-mode][data-nexus-palette][data-nexus-surface=workspace][data-nexus-mode][data-nexus-palette] .chat-composer:is([data-recording=true],[data-expressions=true]){
+ background:var(--nx-field)!important;box-shadow:none!important;
+}
+html:root[data-nexus-surface=workspace][data-nexus-mode][data-nexus-palette] .chat-composer[data-recording=true] .mobile-voice-reference{
+ --voice-record-panel:var(--nx-field);color:var(--nx-text);
+}
+html:root[data-nexus-surface=workspace][data-nexus-mode][data-nexus-palette] .chat-composer[data-expressions=true] .phone-expression-sheet{
+ --expression-surface:var(--nx-field);--expression-ink:var(--nx-text);--expression-muted:var(--nx-muted);--expression-line:var(--nx-border);
+ width:calc(100% + 16px);margin-inline:-8px;
+}
+html:root[data-nexus-surface=workspace][data-nexus-mode][data-nexus-palette][data-nexus-web=messenger] .chat-composer[data-expressions=true][data-phone-expressions=true]{padding-bottom:0!important}
+html:root[data-nexus-surface=workspace][data-nexus-mode][data-nexus-palette][data-nexus-web=desktop] .chat-composer .nx-web-expressions{
+ background:var(--nx-field)!important;color:var(--nx-text);bottom:100%;margin-bottom:0;
+}
+html:root[data-nexus-surface=workspace][data-nexus-mode][data-nexus-palette][data-nexus-web=desktop][data-nexus-mode][data-nexus-palette] .chat-composer :is(.desktop-reference-composer,.voice-reference-recorder .voice-record-controls){background:var(--nx-field)!important;color:var(--nx-text)}
+html:root[data-nexus-surface=workspace][data-nexus-mode][data-nexus-palette][data-nexus-web=desktop] .nx-web-expressions :is(.nx-web-search,.nx-web-expression-footer,.nx-web-expression-categories){background-color:var(--nx-field)!important;color:var(--nx-text)}
+.chat-composer{--composer-safe-bottom:env(safe-area-inset-bottom,0px)}
+html:root[data-nexus-surface=workspace][data-nexus-mode][data-nexus-palette][data-nexus-web=messenger] .chat-composer[data-recording=true]{padding-bottom:max(4px,var(--composer-safe-bottom))!important}
+html:root[data-nexus-surface=workspace][data-nexus-mode][data-nexus-palette] .chat-composer[data-expressions=true] .phone-expression-sheet{padding-bottom:var(--composer-safe-bottom)}
+html:root[data-nexus-surface=workspace][data-nexus-mode][data-nexus-palette] .chat-composer .expression-picker{background:var(--nx-field)!important;color:var(--nx-text);bottom:100%;margin-bottom:0}
+html:root[data-nexus-surface=workspace][data-nexus-mode][data-nexus-palette] .chat-composer .expression-picker :is([aria-selected=true],[aria-pressed=true]){background-color:var(--nx-selected)!important;color:var(--nx-text)!important}
+html:root[data-nexus-surface=workspace][data-nexus-mode][data-nexus-palette] .chat-composer :is(.expression-picker,.phone-expression-sheet) button:focus-visible{outline-color:var(--nx-accent)}
