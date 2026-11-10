@@ -34,3 +34,5 @@ export async function saveContact(user:UserProfile,person:UserProfile,name:Conta
  }
  active();return {...user,privacy:{...user.privacy,...result.options,updatedAt:result.updatedAt}};
 }
+
+export function useContactNumbers(uid:string){const [numbers,setNumbers]=useState<Record<string,string>>({});useEffect(()=>{setNumbers({});return onSnapshot(doc(db,'users',uid,'private','phone-contacts'),snapshot=>setNumbers(Object.fromEntries(Object.values(snapshot.data()?.contacts||{}).filter((value:any)=>typeof value.uid==='string'&&value.uid&&typeof value.phone==='string').map((value:any)=>[value.uid,value.phone]))),()=>{});},[uid]);return numbers;}

@@ -1,3 +1,6 @@
+import PhoneBlockedChat,{PrivateBlockNotice} from '../features/PhoneBlockedChat';
+import {setContactBlocked,useContactBlockHistory,contactBlockTimeline} from '../features/contactBlocking';
+import {removeLoadedChatMedia} from '../features/mediaCache';
 import MobileMessageSelection,{type MobileSelectionAction} from '../features/MobileMessageSelection';
 import {useChatNewMessages,useComposerInset} from '../features/useChatNewMessages';
 import {keepMessage} from '../features/keepMessage';
@@ -226,7 +229,11 @@ export default function ChatWindow({
   const messageAreaRef = useRef<HTMLDivElement | null>(null);
 
   useMobileBack(showChatMenu||showAttachMenu||showEmojiPicker||isSearchingMessages||selectingMessages||selectedIds.length>0,()=>{setShowChatMenu(false);setShowAttachMenu(false);setShowEmojiPicker(false);setIsSearchingMessages(false);setSelectingMessages(false);setSelectedIds([]);},35);
-  const canSend=(activeChat.sendPolicy!=='admins'||!!activeChat.admins?.includes(currentUser.uid))&&(activeChat.kind==='group'||!activeChat.participants.some(uid=>currentUser.privacy?.blockedIds?.includes(uid)));
+  const contactBlocked=activeChat.kind!=='group'&&activeChat.kind!=='channel'&&activeChat.participants.some(uid=>uid!==currentUser.uid&&currentUser.privacy?.blockedIds?.includes(uid));
+  const blockHistory=useContactBlockHistory(currentUser.uid,activeChat.id);
+  const blockOperation=useRef(false);
+  const unblock=async()=>{const target=activeChat.participants.find(uid=>uid!==currentUser.uid);if(!target)return;const updated=await setContactBlocked(currentUser,target,false,activeChat.id);window.dispatchEvent(new CustomEvent('nexus:profile-update',{detail:updated}));};
+  const canSend=(activeChat.sendPolicy!=='admins'||!!activeChat.admins?.includes(currentUser.uid))&&!contactBlocked;
   const groupAvatar=useMediaURLs(activeChat.photoURL?[{id:activeChat.id,fileUrl:activeChat.photoURL,force:true,fileSize:1}]:[],currentUser.uid);
   const otherUser = (activeChat.kind==='group'||activeChat.kind==='channel') ? {nombre:activeChat.title||'Espacio Nexus',uid:activeChat.id,online:false,foto:groupAvatar[activeChat.id]||activeChat.photoURL||'',bio:activeChat.description||'',username:'',estado:'',lastSeen:0,typing:false,privacy:undefined} : activeChat.participants.length===1?{...currentUser,nombre:currentUser.nombre+' (Tú)'}:users.find(u => u.uid === activeChat.participants.find(p => p !== currentUser.uid));
 
@@ -328,8 +335,9 @@ export default function ChatWindow({
 
   // Group messages by Date
   const groupMessagesByDate = (msgList: Message[]) => {
-    const groups: { [key: string]: Message[] } = {};
-    msgList.forEach(m => {
+    const timeline=phoneExpressions&&!searchQuery&&!isSearchingMessages?contactBlockTimeline(msgList,blockHistory,currentUser.uid,activeChat.id,personal.conversations[activeChat.id]?.clearedAt):msgList;
+    const groups: { [key: string]: (Message&{privateBlockNotice?:import('../features/contactBlocking').ContactBlockEvent})[] } = {};
+    timeline.forEach(m => {
       const date = new Date(m.timestamp);
       const dateStr = `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
       if (!groups[dateStr]) groups[dateStr] = [];
@@ -351,7 +359,7 @@ export default function ChatWindow({
   };
 
   const searchableMessages=messages.filter(message=>!searchDate||new Date(message.timestamp).toLocaleDateString('en-CA')===new Date(searchDate+'T00:00:00').toLocaleDateString('en-CA'));
-  const conversationAction=(action:string)=>{if(action==='restrict'){window.dispatchEvent(new Event(restrictEvent));return;}if(action==='search'){setShowContact(false);setIsSearchingMessages(true);return;}if(action==='mute'||action==='lists'||action==='temporary'){setConversationTool(action);return;}if(action==='appearance'){setShowAppearance(true);return;}if(action==='report'){setReporting(true);return;}const perform=async()=>{if(action==='favorite')await changeConversation(currentUser.uid,activeChat.id,{favorite:!personal.conversations[activeChat.id]?.favorite});if(action==='export')await exportConversation(activeChat,currentUser,users,personal);if(action==='clear'&&confirm('¿Vaciar solo tu historial de esta conversación?'))await onClearChatHistory(activeChat.id);if(action==='delete'&&confirm('¿Eliminar esta conversación solo para ti?')){await clearForMe(currentUser.uid,activeChat,true);onBack();}if(action==='block'&&otherUser?.uid){const privacy=normalizePrivacy(currentUser.privacy),blocked=privacy.blockedIds.includes(otherUser.uid);if(!confirm((blocked?'¿Desbloquear a ':'¿Bloquear a ')+otherUser.nombre+'?'))return;const updated=await savePrivacy(currentUser,{...privacy,blockedIds:blocked?privacy.blockedIds.filter(id=>id!==otherUser.uid):[...privacy.blockedIds,otherUser.uid]});window.dispatchEvent(new CustomEvent('nexus:profile-update',{detail:updated}));}};perform().catch(error=>setUploadError(error.message||'No se pudo completar la operación.'));};
+  const conversationAction=(action:string)=>{if(action==='restrict'){window.dispatchEvent(new Event(restrictEvent));return;}if(action==='search'){setShowContact(false);setIsSearchingMessages(true);return;}if(action==='mute'||action==='lists'||action==='temporary'){setConversationTool(action);return;}if(action==='appearance'){setShowAppearance(true);return;}if(action==='report'){setReporting(true);return;}const perform=async()=>{if(action==='favorite')await changeConversation(currentUser.uid,activeChat.id,{favorite:!personal.conversations[activeChat.id]?.favorite});if(action==='export')await exportConversation(activeChat,currentUser,users,personal);if(action==='clear'&&confirm('¿Vaciar solo tu historial de esta conversación?'))await onClearChatHistory(activeChat.id);if(action==='delete'&&confirm('¿Eliminar esta conversación solo para ti?')){await clearForMe(currentUser.uid,activeChat,true);onBack();}if(action==='block'&&otherUser?.uid){if(blockOperation.current)return;const blocked=!!currentUser.privacy?.blockedIds?.includes(otherUser.uid);if(!confirm((blocked?'¿Desbloquear a ':'¿Bloquear a ')+otherUser.nombre+'?'))return;blockOperation.current=true;try{const updated=await setContactBlocked(currentUser,otherUser.uid,!blocked,activeChat.id);window.dispatchEvent(new CustomEvent('nexus:profile-update',{detail:updated}));}finally{blockOperation.current=false;}}};perform().catch(error=>setUploadError(error.message||'No se pudo completar la operación.'));};
   const messageGroups = groupMessagesByDate(
     searchQuery.trim() 
       ? searchableMessages.filter(m => (m.content+' '+(m.fileName||'')).toLowerCase().includes(searchQuery.toLowerCase()) && (searchKind==='all'||m.type===searchKind||searchKind==='video'&&m.type==='video-note'||(searchKind==='links'&&/https?:\/\//.test(m.content)))) 
@@ -587,6 +595,7 @@ export default function ChatWindow({
             </div>
 
             {messageGroups[dateStr].map((msg,index) => {
+              if(msg.privateBlockNotice)return <PrivateBlockNotice key={msg.id} blocked={msg.privateBlockNotice.blocked} canUnblock={contactBlocked&&msg.privateBlockNotice===blockHistory.at(-1)} onUnblock={()=>void unblock().catch(error=>setUploadError(error.message))}/>;
               const isMine = msg.senderId === currentUser.uid;
               const starred=!!personal.flags[flagId(msg.chatId,msg.id)]?.starred;
               const mediaURL=manualMedia[msg.id]||safeMediaURL(resolvedMedia[msg.id]||realtime?.media[msg.transferId||'']||msg.fileUrl);
@@ -666,6 +675,7 @@ export default function ChatWindow({
             })}
           </div>
         ))}
+        {phoneExpressions&&contactBlocked&&!(blockHistory.at(-1)?.blocked&&blockHistory.at(-1)!.at>(personal.conversations[activeChat.id]?.clearedAt||0))&&<PrivateBlockNotice blocked canUnblock onUnblock={()=>void unblock().catch(error=>setUploadError(error.message))}/>}
         <div ref={messagesEndRef} />
       </div>
 
@@ -719,7 +729,7 @@ export default function ChatWindow({
         <input type="file" multiple ref={fileInputRef} aria-label="Seleccionar archivos para enviar" onChange={e=>{const files=Array.from(e.target.files||[]);e.target.value='';if(files.length>10){setUploadError('Selecciona hasta 10 archivos por envío.');return;}setPendingFiles(files);setUploadError('');}} className="hidden"/>
         {!desktopWeb?<MobileChatComposer expressionsOpen={phoneExpressions&&showEmojiPicker} onInputFocus={phoneExpressions?()=>setShowEmojiPicker(false):undefined} input={textareaRef} value={editingTarget?editingText:inputText} editing={!!editingTarget} busy={isSending} spellcheck={preferences.chat.spellcheck} onChange={editingTarget?e=>setEditingText(e.target.value):handleInputChange} onKeyDown={handleKeyDown} onSend={handleSend} onEmoji={toggleMobileExpressions} onAttach={()=>{if(phoneExpressions)setShowEmojiPicker(false);setShowAttachMenu(!showAttachMenu);}} onCamera={()=>{if(phoneExpressions)setShowEmojiPicker(false);setShowCamera(true);}} onRecord={()=>{if(phoneExpressions)setShowEmojiPicker(false);setRecordMode('audio');}}/>:<DesktopChatComposer input={textareaRef} value={editingTarget?editingText:inputText} editing={!!editingTarget} busy={isSending} spellcheck={preferences.chat.spellcheck} onChange={editingTarget?e=>setEditingText(e.target.value):handleInputChange} onKeyDown={handleKeyDown} onSend={()=>void handleSend()} onAttach={()=>setShowAttachMenu(!showAttachMenu)} onEmoji={()=>setShowEmojiPicker(!showEmojiPicker)} onRecord={()=>setRecordMode('audio')}/>}
         {phoneExpressions&&expressionPanel}
-      </>}</footer>:canSend?null:<div className="readonly-channel">Solo los administradores pueden publicar en este espacio.</div>}
+      </>}</footer>:canSend?null:contactBlocked?<PhoneBlockedChat onUnblock={unblock} onDelete={async removeLocal=>{if(removeLocal)await removeLoadedChatMedia(currentUser.uid,messages);await clearForMe(currentUser.uid,activeChat,true);onBack();}} onArchive={async()=>{await updateDoc(doc(db,'chats',activeChat.id),{['archived.'+currentUser.uid]:true});onBack();}} onError={setUploadError}/>:<div className="readonly-channel">Solo los administradores pueden publicar en este espacio.</div>}
       {showAppearance&&<div className="feature-backdrop"><section className="feature-dialog" role="dialog" aria-label="Personalizar chat"><button className="dialog-close" aria-label="Cerrar personalización" onClick={()=>setShowAppearance(false)}><X/></button><h2>Estilo de este chat</h2><AppearancePanel uid={currentUser.uid} chatId={activeChat.id}/></section></div>}
       {reactionInfo&&messages.find(message=>message.id===reactionInfo)&&<ReactionDetails at={reactionAt} message={messages.find(message=>message.id===reactionInfo)!} user={currentUser} users={users} onRemove={emoji=>handleReactionClick(reactionInfo,emoji)} onClose={()=>setReactionInfo(null)}/>}
       {reactionTarget&&<div className="reaction-picker-wrap"><EmojiPicker onClose={()=>setReactionTarget(null)} onSelect={emoji=>{void handleReactionClick(reactionTarget,emoji).then(()=>{setReactionTarget(null);if(!desktopWeb)clearMobileSelection();}).catch(()=>setUploadError('No se pudo guardar la reacción.'));}}/></div>}
@@ -744,7 +754,7 @@ export default function ChatWindow({
       {conversationTool&&<ConversationTool uid={currentUser.uid} chat={activeChat} kind={conversationTool} onClose={()=>setConversationTool(null)}/>}
       {showLocation&&<LocationComposer onLive={activeChat.kind!=='channel'?async duration=>{await startLiveLocation(activeChat,currentUser.uid,duration);}:undefined} onClose={()=>setShowLocation(false)} onSend={text=>onSendMessage(text,'text')}/>}
       {showEvent&&desktopWeb&&<DesktopEvent disappearingMs={activeChat.disappearingMs} onLink={realtime&&activeChat.kind==='group'?at=>realtime.link(activeChat,at,'video'):undefined} onClose={()=>setShowEvent(false)} onSend={file=>sendMedia(file,'document')}/>}
-      {showEvent&&!desktopWeb&&<EventComposer onClose={()=>setShowEvent(false)} onSend={file=>sendMedia(file,'document')}/>}
+      {showEvent&&!desktopWeb&&<EventComposer user={currentUser} onClose={()=>setShowEvent(false)} onSend={file=>sendMedia(file,'document')}/>}
       {showPoll&&<PollDialog chat={activeChat} uid={currentUser.uid} onClose={()=>setShowPoll(false)}/>}
       {translation!==null&&<TranslationDialog text={translation} onClose={()=>setTranslation(null)}/>}
       {showWriting&&<WritingDialog text={inputText} history={messages.slice(-100).map(m=>m.content).join('\n')} onApply={setInputText} onClose={()=>setShowWriting(false)}/>}

@@ -23,7 +23,9 @@
     "test:account-references": "node --import tsx scripts/account-references.test.ts",
     "test:contacts": "node --import tsx scripts/contacts.test.ts",
     "test:cleanup": "node --import tsx scripts/cleanup.test.ts",
-    "test:cleanup:emulators": "node scripts/cleanup-emulator.test.cjs"
+    "test:cleanup:emulators": "node scripts/cleanup-emulator.test.cjs",
+    "test:contact-menu": "node --import tsx scripts/contact-menu.test.ts",
+    "test:contact-menu:emulators": "node scripts/contact-menu-emulator.test.cjs"
   },
   "dependencies": {
     "firebase": "^12.13.0",

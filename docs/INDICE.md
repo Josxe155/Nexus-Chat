@@ -54,3 +54,5 @@ El [README principal](../README.md) describe las funciones y el modelo de seguri
 - [Nuevo contacto](NUEVO-CONTACTO.md): resolución por número de Nexus, alias privado, apertura del chat y sincronización pendiente.
 
 - [Dashboard y limpieza inmediata](DASHBOARD-LIMPIEZA.md): recuperación de bloqueos, conservación y pruebas de v26.85.2.
+
+- [Contactos y bloqueo: referencias](REFERENCIAS-CONTACTOS-Y-BLOQUEO.md): correspondencia del ZIP, funciones y pendientes de v26.86.0.

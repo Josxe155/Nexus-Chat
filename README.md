@@ -73,6 +73,8 @@ Capturas de la aplicación con **datos ficticios de demostración**. No incluyen
 
 Esta distribución es exclusiva de computadora. Nexus Messenger conserva sus pantallas móviles. Se usan los datos reales del chat y del proveedor; no se inventan nombres de paquetes de stickers.
 
+La versión **v26.86.0** aplica las referencias de Contactos en celular, incorpora los formularios de grupo/comunidad/evento y corrige el chat bloqueado, sus avisos privados y las acciones de eliminar, archivar y desbloquear. Consulta [la correspondencia de las 15 capturas, los límites y los pendientes](docs/REFERENCIAS-CONTACTOS-Y-BLOQUEO.md).
+
 La corrección **v26.85.2** repara los bloqueos residuales de limpieza inmediata, renueva las ejecuciones activas y conserva mensajes guardados y sus archivos. También corrige avisos e historial local del dashboard. Consulta [las correcciones y pruebas](docs/DASHBOARD-LIMPIEZA.md).
 
 La corrección **v26.85.1** elimina preparativos de una integración descartada y referencias obsoletas del acceso. Mantiene los métodos de acceso y el formulario de contactos vigentes.
