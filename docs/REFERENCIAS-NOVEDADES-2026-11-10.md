@@ -2,6 +2,8 @@
 
 [Índice](INDICE.md) · [README](../README.md)
 
+La [corrección v26.88.1](CORRECCION-REFERENCIAS-OFICIALES-26.88.1.md) detalla diferencias posteriores contrastadas con artículos e ilustraciones oficiales.
+
 ## Alcance
 
 Revisión de las 55 capturas del ZIP de referencias del 10 de noviembre. Las pantallas nuevas corresponden a Messenger para Android y se aplican a la interfaz de celular. Tablet y computadora conservan sus componentes existentes; comparten los permisos y servicios de canales. No se incorporan publicidad, Meta AI ni datos personales de las capturas. Las referencias originales y las capturas de prueba permanecen fuera del repositorio.

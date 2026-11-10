@@ -73,6 +73,8 @@ Capturas de la aplicación con **datos ficticios de demostración**. No incluyen
 
 Esta distribución es exclusiva de computadora. Nexus Messenger conserva sus pantallas móviles. Se usan los datos reales del chat y del proveedor; no se inventan nombres de paquetes de stickers.
 
+La corrección **v26.88.1** contrasta los apartados móviles con artículos e ilustraciones oficiales de WhatsApp y corrige Novedades, canales, grabación y visor de estados, ocultamiento y contador de Archivados. [Fuentes, diferencias corregidas y pendientes](docs/CORRECCION-REFERENCIAS-OFICIALES-26.88.1.md).
+
 La versión **v26.88.0** actualiza Novedades, canales, estados, llamadas, búsqueda y archivados de celular según las 55 capturas recibidas; ajusta los tonos oscuros y añade permisos transaccionales para canales. [Correspondencia de referencias, comprobaciones y pendientes](docs/REFERENCIAS-NOVEDADES-2026-11-10.md). Los chats restringidos protegen la vista en este navegador y no sustituyen las reglas de acceso a los datos.
 
 La versión **v26.87.0** añade la sincronización opcional de contactos Nexus con Google People API desde el navegador: consentimiento de la cuenta, creación/actualización sin números telefónicos ficticios y conservación de los datos ajenos del contacto. [Funcionamiento, configuración y verificación](docs/GOOGLE-CONTACTOS.md). Incluye los accesos QR de Contactos/Nuevo contacto, el selector de país con bandera y búsqueda y la retirada de la sincronización telefónica. [Recorrido y fuentes](docs/NUEVO-CONTACTO.md).

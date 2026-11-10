@@ -315,7 +315,7 @@ export default function ChatWindow({
 
   const [channelDetailView,setChannelDetailView]=useState<import('../features/PhoneChannelDetails').ChannelDetailView>('info');
   const openChannel=(view:import('../features/PhoneChannelDetails').ChannelDetailView)=>{setChannelDetailView(view);setShowContact(true);setShowChatMenu(false);};
-  useEffect(()=>{if(activeChat.kind==='channel'&&activeChat.channelVersion===2&&channelOwner(activeChat)!==currentUser.uid)void setDoc(doc(db,'channelViewers',channelKey(activeChat.id,currentUser.uid)),{channelId:activeChat.id,uid:currentUser.uid,lastSeen:Date.now()}).catch(()=>{});},[activeChat.id,activeChat.channelVersion,currentUser.uid]);
+  useEffect(()=>{if(activeChat.kind==='channel'&&activeChat.channelVersion===2&&!activeChat.channelDeletedAt&&messages.some(message=>!message.deletedAt&&!message.localState&&(!message.expiresAt||message.expiresAt>Date.now())))void setDoc(doc(db,'channelViewers',channelKey(activeChat.id,currentUser.uid)),{channelId:activeChat.id,uid:currentUser.uid,lastSeen:Date.now()}).catch(()=>{});},[activeChat.id,activeChat.channelVersion,activeChat.channelDeletedAt,currentUser.uid,messages.some(message=>!message.deletedAt&&!message.localState&&(!message.expiresAt||message.expiresAt>Date.now()))]);
   const channelFollowerCount=useChannelFollowerCount(activeChat);
   const channelOwnReactions=useChannelReactions(currentUser.uid,activeChat.id,activeChat.kind==='channel'&&activeChat.channelVersion===2);
   const handleReactionClick = async (messageId: string, emoji: string) => {

@@ -6,6 +6,7 @@ El [README principal](../README.md) describe las funciones y el modelo de seguri
 
 | Documento | Contenido |
 | --- | --- |
+| [Corrección con fuentes oficiales v26.88.1](CORRECCION-REFERENCIAS-OFICIALES-26.88.1.md) | Diferencias corregidas con artículos e ilustraciones de WhatsApp, validación y pendientes. |
 | [Novedades y listas, 10 de noviembre](REFERENCIAS-NOVEDADES-2026-11-10.md) | 55 referencias, colores, canales, pruebas y diferencias pendientes de v26.88.0. |
 | [ACCESO POR TELEFONO](ACCESO-POR-TELEFONO.md) | Guía o revisión del proyecto. |
 | [ACTUALIZACION MESSENGER](ACTUALIZACION-MESSENGER.md) | Guía o revisión del proyecto. |
