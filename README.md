@@ -73,6 +73,8 @@ Capturas de la aplicación con **datos ficticios de demostración**. No incluyen
 
 Esta distribución es exclusiva de computadora. Nexus Messenger conserva sus pantallas móviles. Se usan los datos reales del chat y del proveedor; no se inventan nombres de paquetes de stickers.
 
+La corrección **v26.85.1** elimina preparativos de una integración descartada y referencias obsoletas del acceso. Mantiene los métodos de acceso y el formulario de contactos vigentes.
+
 La versión **v26.85.0** abre Nuevo contacto directamente, resuelve números internos de Nexus o usuarios, conserva alias privados y solo abre un chat tras una coincidencia válida. Consulta [el recorrido, las fuentes y los límites de sincronización](docs/NUEVO-CONTACTO.md).
 
 La corrección **v26.84.1** cubre las franjas de fondo al grabar o abrir emojis y conserva la paleta activa en esos controles. Consulta [el recorrido de revisión y sus límites](docs/REVISION-GENERAL-SUPERFICIES.md).

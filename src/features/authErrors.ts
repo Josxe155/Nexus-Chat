@@ -10,7 +10,6 @@ export function authErrorMessage(error:unknown,fallback='No se pudo iniciar sesi
   'auth/invalid-verification-code':'El código no es correcto. Revisa los seis dígitos.',
   'auth/code-expired':'El código venció. Solicita uno nuevo.',
   'auth/session-expired':'El código venció. Solicita uno nuevo.',
-  'auth/captcha-check-failed':'Completa la comprobación de seguridad e inténtalo de nuevo.',
   'auth/invalid-app-credential':'No se pudo verificar la seguridad del acceso. Recarga la página e inténtalo de nuevo.',
   'auth/quota-exceeded':'El envío de códigos no está disponible por el momento. Usa otro método de acceso.',
   'auth/billing-not-enabled':'El envío de SMS no está disponible en este momento. Puedes entrar con Google o correo.',
