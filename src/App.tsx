@@ -1,3 +1,5 @@
+import {ensureDirectContactChat} from './features/directContactChat';
+import {ContactChatContext} from './features/ContactChatContext';
 import {useAutomaticAccountReports} from './features/accountReports';
 import ChooseUsername,{needsUsernameSelection} from './features/ChooseUsername';
 import {recordVisit} from './features/visitActivity';
@@ -219,21 +221,24 @@ export default function App() {
     setMobileView('chat'); // Switch layouts on mobile devices
   };
 
-  const handleCreateChat = async (otherUserId: string) => {
-    if (!currentUser) return;
+  const handleCreateChat = async (otherUserId: string, contactSaved=false) => {
+    if (!currentUser) throw Error('Vuelve a iniciar sesión.');
+    if(auth.currentUser?.uid!==currentUser.uid)throw Error('La sesión cambió. Vuelve a iniciar sesión.');
     try {
+      const target=await getDoc(doc(db,'users',otherUserId));
+      if(!target.exists()||target.data().moderationRemoved)throw Error('Este contacto ya no está registrado en Nexus Chat.');
       // Find whether a chat room involving both participants already exists
       const participants=[...new Set([currentUser.uid,otherUserId])];
       const existingChat=chats.find(chat=>(!chat.kind||chat.kind==='direct')&&chat.participants.length===participants.length&&participants.every(uid=>chat.participants.includes(uid)));
 
       if (existingChat) {
+        if(auth.currentUser?.uid!==currentUser.uid)throw Error('La sesión cambió. Vuelve a iniciar sesión.');
         await restoreConversation(currentUser.uid,existingChat.id);
         handleSelectChat(existingChat.id);
         return;
       }
 
       // If not exists, provision a brand new Chat document
-      const chatsCollection = collection(db, 'chats');
       const newChatId = encodeURIComponent(JSON.stringify([...participants].sort()));
 
       const newChatObject: Chat = {
@@ -255,8 +260,10 @@ export default function App() {
       };
 
       newChatObject.disappearingMs=getPreferences(currentUser.uid).chat.defaultDurationMs;
-      await setDoc(doc(db, 'chats', newChatId), newChatObject);
-      const options=normalizePrivacy(currentUser.privacy);if(!options.contactIds.includes(otherUserId))setCurrentUser(await savePrivacy(currentUser,{...options,contactIds:[...options.contactIds,otherUserId]}));
+      await ensureDirectContactChat(currentUser.uid,newChatObject);
+      const options=normalizePrivacy(currentUser.privacy);if(!contactSaved&&!options.contactIds.includes(otherUserId))setCurrentUser(await savePrivacy(currentUser,{...options,contactIds:[...options.contactIds,otherUserId]}));
+      if(auth.currentUser?.uid!==currentUser.uid)throw Error('La sesión cambió. Vuelve a iniciar sesión.');
+      await restoreConversation(currentUser.uid,newChatId);
       handleSelectChat(newChatId);
 
     } catch (err) {
@@ -395,7 +402,7 @@ export default function App() {
   }
 
   return (
-    <PersonalContext.Provider value={personal}><RealtimeProvider user={currentUser} users={visibleUsers} knownIds={[...new Set(chats.filter(c=>c.kind!=='channel').flatMap(c=>c.participants))]}><WorkspaceLayout theme={theme} showChat={mobileView === 'chat'} sidebar={
+    <ContactChatContext.Provider value={uid=>handleCreateChat(uid,true)}><PersonalContext.Provider value={personal}><RealtimeProvider user={currentUser} users={visibleUsers} knownIds={[...new Set(chats.filter(c=>c.kind!=='channel').flatMap(c=>c.participants))]}><WorkspaceLayout theme={theme} showChat={mobileView === 'chat'} sidebar={
       <Sidebar latestMessages={latestMessages} currentUser={currentUser} chats={visibleChats} activeChatId={activeChatId} users={visibleUsers} theme={theme}
         onUserChange={setCurrentUser} onOpenHub={()=>setShowHub(true)} onToggleTheme={handleToggleTheme} onChatSelect={handleSelectChat} onCreateChat={handleCreateChat}
         onUpdateProfile={handleUpdateProfile} onTogglePin={handleTogglePin} onToggleArchive={handleToggleArchive}
@@ -407,6 +414,6 @@ export default function App() {
         onOpenContact={handleCreateChat} onSendMessage={handleSendMessage} onReactMessage={handleReactMessage} onEditMessage={handleEditMessage}
         onDeleteMessage={handleDeleteMessage} onClearChatHistory={handleClearChatHistory} setTypingStatus={handleSetTypingStatus} />
         : <div className="workspace-empty"><span className="empty-mark"><img src="/nexus-icon.svg?v=4" width="76" height="76" alt=""/></span><span className="eyebrow">TU ESPACIO, TUS CONVERSACIONES</span><h1>Un hola puede<br />ser el comienzo.</h1><p>Elige una conversación o busca un contacto<br />para empezar a compartir.</p><div className="desktop-welcome-actions"><button onClick={()=>{handleCreateChat(currentUser.uid).then(()=>setTimeout(()=>document.querySelector<HTMLButtonElement>('[title="Adjuntar archivo"]')?.click(),100));}}><span><FileText size={23}/></span>Enviar documento</button><button onClick={()=>window.dispatchEvent(new CustomEvent('nexus:navigate',{detail:'contacts'}))}><span><UserPlus size={23}/></span>Añadir contacto</button><button onClick={()=>navigator.clipboard.writeText(location.origin).catch(()=>{})}><span><Mail size={23}/></span>Invitar a un amigo</button><button className="nexus-ai-entry" onClick={()=>window.dispatchEvent(new CustomEvent('nexus:navigate',{detail:'assistant'}))}><span className="nexus-ai-mark"><Sparkles size={23}/></span>Pregúntale a Nexus AI</button></div><span className="empty-footnote">Sin tarjeta SIM. Solo internet.</span></div>}
-    </WorkspaceLayout><MaintenanceNotice uid={currentUser.uid}/><PermissionReview/><GroupInvite uid={currentUser.uid}/><ContactCodeLink key={currentUser.uid} uid={currentUser.uid} onContact={handleCreateChat}/><ModerationNotices uid={currentUser.uid}/><NotificationToast/>{showHub&&<WorkspaceHub user={currentUser} users={users} chats={chats} onSelect={handleSelectChat} onClose={()=>setShowHub(false)} onUserChange={setCurrentUser}/>}</RealtimeProvider></PersonalContext.Provider>
+    </WorkspaceLayout><MaintenanceNotice uid={currentUser.uid}/><PermissionReview/><GroupInvite uid={currentUser.uid}/><ContactCodeLink key={currentUser.uid} uid={currentUser.uid} onContact={handleCreateChat}/><ModerationNotices uid={currentUser.uid}/><NotificationToast/>{showHub&&<WorkspaceHub user={currentUser} users={users} chats={chats} onSelect={handleSelectChat} onClose={()=>setShowHub(false)} onUserChange={setCurrentUser}/>}</RealtimeProvider></PersonalContext.Provider></ContactChatContext.Provider>
   );
 }

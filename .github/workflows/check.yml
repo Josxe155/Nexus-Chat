@@ -19,5 +19,6 @@ jobs:
       - run: npm run test:dashboard-ai
       - run: npm run test:dashboard-owner
       - run: npm run test:account-references
+      - run: npm run test:contacts
       - run: npm run test:rich-text
       - run: npm run build:hosting

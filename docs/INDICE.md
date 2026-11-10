@@ -50,3 +50,5 @@ El [README principal](../README.md) describe las funciones y el modelo de seguri
 - [Info. de contacto: referencias](INFO-CONTACTO-REFERENCIAS.md): alcance móvil, funciones conectadas y pendientes de v26.84.0.
 
 - [Revisión general de superficies](REVISION-GENERAL-SUPERFICIES.md): franjas de grabación/emojis, paletas y alcance de pruebas de v26.84.1.
+
+- [Nuevo contacto](NUEVO-CONTACTO.md): resolución por número de Nexus, alias privado, apertura del chat y sincronización pendiente.
