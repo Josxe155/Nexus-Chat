@@ -14,12 +14,13 @@ export function useRecordingCamera(preview:RefObject<HTMLVideoElement|null>){
   if(lock.current)return false;lock.current=true;setBusy(true);setError('');
   const camera=new RecordingCamera(()=>preview.current);release();controller.current=camera;
   try{const ready=await camera.open(captureConstraints(true),requested.current);if(ready&&mounted.current)setFacing(camera.facing);return ready&&mounted.current;}
-  catch(cause){camera.close();if(mounted.current)setError(['NotFoundError','OverconstrainedError','NotAllowedError','SecurityError'].includes((cause as Error)?.name)?recordingCameraError(cause):'No se pudo abrir la cámara. Permite usar la cámara y el micrófono y abre Nexus en su dirección publicada.');return false;}
+  catch(cause){camera.close();if(controller.current===camera)controller.current=undefined;if(mounted.current)setError(['NotFoundError','OverconstrainedError','NotAllowedError','SecurityError'].includes((cause as Error)?.name)?recordingCameraError(cause):'No se pudo abrir la cámara. Permite usar la cámara y el micrófono y abre Nexus en su dirección publicada.');return false;}
   finally{lock.current=false;if(mounted.current)setBusy(false);}
  };
  const flip=async()=>{
   if(lock.current)return;setError('');
-  if(!controller.current?.active){requested.current=facing==='user'?'environment':'user';setFacing(requested.current);return;}
+  if(controller.current&&!controller.current.active){setError('La cámara ya no está disponible. Detén y revisa el video antes de volver a intentarlo.');return;}
+  if(!controller.current){requested.current=facing==='user'?'environment':'user';setFacing(requested.current);return;}
   lock.current=true;setBusy(true);const camera=controller.current;
   try{await camera.flip();if(mounted.current){requested.current=camera.facing;setFacing(camera.facing);}}
   catch(cause){if(mounted.current)setError(recordingCameraError(cause));}

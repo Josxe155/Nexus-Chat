@@ -73,7 +73,7 @@ Capturas de la aplicación con **datos ficticios de demostración**. No incluyen
 
 Esta distribución es exclusiva de computadora. Nexus Messenger conserva sus pantallas móviles. Se usan los datos reales del chat y del proveedor; no se inventan nombres de paquetes de stickers.
 
-La versión **v26.91.0** añade cambio entre cámara frontal y trasera en la cámara normal y en videos instantáneos, antes y durante la grabación cuando el navegador lo permite. Conserva el audio, el contador y la revisión antes de enviar. [Funcionamiento, fuente oficial y comprobaciones](docs/CAMARA-TRASERA-VIDEOS.md).
+La versión **v26.91.1** añade cambio entre cámara frontal y trasera en la cámara normal y en videos instantáneos, antes y durante la grabación cuando el navegador lo permite. Conserva el audio, el contador y la revisión antes de enviar. [Funcionamiento, fuente oficial y comprobaciones](docs/CAMARA-TRASERA-VIDEOS.md).
 
 La versión **v26.90.0** añade **Adjuntar → Pegar imagen** en celular. Las imágenes del portapapeles pasan por la revisión existente y requieren confirmar el envío; el texto escrito se conserva. [Compatibilidad, privacidad y comprobaciones](docs/PORTAPAPELES-IMAGENES.md).
 

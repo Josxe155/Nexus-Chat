@@ -1,4 +1,4 @@
-# Cámara frontal y trasera al grabar · v26.91.0
+# Cámara frontal y trasera al grabar · v26.91.1
 
 La cámara de fotos/video y el grabador de video instantáneo incorporan un botón con el icono de cambiar cámara. Su etiqueta accesible indica **Cambiar a cámara trasera** o **Cambiar a cámara frontal**, según la selección actual.
 
@@ -22,7 +22,7 @@ La cámara normal también conserva tomar foto, repetir y enviar captura. No se 
 
 ## Verificación
 
-`npm run test:recording-camera` ejecuta nueve pruebas unitarias: restricciones de orientación, conservación del micrófono, rechazo de la misma cámara, cámara inexistente, recuperación después de liberar la anterior, cierre durante apertura/cambio, preferencia obsoleta y mensajes de error.
+`npm run test:recording-camera` ejecuta diez pruebas unitarias: restricciones de orientación, conservación del micrófono, rechazo de la misma cámara, cámara inexistente, recuperación después de liberar la anterior, cierre durante apertura/cambio, preferencia obsoleta y mensajes de error. La corrección v26.91.1 cubre además el fallo de ambas cámaras: conserva el audio para revisar y no cambia la etiqueta de orientación si ya no hay cámara activa.
 
 Las pruebas de navegador usan los componentes reales y MediaRecorder real. Dos cámaras sintéticas generan imágenes de colores distintos y un micrófono sintético proporciona audio. Se decodificaron videos grabados con ambos colores para comprobar que el mismo archivo contiene las dos cámaras; también se verificó que las identidades de las pistas de grabación y el micrófono permanecen estables.
 
@@ -32,6 +32,6 @@ Las pruebas de navegador usan los componentes reales y MediaRecorder real. Dos c
 | Tablet, 820 | 8/8 (100 %) | Los mismos grabadores y comprobaciones en ambos temas. |
 | Computadora, 1440 | 8/8 (100 %) | Regresión de los componentes compartidos en ambos temas. No añade una nueva entrada de video al menú de cámara de escritorio. |
 
-Además se comprueban ocho casos específicos: decodificación frontal/trasera en ambos tipos de video, cámara trasera ausente, recuperación tras fallo, cierre durante cambio, foto trasera y repetición, navegador sin composición de video y permiso denegado. En total son cuarenta casos de navegador, con transporte de envío simulado y sin escrituras en producción.
+Además se comprueban nueve casos específicos: decodificación frontal/trasera en ambos tipos de video, cámara trasera ausente, recuperación tras fallo, cierre durante cambio, foto trasera y repetición, navegador sin composición de video permiso denegado y fallo de ambas cámaras sin anunciar un cambio inexistente. En total son cuarenta y un casos de navegador, con transporte de envío simulado y sin escrituras en producción.
 
 Estos porcentajes se refieren exclusivamente a los casos definidos. Continúa pendiente probar cámaras físicas en Android y iPhone/Safari y medir el rendimiento en equipos de gama baja. La codificación de video, el acceso a dos cámaras y la grabación en segundo plano dependen del navegador y del dispositivo.
