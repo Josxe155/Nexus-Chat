@@ -26,5 +26,6 @@ jobs:
       - run: npm run test:contacts
       - run: npm run test:message-policy
       - run: npm run test:poll-privacy
+      - run: npm run test:image-clipboard
       - run: npm run test:rich-text
       - run: npm run build:hosting

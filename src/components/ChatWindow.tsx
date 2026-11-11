@@ -45,6 +45,8 @@ import {VoiceTranscriptDialog} from '../features/VoiceTranscript';import {clearF
 import LocationComposer from '../features/LocationComposer';import {MapPin} from 'lucide-react';
 import {ConversationTool} from '../features/ConversationTools';import EventComposer from '../features/EventComposer';import {changeConversation} from '../features/PersonalState';import {normalizePrivacy,savePrivacy} from '../features/privacy';import {Calendar,BellOff,ListPlus} from 'lucide-react';
 import {pastedFiles,copyImage} from '../features/clipboard';
+import {readClipboardImages,clipboardImageError} from '../features/imageClipboard';
+import {ClipboardPaste} from 'lucide-react';
 import FloatingMenu from '../features/FloatingMenu';
 import ContactDetails from '../features/ContactDetails';
 import {ForwardDialog,MessageInformation,DeleteMessagesDialog,exportConversation} from '../features/ConversationActions';
@@ -231,6 +233,7 @@ export default function ChatWindow({
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [uploadProgress, setUploadProgress] = useState<number | null>(null);
   const [uploadError, setUploadError] = useState('');
+  useEffect(()=>{if(!uploadError)return;const timer=setTimeout(()=>setUploadError(''),3000);return()=>clearTimeout(timer);},[uploadError]);
 
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const messageAreaRef = useRef<HTMLDivElement | null>(null);
@@ -241,6 +244,18 @@ export default function ChatWindow({
   const blockOperation=useRef(false);
   const unblock=async()=>{const target=activeChat.participants.find(uid=>uid!==currentUser.uid);if(!target)return;const updated=await setContactBlocked(currentUser,target,false,activeChat.id);window.dispatchEvent(new CustomEvent('nexus:profile-update',{detail:updated}));};
   const canSend=(activeChat.sendPolicy!=='admins'||!!activeChat.admins?.includes(currentUser.uid))&&!contactBlocked&&!activeChat.channelDeletedAt;
+  const clipboardRead=useRef(false),clipboardContext=useRef({key:'',canSend:false,mounted:true});
+  clipboardContext.current.key=JSON.stringify([activeChat.id,currentUser.uid]);clipboardContext.current.canSend=canSend;
+  useEffect(()=>{clipboardContext.current.mounted=true;return()=>{clipboardContext.current.mounted=false;};},[]);
+  const pasteImage=async()=>{
+    if(clipboardRead.current||fileBusy||!canSend)return;
+    clipboardRead.current=true;const key=clipboardContext.current.key;
+    const current=()=>clipboardContext.current.mounted&&clipboardContext.current.key===key&&clipboardContext.current.canSend;
+    setShowAttachMenu(false);setShowEmojiPicker(false);setUploadError('');
+    try{const files=await readClipboardImages();if(current()){uploadKind.current='media';setPendingFiles(files);}}
+    catch(error){if(current())setUploadError(clipboardImageError(error));}
+    finally{clipboardRead.current=false;}
+  };
   const groupAvatar=useMediaURLs(activeChat.photoURL?[{id:activeChat.id,fileUrl:activeChat.photoURL,force:true,fileSize:1}]:[],currentUser.uid);
   const otherUser = (activeChat.kind==='group'||activeChat.kind==='channel') ? {nombre:activeChat.title||'Espacio Nexus',uid:activeChat.id,online:false,foto:groupAvatar[activeChat.id]||activeChat.photoURL||'',bio:activeChat.description||'',username:'',estado:'',lastSeen:0,typing:false,privacy:undefined} : activeChat.participants.length===1?{...currentUser,nombre:currentUser.nombre+' (Tú)'}:users.find(u => u.uid === activeChat.participants.find(p => p !== currentUser.uid));
 
@@ -740,7 +755,7 @@ export default function ChatWindow({
       {canSend&&!(desktopWeb&&(selectingMessages||selectedIds.length>0))?<footer data-recording={recordMode==='audio'} data-expressions={showEmojiPicker} data-phone-expressions={phoneExpressions} className={`chat-composer px-3 sm:px-4 py-2.5 shrink-0 select-none z-10 flex flex-col relative ${theme === 'dark' ? 'bg-[#232732]' : 'bg-[#f0f2f5]'}`}>{!desktopWeb&&<MobileVoiceDiscardHost/>}{recordMode==='audio'?<Recorder mode="audio" onClose={()=>setRecordMode(null)} onSend={sendMedia}/>:<>
         {!phoneExpressions&&expressionPanel}
 
-        {showAttachMenu&&<div className="attachment-panel attachment-complete" role="menu" aria-label="Adjuntar al chat">{[[File,'Documento',()=>chooseFiles('document')],[ImageIcon,'Fotos y videos',()=>chooseFiles('media')],[Camera,'Cámara',()=>{setShowCamera(true);setShowAttachMenu(false);}],[AudioLines,'Audio',()=>{setAudioOptions(true);setShowAttachMenu(false);}],[UserRound,'Contacto',()=>{setShowContacts(true);setShowAttachMenu(false);}],[MapPin,'Ubicación',()=>{setShowLocation(true);setShowAttachMenu(false);}],[BarChart3,'Encuesta',()=>{setShowPoll(true);setShowAttachMenu(false);}],[Calendar,'Evento',()=>{setShowEvent(true);setShowAttachMenu(false);}],[Smile,'Nuevo sticker',()=>{if(desktopWeb)stickerInput.current?.click();else setShowStickers(true);setShowAttachMenu(false);}]].filter(([,label])=>mobileOptions||label!=='Ubicación').map(([Icon,label,action]:any)=><button role="menuitem" key={label} onClick={action}><Icon size={20}/>{label}</button>)}</div>}
+        {showAttachMenu&&<div className="attachment-panel attachment-complete" role="menu" aria-label="Adjuntar al chat">{[[File,'Documento',()=>chooseFiles('document')],[ImageIcon,'Fotos y videos',()=>chooseFiles('media')],[Camera,'Cámara',()=>{setShowCamera(true);setShowAttachMenu(false);}],[AudioLines,'Audio',()=>{setAudioOptions(true);setShowAttachMenu(false);}],[UserRound,'Contacto',()=>{setShowContacts(true);setShowAttachMenu(false);}],[MapPin,'Ubicación',()=>{setShowLocation(true);setShowAttachMenu(false);}],[BarChart3,'Encuesta',()=>{setShowPoll(true);setShowAttachMenu(false);}],[Calendar,'Evento',()=>{setShowEvent(true);setShowAttachMenu(false);}],[Smile,'Nuevo sticker',()=>{if(desktopWeb)stickerInput.current?.click();else setShowStickers(true);setShowAttachMenu(false);}],...(phoneExpressions?[[ClipboardPaste,'Pegar imagen',()=>void pasteImage()]]:[])].filter(([,label])=>mobileOptions||label!=='Ubicación').map(([Icon,label,action]:any)=><button role="menuitem" key={label} onClick={action}><Icon size={20}/>{label}</button>)}</div>}
         <input type="file" multiple ref={fileInputRef} aria-label="Seleccionar archivos para enviar" onChange={e=>{const files=Array.from(e.target.files||[]);e.target.value='';if(files.length>10){setUploadError('Selecciona hasta 10 archivos por envío.');return;}setPendingFiles(files);setUploadError('');}} className="hidden"/>
         {!desktopWeb?<MobileChatComposer expressionsOpen={phoneExpressions&&showEmojiPicker} onInputFocus={phoneExpressions?()=>setShowEmojiPicker(false):undefined} input={textareaRef} value={editingTarget?editingText:inputText} editing={!!editingTarget} busy={isSending} spellcheck={preferences.chat.spellcheck} onChange={editingTarget?e=>setEditingText(e.target.value):handleInputChange} onKeyDown={handleKeyDown} onSend={handleSend} onEmoji={toggleMobileExpressions} onAttach={()=>{if(phoneExpressions)setShowEmojiPicker(false);setShowAttachMenu(!showAttachMenu);}} onCamera={()=>{if(phoneExpressions)setShowEmojiPicker(false);setShowCamera(true);}} onRecord={()=>{if(phoneExpressions)setShowEmojiPicker(false);setRecordMode('audio');}}/>:<DesktopChatComposer input={textareaRef} value={editingTarget?editingText:inputText} editing={!!editingTarget} busy={isSending} spellcheck={preferences.chat.spellcheck} onChange={editingTarget?e=>setEditingText(e.target.value):handleInputChange} onKeyDown={handleKeyDown} onSend={()=>void handleSend()} onAttach={()=>setShowAttachMenu(!showAttachMenu)} onEmoji={()=>setShowEmojiPicker(!showEmojiPicker)} onRecord={()=>setRecordMode('audio')}/>}
         {phoneExpressions&&expressionPanel}

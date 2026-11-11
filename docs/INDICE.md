@@ -6,6 +6,7 @@ El [README principal](../README.md) describe las funciones y el modelo de seguri
 
 | Documento | Contenido |
 | --- | --- |
+| [Pegar imágenes en celular v26.90.0](PORTAPAPELES-IMAGENES.md) | Portapapeles, revisión antes de enviar, permisos y comprobaciones por dispositivo. |
 | [Auditoría con documentación oficial v26.89.0](AUDITORIA-WHATSAPP-26.89.0.md) | Permisos y plazos de mensajes, votos privados, administración de canales, inventario de código y límites verificados. |
 | [Corrección con fuentes oficiales v26.88.1](CORRECCION-REFERENCIAS-OFICIALES-26.88.1.md) | Diferencias corregidas con artículos e ilustraciones de WhatsApp, validación y pendientes. |
 | [Novedades y listas, 10 de noviembre](REFERENCIAS-NOVEDADES-2026-11-10.md) | 55 referencias, colores, canales, pruebas y diferencias pendientes de v26.88.0. |
