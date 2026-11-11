@@ -109,7 +109,7 @@ export default function AuthScreen({ onAuthSuccess, theme, onToggleTheme }: Auth
   return (
     <div className="auth-shell" data-theme={theme}><PermissionReview/>
       <header className="auth-header">
-        <a className="nexus-brand" href="#" aria-label="Nexus Chat, inicio"><img className="brand-mark" src="/icons/nexus-48.png?v=4" width="43" height="43" alt=""/><span>Nexus<span className="brand-light"> Chat</span><span className="brand-dot">.</span></span></a>
+        <a className="nexus-brand" href="/" aria-label="Nexus Chat, inicio"><img className="brand-mark" src="/icons/nexus-48.png?v=4" width="43" height="43" alt=""/><span>Nexus<span className="brand-light"> Chat</span><span className="brand-dot">.</span></span></a>
         <div className="header-actions"><span className="header-note">Un espacio para estar cerca</span><button className="theme-button" onClick={onToggleTheme} id="toggle_theme_btn" aria-label={theme === 'dark' ? 'Activar modo claro' : 'Activar modo oscuro'} title="Cambiar tema">{theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}</button></div>
       </header>
       <main className="auth-main">

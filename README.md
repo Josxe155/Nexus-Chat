@@ -73,6 +73,8 @@ Capturas de la aplicación con **datos ficticios de demostración**. No incluyen
 
 Esta distribución es exclusiva de computadora. Nexus Messenger conserva sus pantallas móviles. Se usan los datos reales del chat y del proveedor; no se inventan nombres de paquetes de stickers.
 
+La revisión **v26.89.0** aplica los plazos oficiales de edición y eliminación de mensajes, añade la retirada y renuncia de administradores y la revocación de invitaciones de canales, corrige acciones que dependían indebidamente de las reacciones y separa los votos personales de los recuentos en las nuevas encuestas que ocultan nombres. Incluye su limpieza cuando el mensaje ya no existe. [Auditoría, fuentes oficiales, alcance de las pruebas y pendientes](docs/AUDITORIA-WHATSAPP-26.89.0.md). No certifica equivalencia completa con WhatsApp ni pruebas en dispositivos físicos.
+
 La corrección **v26.88.1** contrasta los apartados móviles con artículos e ilustraciones oficiales de WhatsApp y corrige Novedades, canales, grabación y visor de estados, ocultamiento y contador de Archivados. [Fuentes, diferencias corregidas y pendientes](docs/CORRECCION-REFERENCIAS-OFICIALES-26.88.1.md).
 
 La versión **v26.88.0** actualiza Novedades, canales, estados, llamadas, búsqueda y archivados de celular según las 55 capturas recibidas; ajusta los tonos oscuros y añade permisos transaccionales para canales. [Correspondencia de referencias, comprobaciones y pendientes](docs/REFERENCIAS-NOVEDADES-2026-11-10.md). Los chats restringidos protegen la vista en este navegador y no sustituyen las reglas de acceso a los datos.

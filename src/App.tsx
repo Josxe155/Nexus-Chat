@@ -1,3 +1,4 @@
+import {editMessageContent,deleteMessageEverywhere} from './features/messageMutations';
 import {useChannelNotifications} from './features/channelNotifications';
 import ChannelAccess from './features/ChannelAccess';
 import {setChannelReaction,useFollowedChannels} from './features/channels';
@@ -320,16 +321,8 @@ export default function App() {
   };
 
   // 11. Operations: Edit Message
-  const handleEditMessage=async(messageId:string,newContent:string)=>{
-    if(!currentUser||!activeChatId)return;
-    const messageRef=doc(db,'chats',activeChatId,'messages',messageId);const chatRef=doc(db,'chats',activeChatId);
-    await runTransaction(db,async transaction=>{const [snapshot,chatSnapshot]=await Promise.all([transaction.get(messageRef),transaction.get(chatRef)]);const message=snapshot.data();const timestamp=message?.serverSentAt?.toMillis?.()||message?.timestamp;if(!message||message.senderId!==currentUser.uid||Date.now()-timestamp>900000||!newContent.trim()||newContent.length>20000)throw new Error('Puedes editar tus mensajes durante los primeros 15 minutos.');const chat=chatSnapshot.data()as Chat;if(message.sealed)throw Error('Este mensaje pertenece al historial cifrado anterior y no se puede editar.');transaction.update(messageRef,{content:newContent.trim(),edited:true});if(chatSnapshot.data()?.lastMessage?.id===messageId)transaction.update(chatRef,{'lastMessage.content':message.sealed?encryptedPreview:newContent.trim()});});
-  };
-  const handleDeleteMessage=async(messageId:string)=>{
-    if(!currentUser||!activeChatId)return;
-    const messageRef=doc(db,'chats',activeChatId,'messages',messageId);const chatRef=doc(db,'chats',activeChatId);
-    let mediaToDelete:string|undefined;try{await runTransaction(db,async transaction=>{const [snapshot,chatSnapshot]=await Promise.all([transaction.get(messageRef),transaction.get(chatRef)]);if(snapshot.data()?.senderId!==currentUser.uid)throw new Error('Solo puedes eliminar tus propios mensajes.');mediaToDelete=(await readableMessage({...snapshot.data(),id:messageId}as Message,currentUser.uid)).fileUrl;transaction.update(messageRef,{sealed:deleteField(),deletedAt:Date.now(),content:'🚫 Este mensaje fue eliminado',type:'text',fileUrl:'',fileName:'',fileSize:0});if(chatSnapshot.data()?.lastMessage?.id===messageId)transaction.update(chatRef,{'lastMessage.content':'🚫 Este mensaje fue eliminado','lastMessage.type':'text'});});await queueMediaDeletion(mediaToDelete).catch(()=>{});}catch(error){console.error(error);throw error;}
-  };
+  const handleEditMessage=async(messageId:string,newContent:string)=>{if(currentUser&&activeChatId)await editMessageContent(currentUser.uid,activeChatId,messageId,newContent);};
+  const handleDeleteMessage=async(messageId:string)=>{if(currentUser&&activeChatId)await deleteMessageEverywhere(currentUser.uid,activeChatId,messageId);};
 
   // 13. Operations: Profile settings modification
   const handleUpdateProfile=async(nombre:string,bio:string,foto:string)=>{if(currentUser)setCurrentUser(await savePrivacy({...currentUser,nombre,bio,foto},normalizePrivacy(currentUser.privacy)));};

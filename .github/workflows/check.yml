@@ -24,5 +24,7 @@ jobs:
       - run: npm run test:contact-menu
       - run: npm run test:google-contacts
       - run: npm run test:contacts
+      - run: npm run test:message-policy
+      - run: npm run test:poll-privacy
       - run: npm run test:rich-text
       - run: npm run build:hosting

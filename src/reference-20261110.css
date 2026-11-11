@@ -133,3 +133,9 @@ html:root[data-nexus-surface=workspace][data-nexus-mode] .is-phone-status .mobil
  .status-create-fabs>button:last-child{width:56px;height:56px;border-radius:18px}
 }
 .is-phone-status .status-stage-content .text-status{font-weight:inherit;font-style:inherit;font-family:inherit}
+.phone-channel-self>button{height:36px;width:30px;display:grid;place-items:center;padding:0;flex:none}
+.phone-channel-self>span{min-width:0;flex:1}
+.phone-channel-self>span>strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block}
+
+body:has(.phone-channel-details)>.floating-menu-scrim{z-index:1790}
+body:has(.phone-channel-details)>.message-menu.floating-message-menu{z-index:1791!important}

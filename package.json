@@ -28,7 +28,11 @@
     "test:contact-menu": "node --import tsx scripts/contact-menu.test.ts",
     "test:contact-menu:emulators": "node scripts/contact-menu-emulator.test.cjs",
     "test:references": "node --import tsx scripts/reference-november.test.ts",
-    "test:channels:emulators": "node scripts/channels-emulator.test.cjs"
+    "test:channels:emulators": "node scripts/channels-emulator.test.cjs",
+    "test:message-policy": "node --import tsx scripts/message-policy.test.ts",
+    "test:poll-privacy": "node --import tsx scripts/poll-privacy.test.ts",
+    "test:message-policy:emulators": "node scripts/message-policy-emulator.test.cjs",
+    "test:anonymous-polls:emulators": "node scripts/anonymous-polls-emulator.test.cjs"
   },
   "dependencies": {
     "firebase": "^12.13.0",

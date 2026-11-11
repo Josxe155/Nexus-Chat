@@ -64,6 +64,7 @@ export interface Message {
   replyTo?: MessageReplyContext;
   edited?: boolean;
   deletedAt?: number;
+  deletedBy?:string;
   expiresAt?: number;
   keptBy?: string;
   viewOnce?: boolean;
@@ -75,7 +76,7 @@ export interface Message {
   pinExpiresAt?:number;
   pinnedAt?:number;
   pinnedBy?:string;
-  poll?: {hideVoterNames?:boolean;closesAt?:number;closedAt?:any;question: string; options: {id: string; text: string}[]; multiple: boolean; optionIds:string[]; votes: Record<string,string[]>};
+  poll?: {anonymousVersion?:1;counts?:Record<string,number>;voterCount?:number;hideVoterNames?:boolean;closesAt?:number;closedAt?:any;question: string; options: {id: string; text: string}[]; multiple: boolean; optionIds:string[]; votes: Record<string,string[]>};
 }
 
 export interface Chat {

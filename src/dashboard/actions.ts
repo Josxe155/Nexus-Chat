@@ -28,6 +28,7 @@ async function inspect(cutoff:number,execute=false,onProgress=(text:string)=>{},
   }else{counts.protectedMessages+=retained(rows.docs);counts.messages+=rows.docs.filter(d=>!d.data().keptBy).length;}
   cursor=rows.docs.at(-1);onProgress(counts.messages+' mensajes '+(execute?'eliminados':'elegibles'));if(rows.size<200)break;
  }
+  if(execute){let voteCursor;for(;;){await heartbeat();let votes=query(collection(db,'chats',chat.id,'pollVotes'),where('messageTimestamp','<',cutoff),orderBy('messageTimestamp'),limit(100));if(voteCursor)votes=query(votes,startAfter(voteCursor));const rows=await getDocsFromServer(votes);if(rows.empty)break;await runTransaction(db,async tx=>{const parents=await Promise.all(rows.docs.map(vote=>tx.get(doc(db,'chats',chat.id,'messages',vote.data().messageId))));rows.docs.forEach((vote,index)=>{if(!parents[index].exists())tx.delete(vote.ref);});});voteCursor=rows.docs.at(-1);if(rows.size<100)break;}}
   if(execute){await heartbeat();await runTransaction(db,async tx=>{
    const fresh=await tx.get(chat.ref);if(!fresh.exists())return;
    const data=fresh.data(),last=data.lastMessage,pins=data.messagePins||{},pinIds=Object.keys(pins).filter(id=>id&&!id.includes('/'));

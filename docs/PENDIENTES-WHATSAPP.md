@@ -2,6 +2,12 @@
 
 # Nexus Chat: funciones incorporadas y diferencias pendientes
 
+## Estado al 11 de noviembre de 2026
+
+La [auditoría v26.89.0](AUDITORIA-WHATSAPP-26.89.0.md) distingue análisis estático, recorridos de navegador y pruebas de reglas. Continúa pendiente la equivalencia integral de pantallas y funciones. Los porcentajes históricos que aparecen más abajo corresponden a sus entregas, no al estado global del producto.
+
+La comprobación actual de favicon.ico y de las seis variantes PNG de marca confirma transparencia real (alfa mínimo 0, máximo 255 y esquinas transparentes). El inventario opaco del 9 de noviembre, conservado debajo, es histórico y ya no describe los recursos actuales. El refinamiento de bordes y legibilidad de 16/32 píxeles continúa como revisión visual independiente.
+
 ## Prioridades del 9 de noviembre de 2026
 
 Este bloque registra trabajo pendiente solicitado después de v26.79.4. No describe mejoras visuales ya aplicadas. Las secciones posteriores conservan el inventario histórico de funciones y diferencias.
@@ -16,7 +22,7 @@ Este bloque registra trabajo pendiente solicitado después de v26.79.4. No descr
 
 ### Inventario del favicon y los iconos
 
-La inspección del 9 de noviembre confirma que los recursos actuales todavía tienen fondo opaco:
+La inspección histórica del 9 de noviembre detectó entonces recursos con fondo opaco; fue superada por la comprobación de transparencia del 11 de noviembre:
 
 - `public/favicon.ico`: cuatro representaciones de 16, 32, 48 y 64 píxeles; todas con alfa 255 en toda la imagen.
 - `public/icons/nexus-32.png`, `nexus-48.png`, `nexus-180.png`, `nexus-192.png`, `nexus-256.png` y `nexus-512.png`: las seis variantes son opacas.
