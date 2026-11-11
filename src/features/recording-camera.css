@@ -1,0 +1,4 @@
+.recorder-dialog .feature-actions,.capture-dialog .feature-actions{flex-wrap:wrap}
+.recorder-dialog .feature-actions>button,.capture-dialog .feature-actions>button{min-width:max-content;white-space:nowrap}
+.feature-dialog .feature-actions>.recording-camera-switch{flex:0 0 44px;width:44px;padding:10px;display:grid;place-items:center}
+.recording-camera-switch>svg{width:22px;height:22px;flex-shrink:0}

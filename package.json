@@ -33,7 +33,8 @@
     "test:poll-privacy": "node --import tsx scripts/poll-privacy.test.ts",
     "test:message-policy:emulators": "node scripts/message-policy-emulator.test.cjs",
     "test:anonymous-polls:emulators": "node scripts/anonymous-polls-emulator.test.cjs",
-    "test:image-clipboard": "node --import tsx scripts/image-clipboard.test.ts"
+    "test:image-clipboard": "node --import tsx scripts/image-clipboard.test.ts",
+    "test:recording-camera": "node --import tsx scripts/recording-camera.test.ts"
   },
   "dependencies": {
     "firebase": "^12.13.0",
