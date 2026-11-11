@@ -2,6 +2,10 @@
 
 # Nexus Chat: funciones incorporadas y diferencias pendientes
 
+## Acceso administrativo y Assistant
+
+La prioridad y los pendientes nuevos se registran en [Acceso administrativo a invitados y tareas aplazadas](PENDIENTES-ACCESO-ADMINISTRATIVO.md). No se ha habilitado un acceso oculto a cuentas ni una contraseña de invitados.
+
 ## Estado al 11 de noviembre de 2026
 
 La [auditoría v26.89.0](AUDITORIA-WHATSAPP-26.89.0.md) distingue análisis estático, recorridos de navegador y pruebas de reglas. Continúa pendiente la equivalencia integral de pantallas y funciones. Los porcentajes históricos que aparecen más abajo corresponden a sus entregas, no al estado global del producto.
