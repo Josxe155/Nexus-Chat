@@ -36,7 +36,9 @@ export function requestsImmediateAction(prompt:string,plan:AssistantAction,execu
  if(plan.kind==='cleanup'||execution==='prepare')return false;
  const command=prompt.replace(/"[^"]*"|“[^”]*”|«[^»]*»/g,' ').trim();
  if(/^(?:¿|¡)?(?:por\s+favor[,\s]+)?(?:prepara|prop[oó]n|simula)\b|\b(?:solo|solamente)\s+(?:consulta|lee|lectura|muestra|explica|analiza)|\bno\s+(?:ejecutes|modifiques|guardes|cambies|elimines|borres)|\bsin\s+(?:cambios|ejecutar|guardar)/iu.test(command))return false;
- if(execution==='execute')return true;
+ if(/^(?:¿\s*)?(?:puedes\s+)?(?:analiza(?:r)?|lee(?:r)?|revisa(?:r)?|describe|describir|resume|resumir|transcribe|transcribir|busca(?:r)?|consulta(?:r)?|cuenta|explica(?:r)?|compara(?:r)?|muestra|mostrar)\b/iu.test(command))return false;
+ const intent=command.replace(/^[¿¡]\s*/u,'').replace(/^por\s+favor[,\s]+/iu,'').replace(/^(?:(?:quiero|necesito|deseo)\s+(?:que\s+)?|me\s+gustar[ií]a\s+que\s+|(?:puedes|podr[ií]as)\s+)/iu,'').replace(/^por\s+favor[,\s]+/iu,'');
+ if(execution==='execute')return /^(?:crea(?:r|s)?|crees|a[nñ]ade(?:s)?|a[nñ]adir|a[nñ]adas|agrega(?:r|s)?|agregues|actualiza(?:r|s)?|actualices|modifica(?:r|s)?|modifiques|edita(?:r|s)?|edites|cambia(?:r|s)?|cambies|publica(?:r|s)?|publiques|activa(?:r|s)?|actives|desactiva(?:r|s)?|desactives|pausa(?:r|s)?|pauses|reprograma(?:r|s)?|reprogrames|elimina(?:r|s)?|elimines|borra(?:r|s)?|borres|quita(?:r|s)?|quites|escribe(?:s)?|escribir|env[ií]a(?:r|s)?|env[ií]es|manda(?:r|s)?|mandes|guarda(?:r|s)?|guardes|restaura(?:r|s)?|restaures|archiva(?:r|s)?|archives|fija(?:r|s)?|silencia(?:r|s)?|bloquea(?:r|s)?|desbloquea(?:r|s)?|retira(?:r|s)?|mueve(?:s)?|mover|ejecuta(?:r|s)?|aplica(?:r|s)?|corrige(?:s)?|corregir|corrijas)\b/iu.test(intent);
  return /^(?:por\s+favor[,\s]+)?(?:crea|a[nñ]ade|agrega|actualiza|modifica|edita|cambia|publica|activa|desactiva|pausa|reprograma|elimina|borra|quita|escribe|envía|manda|guarda|restaura|archiva|fija|silencia|bloquea|desbloquea|retira|mueve)\b/iu.test(prompt.trim());
 }
 

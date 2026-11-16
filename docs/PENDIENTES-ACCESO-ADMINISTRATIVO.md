@@ -1,6 +1,6 @@
 # Acceso a invitados y tareas aplazadas
 
-Estado del código: v26.92.0, 16 de noviembre de 2026.
+Estado del código: v26.93.0, 16 de noviembre de 2026.
 
 ## Acceso implementado
 
@@ -11,8 +11,12 @@ El alcance, las limitaciones y el procedimiento están en [Credenciales de invit
 ## Pendientes
 
 1. Borrado completo de cuentas de invitado y todos sus datos tras treinta días. No se presenta la limpieza desde el navegador como ejecución garantizada con la web cerrada; se mantiene la restricción de no usar servidor ni Blaze.
-2. Pantalla de cuenta bloqueada con el logo de Nexus y un mensaje claro. Un reporte no debe confundirse con una sanción aplicada.
-3. Ampliar las modificaciones operativas de Nexus Assistant, con cambios concretos, auditoría y protección de identidad, permisos, credenciales y datos importantes. Esta entrega no amplía sus permisos.
-4. Lectura multimedia del Assistant: localizar archivos, consultar metadatos y distinguirlos del análisis real de imágenes, videos o documentos. Esta entrega no incorpora ese análisis.
+2. Completar la revisión en dispositivos físicos, copias/restauración e interfaces con las referencias pendientes.
+3. Ampliar los formatos de documentos y el tamaño de análisis del Assistant cuando pueda verificarse su funcionamiento en el navegador. Esta entrega admite hasta 8 MB acumulados por consulta.
+4. Refinamiento artístico de bordes del logo y legibilidad de tamaños pequeños; la transparencia y la unificación de los recursos ya se verificaron.
+
+## Completado en v26.93.0
+
+Pantalla de cuenta bloqueada, búsquedas paginadas, cambios auditados de mensajes y lectura multimedia real del Assistant. Se mantiene la protección de cuentas, permisos y credenciales. [Alcance y comprobaciones](CAPACIDADES-ASSISTANT-26.93.0.md).
 
 Los porcentajes de comprobaciones de una entrega describen únicamente sus casos terminados y verificados por tamaño de pantalla; no son un porcentaje de finalización de Nexus Chat ni de pruebas en dispositivos físicos.

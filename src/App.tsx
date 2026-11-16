@@ -1,3 +1,4 @@
+import BlockedAccount from './features/BlockedAccount';
 import {awaitGuestCreation} from './features/guestAccount';
 import {isGuestIdentity,needsEmailVerification} from './features/guestIdentity';
 import {editMessageContent,deleteMessageEverywhere} from './features/messageMutations';
@@ -398,7 +399,7 @@ export default function App() {
   useNotificationController(currentUser,visibleChats,visibleUsers,handleSelectChat,chatsLoaded&&personal.loaded,mutedChatIds);
   useEffect(()=>{const next=Math.min(...paged.messages.map(message=>message.expiresAt||Infinity).filter(time=>time>Date.now()));if(!Number.isFinite(next))return;const timer=setTimeout(()=>setExpiryRevision(value=>value+1),Math.min(2147483647,Math.max(1,next-Date.now()+10)));return()=>clearTimeout(timer);},[paged.messages,expiryRevision]);
 
-  if(accountRemoved)return <main className="account-removed" role="alert"><h1>Cuenta desactivada</h1><p>Tu cuenta se retiró tras recibir varios reportes.</p><button onClick={()=>signOut(auth)}>Cerrar sesión</button></main>;
+  if(accountRemoved)return <BlockedAccount theme={theme} onLogout={()=>signOut(auth)}/>;
   if (loading||currentUser&&!sessionError&&(!chatsLoaded||!usersLoaded||!personal.loaded)) return <StartupScreen phase={authUid?'conversations':'session'} progress={authUid?startupProgress:null}/>;
 
   if(needsEmailVerification(auth.currentUser)||auth.currentUser?.providerData.some(p=>p.providerId==='password')&&!isGuestIdentity(auth.currentUser)&&(sessionError.includes('Completa el registro')||sessionError.includes('ocupado')))return <EmailVerificationGate initialComplete={auth.currentUser?.emailVerified||false}/>;

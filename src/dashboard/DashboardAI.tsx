@@ -1,3 +1,4 @@
+import {createAssistantMediaReader,mediaDeclarations} from './assistantMedia';
 import {draftError,limitAnswer} from './assistantLimits';
 import {useEffect,useRef,useState} from 'react';
 import {Send,Sparkles,Square} from 'lucide-react';
@@ -52,8 +53,9 @@ export default function DashboardAI({db,rtdb,user,snapshot}:{db:Firestore;rtdb:D
    }
    const command=parseMessageEditCommand(prompt);
    if(command){complete(await editMessageByCommand(db,user,command,controller.signal,commit));return;}
-   const read=createDashboardReader(db,rtdb,user);
+   const read=createDashboardReader(db,rtdb,user),readMedia=createAssistantMediaReader(db,rtdb,user);
    const executeTool=async(name:string,args:Record<string,unknown>,signal:AbortSignal)=>{
+    if(name==='inspect_media')return readMedia(args,signal);
     if(name==='search_local_history')return searchAssistantHistory(turns,args);
     if(readDeclarations.some(declaration=>declaration.name===name))return read(name,args,signal);
     const result=await actions.prepare(name,args,signal);
@@ -67,7 +69,7 @@ export default function DashboardAI({db,rtdb,user,snapshot}:{db:Firestore;rtdb:D
    };
    const {askDashboardAI}=await import('./askDashboardAI');
    const context=JSON.stringify({version:'v'+version,fecha:new Date().toISOString(),administradorActual:user.uid,mapa:dataMap,resumen:snapshot??null,conversacion:assistantContextHistory(turns)});
-   const result=await askDashboardAI(prompt,context,controller.signal,{declarations:[...readDeclarations,...actionDeclarations,localHistoryDeclaration],execute:executeTool});
+   const result=await askDashboardAI(prompt,context,controller.signal,{declarations:[...readDeclarations,...mediaDeclarations,...actionDeclarations,localHistoryDeclaration],execute:executeTool});
    if(!controller.signal.aborted)complete(result.text+(executed.length?'\n\nAcciones realizadas:\n'+executed.join('\n'): '')+proposals(plans)+(result.truncated?'\n\nNo se pudo completar toda la respuesta. Conservamos lo recibido; puedes pedir que continúe.':''));
   }catch(failure){if(request.current===controller){if(plans.length)complete((executed.length?'Acciones completadas:\n\n'+executed.join('\n\n'):'Se prepararon los siguientes cambios. Aún no se han ejecutado.')+proposals(plans));setQuestion(prompt);setError(controller.signal.reason==='timeout'?'La consulta tardó demasiado. Puedes volver a intentarlo.':controller.signal.aborted?'Consulta cancelada.':failure instanceof Error?failure.message:'No se pudo completar la consulta.');}}
   finally{clearTimeout(timer);if(request.current===controller){request.current=null;setBusy(false);setCommitting(false);}}

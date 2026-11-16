@@ -1,3 +1,4 @@
+import {messageChangeInput,assertMessageChange} from './assistantMessageTools';
 import {cleanupLease} from './cleanupState';
 import {redactAssistantData} from './assistantData';
 import {doc,getDocFromServer,runTransaction,serverTimestamp,deleteField,type Firestore} from 'firebase/firestore';
@@ -9,8 +10,9 @@ import {actionPath,assertOperationalData,normalizeRecord,sameRecord,validateActi
 export type {AssistantAction} from './assistantActionCore';
 const string={type:'STRING'};
 export const actionDeclarations=[
+ {name:'prepare_message_change',description:'Edita o elimina un mensaje de texto concreto, conservando el autor y la fecha al editar, con auditoría y comprobación de concurrencia. Primero localiza el mensaje con search_messages. expectedContent debe coincidir con su texto actual. edit necesita text. delete elimina solo ese documento y actualiza la vista previa del chat. Respeta las órdenes de preparar o de solo lectura.',parameters:{type:'OBJECT',properties:{chatId:string,messageId:string,change:{type:'STRING',enum:['edit','delete']},expectedContent:string,text:string,execution:{type:'STRING',enum:['execute','prepare']}},required:['chatId','messageId','change','expectedContent']}},
  {name:'prepare_firestore_action',description:'Prepara la creación, actualización o eliminación de documentos operativos de Nexus. Excluye cuentas, perfiles, identidad y seguridad. Las órdenes directas pueden ejecutarse al preparar; una petición de preparación devuelve una propuesta pendiente. Comprueba executed en la respuesta. Para update usa campos con puntos y JSON; {$serverTimestamp:true} asigna fecha del servidor y {$delete:true} elimina un campo. No guarda conversaciones del asistente en Firebase.',parameters:{type:'OBJECT',properties:{execution:{type:'STRING',enum:['execute','prepare']},path:string,operation:{type:'STRING',enum:['create','update','delete']},dataJson:string},required:['path','operation']}},
- {name:'prepare_realtime_action',description:'Prepara creación, actualización o eliminación de datos operativos de Realtime Database, Las órdenes directas pueden ejecutarse; comprueba executed. dataJson es JSON; update modifica las claves indicadas. No modifica cuentas, perfiles, identidad, moderación ni seguridad.',parameters:{type:'OBJECT',properties:{path:string,operation:{type:'STRING',enum:['create','update','delete']},dataJson:string},required:['path','operation']}},
+ {name:'prepare_realtime_action',description:'Prepara creación, actualización o eliminación de datos operativos de Realtime Database, Las órdenes directas pueden ejecutarse; comprueba executed. dataJson es JSON; update modifica las claves indicadas. No modifica cuentas, perfiles, identidad, moderación ni seguridad.',parameters:{type:'OBJECT',properties:{execution:{type:'STRING',enum:['execute','prepare']},path:string,operation:{type:'STRING',enum:['create','update','delete']},dataJson:string},required:['path','operation']}},
  {name:'prepare_cleanup_schedule',description:'Prepara activar, pausar o reprogramar la limpieza mensual de Firebase. Cuando enabled=true usa una fecha futura nextDueAt en milisegundos. Conserva cuentas y perfiles; la ejecución periódica sigue necesitando el dashboard abierto.',parameters:{type:'OBJECT',properties:{execution:{type:'STRING',enum:['execute','prepare']},enabled:{type:'BOOLEAN'},nextDueAt:{type:'NUMBER'}},required:['enabled']}},
  {name:'prepare_manual_cleanup',description:'Prepara una limpieza de contenido conservando cuentas, perfiles y medios protegidos. Solo se ejecuta tras recibir LIMPIAR AHORA y el identificador de confirmación.',parameters:{type:'OBJECT',properties:{}}},
  {name:'navigate_dashboard',description:'Abre una pantalla del dashboard. No modifica datos.',parameters:{type:'OBJECT',properties:{page:{type:'STRING',enum:['resumen','reportes','avisos','mantenimiento','informes','modo-ia']}},required:['page']}},
@@ -38,6 +40,8 @@ export function createAssistantActions(db:Firestore,rtdb:Database,user:User,onPl
    const data={enabled,execution:'browser',nextDueAt,warningDays:3,status:'scheduled',leaseUntil:0,...(before?{manualCutoff:{$delete:true},runId:{$delete:true}}:{})};
    const plan:AssistantAction={id:crypto.randomUUID(),actor:user.uid,createdAt:Date.now(),kind:'schedule',path,operation:before?'update':'create',data,before:normalizeRecord(before)};onPlan(plan);return {prepared:true,id:plan.id,path,data,confirmation:'CONFIRMAR '+plan.id};
   }
+  const messageArgs=name==='prepare_message_change'?args:null;
+  if(messageArgs){args=messageChangeInput(messageArgs);name='prepare_firestore_action';}
   const kind=name==='prepare_firestore_action'?'firestore':name==='prepare_realtime_action'?'realtime':name==='prepare_manual_cleanup'?'cleanup':null;
   if(!kind)throw Error('Acción desconocida.');
   const operation=kind==='cleanup'?'cleanup':String(args.operation);
@@ -46,6 +50,7 @@ export function createAssistantActions(db:Firestore,rtdb:Database,user:User,onPl
   let data:Record<string,any>={};if(operation!=='delete'&&kind!=='cleanup')data=validateActionData(JSON.parse(String(args.dataJson||'{}')));
   assertOperationalData(data);
   const before=kind==='firestore'?(await getDocFromServer(doc(db,path))).data()??null:kind==='realtime'?(await get(ref(rtdb,path))).val():null;
+  if(messageArgs)assertMessageChange(before,messageArgs);
   if(kind==='firestore'&&/^chats\/[^/]+\/messages\/[^/]+$/.test(path)&&operation==='update'){
    if('content' in data){if(before?.type!=='text'||before?.sealed||before?.deletedAt||before?.expiresAt&&before.expiresAt<=Date.now()||typeof data.content!=='string'||!data.content.trim()||data.content.length>20000)throw Error('Ese mensaje no se puede editar como texto.');data.edited=true;}
    for(const field of ['id','chatId','senderId','timestamp','serverSentAt'])if(field in data&&!sameRecord(data[field],before?.[field]))throw Error('La edición debe conservar el autor, la fecha y los identificadores originales.');
@@ -79,10 +84,13 @@ export function createAssistantActions(db:Firestore,rtdb:Database,user:User,onPl
     const [snapshot,already,chatSnapshot]=await Promise.all([tx.get(target),tx.get(audit),chat?tx.get(chat):Promise.resolve(null)]);
     if(already.exists())return;
     const before=snapshot.data()??null;if(!sameRecord(before,plan.before))throw Error('Los datos cambiaron desde la propuesta. Solicita otra antes de confirmar.');
+    const textEdit=messagePath&&plan.operation==='update'&&typeof plan.data.content==='string';
+    const patch=textEdit?{...plan.data,adminEditedBy:user.uid,adminEditedAt:{$serverTimestamp:true},adminEditId:plan.id}:plan.data;
     let after:any=null;
     if(plan.operation==='delete')tx.delete(target);
     else if(plan.operation==='create'){after=materialize(plan.data);tx.set(target,after);}
-    else{after=materialize(applyActionPatch(before,plan.data));tx.update(target,materialize(plan.data));}
+    else{after=materialize(applyActionPatch(before,patch));tx.update(target,materialize(patch));}
+    if(textEdit)tx.set(doc(db,'dashboardEdits',plan.id),{actor:user.uid,chatId:messagePath![1],messageId:messagePath![2],senderId:before!.senderId,before:before!.content,after:plan.data.content,at:serverTimestamp()});
     const last=chatSnapshot?.data()?.lastMessage;
     if(chat&&last&&(last.id===messagePath![2]||last.senderId===before?.senderId&&last.timestamp===before?.timestamp&&last.content===before?.content)){if(plan.operation==='delete')tx.update(chat,{lastMessage:deleteField()});else if(plan.operation==='update'&&typeof plan.data.content==='string')tx.update(chat,{'lastMessage.content':plan.data.content,'lastMessage.edited':true});}
     tx.set(audit,{actor:user.uid,target,operation:plan.operation,before,after,at:serverTimestamp()});

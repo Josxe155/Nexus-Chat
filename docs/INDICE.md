@@ -7,6 +7,7 @@ El [README principal](../README.md) describe las funciones y el modelo de seguri
 | Documento | Contenido |
 | --- | --- |
 | [Acceso administrativo y tareas aplazadas](PENDIENTES-ACCESO-ADMINISTRATIVO.md) | Acceso implementado, borrado a treinta días pendiente y tareas de moderación y Assistant. |
+| [Bloqueo y capacidades del Assistant v26.93.0](CAPACIDADES-ASSISTANT-26.93.0.md) | Pantalla de sanción, mensajes auditados, multimedia real e iconos transparentes. |
 | [Credenciales de invitados v26.92.0](INVITADOS-CREDENCIALES.md) | Recuperación por correo y contraseña, reglas privadas y límites reales. |
 | [Cámara trasera al grabar v26.91.1](CAMARA-TRASERA-VIDEOS.md) | Cambio frontal/trasera, continuidad del video, permisos y comprobaciones. |
 | [Pegar imágenes en celular v26.90.0](PORTAPAPELES-IMAGENES.md) | Portapapeles, revisión antes de enviar, permisos y comprobaciones por dispositivo. |

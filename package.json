@@ -36,7 +36,9 @@
     "test:image-clipboard": "node --import tsx scripts/image-clipboard.test.ts",
     "test:recording-camera": "node --import tsx scripts/recording-camera.test.ts",
     "test:guest-identity": "node --import tsx scripts/guest-identity.test.ts",
-    "test:guest:emulators": "node scripts/guest-account-emulator.test.cjs"
+    "test:guest:emulators": "node scripts/guest-account-emulator.test.cjs",
+    "test:assistant-media": "node --import tsx scripts/assistant-media.test.ts",
+    "test:assistant-capabilities:emulators": "node scripts/assistant-capabilities-emulator.test.cjs"
   },
   "dependencies": {
     "firebase": "^12.13.0",

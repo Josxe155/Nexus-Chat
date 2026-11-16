@@ -1,3 +1,5 @@
+> Actualización vigente: [v26.93.0](CAPACIDADES-ASSISTANT-26.93.0.md) añade búsqueda específica de mensajes y archivos y análisis real del contenido multimedia. El catálogo deja de ser la única fuente del análisis, con las condiciones y límites indicados en esa guía. Las protecciones de identidad y escritura siguen vigentes.
+
 # Nexus Assistant: gestión operativa de datos · v26.79.5
 
 El propietario acotó el alcance a las operaciones de datos de Nexus en Firestore y Realtime Database. Queda descartada la preparación anterior para administrar cuentas de Authentication, modificar código o desplegar la web desde la IA. No requiere crear un trabajador de GitHub Actions, una cuenta de servicio, un pool OIDC ni nuevos permisos de IAM. Esa preparación no llegó a habilitarse ni a publicarse.

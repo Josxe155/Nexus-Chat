@@ -1,3 +1,4 @@
+import BlockedAccount from '../features/BlockedAccount';
 import {createGuestAccount,takeGuestCreationError} from '../features/guestAccount';
 import {isGuestIdentity,needsEmailVerification} from '../features/guestIdentity';
 import PermissionReview from '../features/PermissionReview';
@@ -11,7 +12,7 @@ import {migrateOwnProfile} from '../features/privacy';
 import {avatar,DEFAULT_AVATAR} from '../features/avatar';
 import React, { useState } from 'react';
 import { auth, db } from '../firebase';
-import { signInWithPopup, GoogleAuthProvider, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendEmailVerification } from 'firebase/auth';
+import { signInWithPopup, GoogleAuthProvider, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendEmailVerification,signOut } from 'firebase/auth';
 import { doc, setDoc, getDoc,writeBatch } from 'firebase/firestore';
 import { ArrowRight, ArrowUpRight, MessageCircle, Moon, Sun, Sparkles, Paperclip, CheckCheck, Smile, Users, Image, LoaderCircle } from 'lucide-react';
 
@@ -26,6 +27,7 @@ export default function AuthScreen({ onAuthSuccess, theme, onToggleTheme }: Auth
   const [guestName, setGuestName] = useState('');
   const [showGuestForm, setShowGuestForm] = useState(false);
   const [error, setError] = useState(takeGuestCreationError);
+  const [blocked,setBlocked]=useState(false);
   const [emailMode,setEmailMode]=useState(false);
   const [usernameInput,setUsernameInput]=useState(''),[country,setCountry]=useState('EC'),[phone,setPhone]=useState(''),[confirmPassword,setConfirmPassword]=useState('');
   const [email,setEmail]=useState('');
@@ -80,7 +82,7 @@ export default function AuthScreen({ onAuthSuccess, theme, onToggleTheme }: Auth
       await registerUserInDB(result.user);
     } catch (err: any) {
       console.error(err);
-      setError(authErrorMessage(err));
+      if(err?.code==='auth/user-disabled')setBlocked(true);else setError(authErrorMessage(err));
     } finally {
       setLoading(false);
     }
@@ -107,7 +109,8 @@ export default function AuthScreen({ onAuthSuccess, theme, onToggleTheme }: Auth
     if(signUp){if(password!==confirmPassword)throw Error('Las contraseñas no coinciden.');if(password.length<12||!/[a-zA-Z]/.test(password)||!/[0-9]/.test(password))throw Object.assign(Error(),{code:'auth/weak-password'});if(!/^[a-z0-9_.]{3,32}$/.test(usernameInput.trim().toLowerCase()))throw Error('El usuario debe tener entre 3 y 32 letras, números, puntos o guiones bajos.');registration={username:usernameInput.trim().toLowerCase(),phone:''};}
     if(signUp)reportRegistrationStatus('Estamos preparando tu cuenta y el correo de verificación.');const result=signUp?await createUserWithEmailAndPassword(auth,email.trim(),password):await signInWithEmailAndPassword(auth,email.trim(),password);
     if(signUp){await admitAccount(result.user,registration);auth.languageCode='es';await sendEmailVerification(result.user);setNotice('Te enviamos un correo para verificar tu cuenta.');reportRegistrationStatus('Te enviamos un correo para verificar tu cuenta.');}else await registerUserInDB(result.user);
-  }catch(e:any){const message=e?.code?authErrorMessage(e):e.message||'No se pudo continuar.';setError(message);if(signUp&&auth.currentUser&&needsEmailVerification(auth.currentUser))reportRegistrationStatus(message);}finally{setLoading(false);}};
+  }catch(e:any){if(e?.code==='auth/user-disabled')setBlocked(true);const message=e?.code?authErrorMessage(e):e.message||'No se pudo continuar.';setError(message);if(signUp&&auth.currentUser&&needsEmailVerification(auth.currentUser))reportRegistrationStatus(message);}finally{setLoading(false);}};
+  if(blocked)return <BlockedAccount theme={theme} onLogout={async()=>{await signOut(auth);setBlocked(false);setError('');setPassword('');}}/>;
   return (
     <div className="auth-shell" data-theme={theme}><PermissionReview/>
       <header className="auth-header">

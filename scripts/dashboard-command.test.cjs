@@ -8,7 +8,7 @@ const fs=require('node:fs'),path=require('node:path'),assert=require('node:asser
  fs.writeFileSync(session,"import {doc,getDocFromServer} from 'firebase/firestore';export async function verifyDashboardAccess(user,db){return (await getDocFromServer(doc(db,'dashboardAdmins',user.uid))).data()?.enabled===true}");
  await build({entryPoints:[path.join(__dirname,'../src/dashboard/editMessage.ts')],outfile:output,bundle:true,platform:'node',format:'cjs',external:['firebase/firestore','firebase/auth'],plugins:[{name:'test-session',setup(b){b.onResolve({filter:/^\.\/session$/},()=>({path:session}));}}]});
  const {editMessageByCommand}=require(output);
- const env=await initializeTestEnvironment({projectId:'demo-nexus',firestore:{host:'127.0.0.1',port:8085,rules:fs.readFileSync(path.join(__dirname,'../firestore.rules'),'utf8')}});
+ const env=await initializeTestEnvironment({projectId:'demo-nexus',firestore:{host:'127.0.0.1',port:Number(process.env.FIRESTORE_EMULATOR_PORT||8085),rules:fs.readFileSync(path.join(__dirname,'../firestore.rules'),'utf8')}});
  try{
   await env.clearFirestore();
   await env.withSecurityRulesDisabled(async c=>{
