@@ -1,4 +1,4 @@
-# Estado actual de Nexus Chat — v26.94.1
+# Estado actual de Nexus Chat — v26.94.2
 
 ## Implementado
 
@@ -9,6 +9,10 @@
 - Pantalla de cuenta bloqueada, logo oficial, favicon e iconos transparentes.
 - Lectura neuronal española con KokoroJS; necesita descargar y ejecutar el modelo en el navegador.
 - Sincronización del código con GitHub y publicación de entregas verificadas en Firebase Hosting.
+
+## Corrección v26.94.2
+
+La descarga del modelo de voz conserva bloques locales confirmados y solicita los bytes restantes al reintentar. Reutiliza los modelos completos ya guardados y coordina las pestañas. La primera transferencia sigue siendo de unos 92 MB; la preparación y memoria del celular no desaparecen. [Funcionamiento y límites](DESCARGA-VOZ-REANUDABLE.md).
 
 ## Corrección v26.94.1
 

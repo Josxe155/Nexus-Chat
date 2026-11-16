@@ -14,7 +14,7 @@ export default function ReportVoice({report,disabled}:{report:RefObject<HTMLElem
   if(state!=='idle'){release();return;}
   const content=report.current?.innerText.split(/\n+/).map(line=>line.trim()).filter(Boolean).map(line=>/[.!?]$/.test(line)?line:line+'.').join(' ');
   if(!content)return;
-  setError('');setProgress(undefined);active.current=playSpanish(content,setState,()=>setError('No se pudo preparar la voz a tiempo o reproducir el informe. Revisa la conexión e inténtalo de nuevo.'),setProgress);
+  setError('');setProgress(undefined);active.current=playSpanish(content,setState,()=>setError('No se pudo preparar la voz a tiempo o reproducir el informe. La descarga guardada puede continuar al reintentar.'),setProgress);
  }
  return <>
   <button type="button" className="secondary icon-action" title={state==='preparing'?'Preparando la voz. La primera lectura necesita descargar el modelo. Pulsa para cancelar.':undefined} disabled={disabled} onClick={listen}>

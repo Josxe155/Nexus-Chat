@@ -1,3 +1,4 @@
+import {prepareKokoroDownload} from '../features/kokoroDownload';
 import wasmURL from '@nexus-kokoro-wasm?url';
 import {KokoroTTS,env as kokoroEnv,type GenerateOptions} from 'kokoro-js';
 import {RawAudio,env} from '@huggingface/transformers';
@@ -8,6 +9,7 @@ kokoroEnv.wasmPaths={mjs:new URL('/tts/v1/ort-wasm-simd-threaded.jsep.mjs',self.
 if(env.backends.onnx.wasm)env.backends.onnx.wasm.numThreads=1;
 let ready:Promise<KokoroTTS>|undefined;
 function load(){return ready??=(async()=>{
+ await prepareKokoroDownload(percent=>scope.postMessage({type:'progress',percent}));
  await initialize({wasm:'/tts/v1/espeak/wasm/espeak-ng.wasm',manifest:'/tts/v1/espeak/data/manifest.json',data:'/tts/v1/espeak/data/data.data'});
  await setVoice(KOKORO_LANGUAGE);
  return KokoroTTS.from_pretrained(KOKORO_MODEL,{dtype:'q8',device:'wasm',progress_callback:(info)=>{if('progress' in info&&'file' in info&&String(info.file).endsWith('.onnx'))scope.postMessage({type:'progress',percent:Math.max(0,Math.min(100,Math.floor(Number(info.progress))))});}});

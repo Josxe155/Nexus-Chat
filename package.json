@@ -40,7 +40,8 @@
     "test:assistant-media": "node --import tsx scripts/assistant-media.test.ts",
     "test:assistant-capabilities:emulators": "node scripts/assistant-capabilities-emulator.test.cjs",
     "test:assistant-confirmation": "node --import tsx scripts/assistant-confirmation.test.ts",
-    "test:kokoro-speech": "node --import tsx scripts/kokoro-speech.test.ts"
+    "test:kokoro-speech": "node --import tsx scripts/kokoro-speech.test.ts",
+    "test:voice-download": "node --import tsx scripts/voice-download.test.ts"
   },
   "dependencies": {
     "@huggingface/transformers": "3.8.1",

@@ -1,4 +1,4 @@
-> Corrección vigente v26.94.1: [estado actual y preparación limitada](ESTADO-ACTUAL-NEXUS.md). El primer audio tiene un límite absoluto de dos minutos aunque continúen los avisos de progreso.
+> Corrección vigente v26.94.2: [descarga reanudable](DESCARGA-VOZ-REANUDABLE.md). El primer audio conserva un límite absoluto de dos minutos aunque continúen los avisos de progreso.
 
 # Texto a voz con KokoroJS — v26.94.0
 
