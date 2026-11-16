@@ -2,7 +2,8 @@ rules_version = '2';
 service cloud.firestore {
  match /databases/{database}/documents {
   // Permanent production rules: no global date limit, unmatched paths denied.
-  function signedIn(){return request.auth != null && (request.auth.token.get('firebase',{}).get('sign_in_provider','')!='password' || request.auth.token.get('email_verified',false)==true) && !exists(/databases/$(database)/documents/deletedAccounts/$(request.auth.uid));}
+  function managedGuestEmail(uid,email){return email=='guest.'+uid.lower()+'@guests.nexus-chat.invalid';}
+  function signedIn(){return request.auth != null && (request.auth.token.get('firebase',{}).get('sign_in_provider','')!='password' || request.auth.token.get('email_verified',false)==true || managedGuestEmail(request.auth.uid,request.auth.token.get('email',''))) && !exists(/databases/$(database)/documents/deletedAccounts/$(request.auth.uid));}
   function ownerIdentity(){
    let owner=get(/databases/$(database)/documents/dashboardSecurity/owner).data;
    return request.auth!=null && owner.enabled==true && request.auth.uid==owner.uid
@@ -10,7 +11,7 @@ service cloud.firestore {
     && request.auth.token.get('email','').lower()==owner.email
     && request.auth.token.get('firebase',{}).get('sign_in_provider','') in ['google.com','password'];
   }
-  function operator(){return signedIn() && ownerIdentity() && exists(/databases/$(database)/documents/dashboardAdmins/$(request.auth.uid)) && get(/databases/$(database)/documents/dashboardAdmins/$(request.auth.uid)).data.enabled==true;}
+  function operator(){return request.auth!=null && request.auth.token.get('email_verified',false)==true && signedIn() && ownerIdentity() && exists(/databases/$(database)/documents/dashboardAdmins/$(request.auth.uid)) && get(/databases/$(database)/documents/dashboardAdmins/$(request.auth.uid)).data.enabled==true;}
   match /dashboardSecurity/{id}{allow get: if id=='owner' && ownerIdentity();allow list,write: if false;}
   function cutoffMillis(value){return value is timestamp ? value.toMillis() : value;}
   function cleanupDue(time){
@@ -51,6 +52,22 @@ service cloud.firestore {
    allow update,delete: if false;
   }
   match /dashboardVisits/{uid}{allow read: if operator() || (signedIn() && request.auth.uid==uid);allow create,update: if signedIn() && request.auth.uid==uid && request.resource.data.keys().hasOnly(['uid','firstVisitAt','lastVisitAt']) && request.resource.data.uid==uid && request.resource.data.lastVisitAt==request.time && (resource==null ? request.resource.data.firstVisitAt==request.time : request.resource.data.firstVisitAt==resource.data.firstVisitAt);allow delete: if false;}
+  function validGuestCredentials(d,uid){
+   return d.keys().hasOnly(['uid','email','password','version','createdAt'])
+    && d.keys().hasAll(['uid','email','password','version','createdAt'])
+    && d.uid is string && d.uid==uid && d.version is int && d.version==1
+    && d.createdAt is timestamp && d.createdAt==request.time
+    && d.email is string && managedGuestEmail(uid,d.email)
+    && d.password is string && d.password.matches('Nc9![A-Za-z0-9_-]{43}');
+  }
+  match /guestAccountCredentials/{uid}{
+   allow read,update,delete: if false;
+   allow create: if request.auth!=null && request.auth.uid==uid
+    && request.auth.token.get('firebase',{}).get('sign_in_provider','')=='password'
+    && request.auth.token.get('email','')==request.resource.data.email
+    && !exists(/databases/$(database)/documents/deletedAccounts/$(uid))
+    && validGuestCredentials(request.resource.data,uid);
+  }
   match /dashboardAdmins/{uid}{allow get: if signedIn() && request.auth.uid==uid;allow list,write: if false;}
   match /contactCodes/{token} {
    allow get: if signedIn() && resource.data.uid is string
@@ -120,7 +137,7 @@ service cloud.firestore {
    return before.type=='poll' && before.get('deletedAt',0)==0 && before.get('expiresAt',request.time.toMillis()+1)>request.time.toMillis() && a.get('anonymousVersion',0)==1 && !('closedAt' in a) && a.get('closesAt',request.time.toMillis()+1)>request.time.toMillis() && after.diff(before).affectedKeys().hasOnly(['poll']) && b.diff(a).affectedKeys().hasOnly(['counts','voterCount']) && next is list && next.size()<=12 && next.toSet().size()==next.size() && next.hasOnly(a.optionIds) && (a.multiple || next.size()<=1) && b.counts is map && b.counts.keys().hasOnly(a.optionIds) && b.counts.keys().hasAll(a.optionIds) && b.voterCount is int && b.voterCount>=0 && b.voterCount==a.voterCount+(next.size()>0?1:0)-(old.size()>0?1:0)
     && removed.size()<=1 && added.size()<=1 && (!a.multiple || removed.size()+added.size()<=1) && b.counts.diff(a.counts).affectedKeys().hasOnly(removed.concat(added)) && (removed.size()==0 || b.counts[minus] is int && b.counts[minus]>=0 && b.counts[minus]==a.counts[minus]-1) && (added.size()==0 || b.counts[plus] is int && b.counts[plus]==a.counts[plus]+1);
   }
-  function validPoll(p){let options=p.options;return pollDeadline(p) && validAnonymousPoll(p) && p is map && p.question is string && p.question.size()>0 && p.question.size()<=255 && p.multiple is bool && options is list && options.size()>=2 && options.size()<=12 && p.optionIds==pollIds(options.size()) && p.votes is map && p.votes.size()==0 && (options.size()<=0 || (options[0].id=='0' && options[0].text.matches('(?s).{1,100}'))) && (options.size()<=1 || (options[1].id=='1' && options[1].text.matches('(?s).{1,100}'))) && (options.size()<=2 || (options[2].id=='2' && options[2].text.matches('(?s).{1,100}'))) && (options.size()<=3 || (options[3].id=='3' && options[3].text.matches('(?s).{1,100}'))) && (options.size()<=4 || (options[4].id=='4' && options[4].text.matches('(?s).{1,100}'))) && (options.size()<=5 || (options[5].id=='5' && options[5].text.matches('(?s).{1,100}'))) && (options.size()<=6 || (options[6].id=='6' && options[6].text.matches('(?s).{1,100}'))) && (options.size()<=7 || (options[7].id=='7' && options[7].text.matches('(?s).{1,100}'))) && (options.size()<=8 || (options[8].id=='8' && options[8].text.matches('(?s).{1,100}'))) && (options.size()<=9 || (options[9].id=='9' && options[9].text.matches('(?s).{1,100}'))) && (options.size()<=10 || (options[10].id=='10' && options[10].text.matches('(?s).{1,100}'))) && (options.size()<=11 || (options[11].id=='11' && options[11].text.matches('(?s).{1,100}')));}
+  function validPoll(p){let options=p.options;let count=options.size();return pollDeadline(p) && validAnonymousPoll(p) && p is map && p.question is string && p.question.size()>0 && p.question.size()<=255 && p.multiple is bool && options is list && count>=2 && count<=12 && p.optionIds==pollIds(count) && p.votes is map && p.votes.size()==0 && (options[0].id=='0' && options[0].text.matches('(?s).{1,100}')) && (options[1].id=='1' && options[1].text.matches('(?s).{1,100}')) && (count<=2 || (options[2].id=='2' && options[2].text.matches('(?s).{1,100}'))) && (count<=3 || (options[3].id=='3' && options[3].text.matches('(?s).{1,100}'))) && (count<=4 || (options[4].id=='4' && options[4].text.matches('(?s).{1,100}'))) && (count<=5 || (options[5].id=='5' && options[5].text.matches('(?s).{1,100}'))) && (count<=6 || (options[6].id=='6' && options[6].text.matches('(?s).{1,100}'))) && (count<=7 || (options[7].id=='7' && options[7].text.matches('(?s).{1,100}'))) && (count<=8 || (options[8].id=='8' && options[8].text.matches('(?s).{1,100}'))) && (count<=9 || (options[9].id=='9' && options[9].text.matches('(?s).{1,100}'))) && (count<=10 || (options[10].id=='10' && options[10].text.matches('(?s).{1,100}'))) && (count<=11 || (options[11].id=='11' && options[11].text.matches('(?s).{1,100}')));}
   function ownReceipt(field){let old=resource.data.get(field,{});let next=request.resource.data.get(field,{});let key=request.auth.uid;return next is map && next.diff(old).affectedKeys().hasOnly([key]) && next.get(key,0) is number && next.get(key,0)>=old.get(key,0) && next.get(key,0)<=request.time.toMillis()+60000 && (!next.diff(old).affectedKeys().hasAny([key]) || next.get(key,0)>0);}
   function receiptUpdate(chatId){return resource.data.senderId!=request.auth.uid && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['receivedBy','readBy']) && ownReceipt('receivedBy') && ownReceipt('readBy') && (!request.resource.data.get('readBy',{}).diff(resource.data.get('readBy',{})).affectedKeys().hasAny([request.auth.uid]) || receiptsAllowed(chatId,resource.data.senderId));}
   function validReply(p){return p is map && p.id is string && p.id.size()<=128 && p.senderName is string && p.senderName.size()<=128 && p.content is string && p.content.size()<=20000 && p.type is string;}
@@ -300,11 +317,12 @@ service cloud.firestore {
     allow read: if operator();allow delete: if cleanupDue(resource.data.timestamp) && resource.data.get('keptBy','')=='';
     allow get: if member(chatId) && !exists(/databases/$(database)/documents/chats/$(chatId)/messages/$(mid));
     allow read: if member(chatId) && resource.data.timestamp >= room(chatId).get('historyStartsAt',{}).get(request.auth.uid,0);
-    allow create: if member(chatId) && maySend(room(chatId)) && notBlocked(room(chatId)) && request.resource.data.id==mid && request.resource.data.chatId==chatId && request.resource.data.senderId==request.auth.uid
-     && request.resource.data.content is string && request.resource.data.content.size()<=20000 && request.resource.data.timestamp is number && request.resource.data.timestamp>=request.time.toMillis()-60000 && request.resource.data.timestamp<=request.time.toMillis()+60000
-     && request.resource.data.serverSentAt==request.time && (validMessage(request.resource.data) && !('sealed' in request.resource.data) && !request.resource.data.keys().hasAny(['deletedAt','deletedBy','adminEditedBy','adminEditedAt','adminEditId','keptBy','keptAt','originalExpiresAt','keepRequestedBy','keepVetoed']))
-     && (!('viewOnce' in request.resource.data) || validNewSingleMessage(request.resource.data))
-     && request.resource.data.type in ['text','image','video','video-note','audio','document','sticker','poll','contact'] && request.resource.data.status in ['sent','delivered','read'];
+    function validNewMessage(){let d=request.resource.data;let chat=room(chatId);return member(chatId) && maySend(chat) && notBlocked(chat) && d.id==mid && d.chatId==chatId && d.senderId==request.auth.uid
+     && d.content is string && d.content.size()<=20000 && d.timestamp is number && d.timestamp>=request.time.toMillis()-60000 && d.timestamp<=request.time.toMillis()+60000
+     && d.serverSentAt==request.time && (validMessage(d) && !('sealed' in d) && !d.keys().hasAny(['deletedAt','deletedBy','adminEditedBy','adminEditedAt','adminEditId','keptBy','keptAt','originalExpiresAt','keepRequestedBy','keepVetoed']))
+     && (!('viewOnce' in d) || validNewSingleMessage(d))
+     && d.type in ['text','image','video','video-note','audio','document','sticker','poll','contact'] && d.status in ['sent','delivered','read'];}
+    allow create: if validNewMessage();
     allow update: if member(chatId) && ((request.resource.data.diff(resource.data).affectedKeys().hasAny(['content','deletedAt']) && messageContentChange(chatId)) || (resource.data.get('poll',{}).get('anonymousVersion',0)==1 && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['poll']) && anonymousVoteChange(chatId,mid,resource.data,request.resource.data)) || (request.resource.data.diff(resource.data).affectedKeys().hasAny(['keptBy','keptAt','originalExpiresAt','keepRequestedBy','keepVetoed']) ? keepMessageUpdate(chatId) : (messagePinUpdate(chatId,mid) ||
      (room(chatId).get('kind','direct')!='channel' && resource.data.senderId==request.auth.uid && resource.data.get('deletedAt',0)==0 && !('sealed' in resource.data) && resource.data.type=='poll' && request.time.toMillis()<=(('serverSentAt' in resource.data)?resource.data.serverSentAt.toMillis():resource.data.timestamp)+900000 && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['content','poll','edited']) && request.resource.data.edited==true && request.resource.data.poll.diff(resource.data.poll).affectedKeys().hasOnly(['question']) && request.resource.data.poll.question is string && request.resource.data.poll.question.size()>0 && request.resource.data.poll.question.size()<=255 && request.resource.data.content==request.resource.data.poll.question)
           || receiptUpdate(chatId)
@@ -436,8 +454,8 @@ service cloud.firestore {
      && (resource==null ? action.before==null : action.before==resource.data)
      && (request.resource==null ? action.after==null : action.after==request.resource.data);
    }
-   allow read: if operator();
-   allow write: if operator() && !(area in ['dashboardAdmins','dashboardActions','dashboardEdits','assistantOperations','dashboardSecurity','users','usernames','nexusNumbers','nexusNumberReservations','contactCodes','deletedAccounts','moderatedUsers','moderatedChats','assistantAdminJobs','assistantAdminAudit',"mediaFiles","clientMedia","calls","callRooms","signals","incoming","presence","presenceSessions","presenceLastSeen","presencePrivacy"])
+   allow read: if operator() && area!='guestAccountCredentials';
+   allow write: if operator() && !(area in ['guestAccountCredentials','dashboardAdmins','dashboardActions','dashboardEdits','assistantOperations','dashboardSecurity','users','usernames','nexusNumbers','nexusNumberReservations','contactCodes','deletedAccounts','moderatedUsers','moderatedChats','assistantAdminJobs','assistantAdminAudit',"mediaFiles","clientMedia","calls","callRooms","signals","incoming","presence","presenceSessions","presenceLastSeen","presencePrivacy"])
     && request.path!=/databases/$(database)/documents/publicConfig/cleanup
     && request.path!=/databases/$(database)/documents/publicConfig/assistantAdmin && assistantWrite();
   }

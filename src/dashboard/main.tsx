@@ -1,3 +1,4 @@
+import {visibleAccountEmail} from '../features/guestIdentity';
 import useServerClock from '../features/useServerClock';
 import {cleanupLease,dashboardErrorMessage} from './cleanupState';
 import {clearAssistantHistories} from './assistantHistory';
@@ -55,7 +56,7 @@ function Access({user,error,retry,onLogout}:{user:User|null;error?:string;retry:
  const action=useAction();
  return <section className="access panel-card"><span className="eyebrow">ACCESO PRIVADO</span><h1>Accede al dashboard</h1>
   <p>Usa una cuenta administradora autorizada de Nexus Chat.</p>
-  {user&&<p>Sesión actual: {user.email||'Cuenta de Nexus'}.</p>}
+  {user&&<p>Sesión actual: {visibleAccountEmail(user)||'Cuenta de Nexus'}.</p>}
   {error&&<p className="feedback error" role="alert">{error}</p>}
   {user&&<button className="secondary" disabled={action.busy} onClick={retry}>Volver a comprobar acceso</button>}
   <button disabled={action.busy} onClick={()=>void action.run(async()=>{await loginGoogle();retry();})}>Continuar con Google</button>
@@ -132,7 +133,7 @@ function Workspace({user,db,rtdb,onLogout}:{user:User;db:Firestore;rtdb:Database
    <button className="secondary icon-action" disabled={action.busy} onClick={()=>void action.run(onLogout)}><LogOut size={17}/> Salir del panel</button>
   </div>
   <div className="dashboard-highlights">
-   <section><small><ShieldCheck size={15}/> Cuenta autorizada</small><strong>{user.email||'Cuenta de Nexus'}</strong></section>
+   <section><small><ShieldCheck size={15}/> Cuenta autorizada</small><strong>{visibleAccountEmail(user)||'Cuenta de Nexus'}</strong></section>
    <section><small><CalendarClock size={15}/> Limpieza mensual</small><strong>{!ready?'Sin comprobar':plan.enabled?'Plan activo':'Sin activar'}</strong>
     {ready&&plan.enabled&&hasDate&&<small>{dateLabel(plan.nextDueAt!)} · Ecuador</small>}</section>
    <section><small><LayoutDashboard size={15}/> Versión de Nexus</small><strong><span className="version-prefix">v</span>{version}</strong></section>

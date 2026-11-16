@@ -34,7 +34,9 @@
     "test:message-policy:emulators": "node scripts/message-policy-emulator.test.cjs",
     "test:anonymous-polls:emulators": "node scripts/anonymous-polls-emulator.test.cjs",
     "test:image-clipboard": "node --import tsx scripts/image-clipboard.test.ts",
-    "test:recording-camera": "node --import tsx scripts/recording-camera.test.ts"
+    "test:recording-camera": "node --import tsx scripts/recording-camera.test.ts",
+    "test:guest-identity": "node --import tsx scripts/guest-identity.test.ts",
+    "test:guest:emulators": "node scripts/guest-account-emulator.test.cjs"
   },
   "dependencies": {
     "firebase": "^12.13.0",

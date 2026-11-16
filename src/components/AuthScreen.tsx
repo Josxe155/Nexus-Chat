@@ -1,3 +1,5 @@
+import {createGuestAccount,takeGuestCreationError} from '../features/guestAccount';
+import {isGuestIdentity,needsEmailVerification} from '../features/guestIdentity';
 import PermissionReview from '../features/PermissionReview';
 import PasswordRecovery from './PasswordRecovery';
 import {useMobileBack} from '../features/useMobileBack';
@@ -9,7 +11,7 @@ import {migrateOwnProfile} from '../features/privacy';
 import {avatar,DEFAULT_AVATAR} from '../features/avatar';
 import React, { useState } from 'react';
 import { auth, db } from '../firebase';
-import { signInWithPopup, GoogleAuthProvider, signInAnonymously, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendEmailVerification } from 'firebase/auth';
+import { signInWithPopup, GoogleAuthProvider, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendEmailVerification } from 'firebase/auth';
 import { doc, setDoc, getDoc,writeBatch } from 'firebase/firestore';
 import { ArrowRight, ArrowUpRight, MessageCircle, Moon, Sun, Sparkles, Paperclip, CheckCheck, Smile, Users, Image, LoaderCircle } from 'lucide-react';
 
@@ -23,7 +25,7 @@ export default function AuthScreen({ onAuthSuccess, theme, onToggleTheme }: Auth
   const [loading, setLoading] = useState(false);
   const [guestName, setGuestName] = useState('');
   const [showGuestForm, setShowGuestForm] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState(takeGuestCreationError);
   const [emailMode,setEmailMode]=useState(false);
   const [usernameInput,setUsernameInput]=useState(''),[country,setCountry]=useState('EC'),[phone,setPhone]=useState(''),[confirmPassword,setConfirmPassword]=useState('');
   const [email,setEmail]=useState('');
@@ -49,7 +51,7 @@ export default function AuthScreen({ onAuthSuccess, theme, onToggleTheme }: Auth
         uid: firebaseUser.uid,
         nombre: finalName,
         username: registration?.username||username,
-        usernameProvisional: !registration&&!firebaseUser.isAnonymous,
+        usernameProvisional: !registration&&!isGuestIdentity(firebaseUser),
         foto: '',
         bio: '',
         estado: 'Disponible',
@@ -58,9 +60,9 @@ export default function AuthScreen({ onAuthSuccess, theme, onToggleTheme }: Auth
         createdAt: Date.now()
       };
 
-      if(firebaseUser.isAnonymous&&customName){userData.nombre=customName;await setDoc(doc(db,'users',firebaseUser.uid,'private','profile'),{nombre:customName},{merge:true});}
-      if(!userDoc.exists())Object.assign(userData,{isGuest:firebaseUser.isAnonymous,lastActiveAt:Date.now()});
-      if(userDoc.exists()){if(firebaseUser.isAnonymous&&customName)await setDoc(userRef,{nombre:customName},{merge:true});}else{const batch=writeBatch(db);batch.set(userRef,userData);batch.set(doc(db,'users',firebaseUser.uid,'private','profile'),{nombre:finalName,username,foto:finalFoto,bio:'¡Hola! Estoy usando Nexus Chat.'});batch.set(doc(db,'usernames',username),{uid:firebaseUser.uid});try{await batch.commit();}catch(error:any){if(error.code!=='permission-denied')throw error;let legacy=false;try{await getDoc(doc(db,'usernames',username));}catch(check:any){legacy=check.code==='permission-denied';}if(!legacy)throw error;const compatible=writeBatch(db);compatible.set(userRef,userData);compatible.set(doc(db,'users',firebaseUser.uid,'private','profile'),{nombre:finalName,username,foto:finalFoto,bio:'¡Hola! Estoy usando Nexus Chat.'});await compatible.commit();}}
+      if(isGuestIdentity(firebaseUser)&&customName){userData.nombre=customName;await setDoc(doc(db,'users',firebaseUser.uid,'private','profile'),{nombre:customName},{merge:true});}
+      if(!userDoc.exists())Object.assign(userData,{isGuest:isGuestIdentity(firebaseUser),lastActiveAt:Date.now()});
+      if(userDoc.exists()){if(isGuestIdentity(firebaseUser)&&customName)await setDoc(userRef,{nombre:customName},{merge:true});}else{const batch=writeBatch(db);batch.set(userRef,userData);batch.set(doc(db,'users',firebaseUser.uid,'private','profile'),{nombre:finalName,username,foto:finalFoto,bio:'¡Hola! Estoy usando Nexus Chat.'});batch.set(doc(db,'usernames',username),{uid:firebaseUser.uid});try{await batch.commit();}catch(error:any){if(error.code!=='permission-denied')throw error;let legacy=false;try{await getDoc(doc(db,'usernames',username));}catch(check:any){legacy=check.code==='permission-denied';}if(!legacy)throw error;const compatible=writeBatch(db);compatible.set(userRef,userData);compatible.set(doc(db,'users',firebaseUser.uid,'private','profile'),{nombre:finalName,username,foto:finalFoto,bio:'¡Hola! Estoy usando Nexus Chat.'});await compatible.commit();}}
       const privateProfile=await getDoc(doc(db,'users',firebaseUser.uid,'private','profile'));
       const profile={...userData,...(privateProfile.exists()?privateProfile.data():{}),username:userData.username,usernameChangedAt:userDoc.exists()?userDoc.data().usernameChangedAt:undefined} as any;try{onAuthSuccess(await migrateOwnProfile(profile));}catch(error:any){if(error.code!=='permission-denied')throw error;console.warn('Las nuevas opciones de privacidad requieren publicar las reglas actualizadas.');onAuthSuccess(profile);}
     } catch (err: any) {
@@ -90,8 +92,8 @@ export default function AuthScreen({ onAuthSuccess, theme, onToggleTheme }: Auth
     setLoading(true);
     setError('');
     try {
-      const result = await signInAnonymously(auth);
-      await registerUserInDB(result.user, guestName.trim());
+      const user = await createGuestAccount(auth,db,guestName.trim());
+      await registerUserInDB(user, guestName.trim());
     } catch (err: any) {
       console.error(err);
       setError(authErrorMessage(err,'No se pudo iniciar la sesión de invitado. Inténtalo de nuevo.'));
@@ -105,7 +107,7 @@ export default function AuthScreen({ onAuthSuccess, theme, onToggleTheme }: Auth
     if(signUp){if(password!==confirmPassword)throw Error('Las contraseñas no coinciden.');if(password.length<12||!/[a-zA-Z]/.test(password)||!/[0-9]/.test(password))throw Object.assign(Error(),{code:'auth/weak-password'});if(!/^[a-z0-9_.]{3,32}$/.test(usernameInput.trim().toLowerCase()))throw Error('El usuario debe tener entre 3 y 32 letras, números, puntos o guiones bajos.');registration={username:usernameInput.trim().toLowerCase(),phone:''};}
     if(signUp)reportRegistrationStatus('Estamos preparando tu cuenta y el correo de verificación.');const result=signUp?await createUserWithEmailAndPassword(auth,email.trim(),password):await signInWithEmailAndPassword(auth,email.trim(),password);
     if(signUp){await admitAccount(result.user,registration);auth.languageCode='es';await sendEmailVerification(result.user);setNotice('Te enviamos un correo para verificar tu cuenta.');reportRegistrationStatus('Te enviamos un correo para verificar tu cuenta.');}else await registerUserInDB(result.user);
-  }catch(e:any){const message=e?.code?authErrorMessage(e):e.message||'No se pudo continuar.';setError(message);if(signUp&&auth.currentUser&&!auth.currentUser.emailVerified)reportRegistrationStatus(message);}finally{setLoading(false);}};
+  }catch(e:any){const message=e?.code?authErrorMessage(e):e.message||'No se pudo continuar.';setError(message);if(signUp&&auth.currentUser&&needsEmailVerification(auth.currentUser))reportRegistrationStatus(message);}finally{setLoading(false);}};
   return (
     <div className="auth-shell" data-theme={theme}><PermissionReview/>
       <header className="auth-header">

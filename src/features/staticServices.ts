@@ -1,3 +1,4 @@
+import {isGuestIdentity} from './guestIdentity';
 import {resolveRegisteredContact} from './contactResolution';
 import {accountReportData,reportSettingsData} from './accountReportModel';
 import {touchGuestActivity} from './accountActivity';
@@ -8,7 +9,7 @@ export async function staticRequest(path:string,options:RequestInit={}){try{if(p
  if(path.startsWith('/api/media'))return await mediaRequest(path,options);
  if(path==='/api/assistant')return result(await assistant(input.messages,options.signal));
  if(path==='/api/turn'){if(!/^[a-zA-Z0-9_-]+\.metered\.live$/.test(config.meteredHost))throw Error('Conexión no disponible.');const url=new URL('https://'+config.meteredHost+'/api/v1/turn/credentials');url.searchParams.set('apiKey',config.meteredKey);const response=await fetch(url,{signal:options.signal||AbortSignal.timeout(15000)});if(!response.ok)throw Error('Conexión no disponible.');const values=await response.json();if(!Array.isArray(values)||values.length>32||!values.length||values.some(item=>{const urls=Array.isArray(item.urls)?item.urls:[item.urls];return !urls.length||urls.some(url=>typeof url!=='string'||!/^turns?:|^stuns?:/.test(url));}))throw Error('Conexión no disponible.');return result({iceServers:values});}
- if(path==='/api/activity'){await touchGuestActivity(user.uid,user.isAnonymous);return result({registered:true});}
+ if(path==='/api/activity'){await touchGuestActivity(user.uid,isGuestIdentity(user));return result({registered:true});}
  if(path==='/api/contacts/resolve')return result(await resolveRegisteredContact(input));
  if(path==='/api/moderation/report'){if(!['user','group','channel'].includes(input.kind)||typeof input.reason!=='string'||!input.reason.trim()||input.reason.length>1000||input.targetId===user.uid)throw Error('Reporte no válido.');const chat=await getDoc(doc(db,'chats',input.chatId));if(!chat.exists()||!chat.data().participants.includes(user.uid))throw Error('No puedes reportar esta conversación.');const id=encodeURIComponent(input.kind+'_'+input.targetId+'_'+user.uid);await setDoc(doc(db,'communityReports',id),{reporter:user.uid,kind:input.kind,targetId:input.targetId,chatId:input.chatId,reason:input.reason.trim(),at:Date.now()});return result({recorded:true});}
  if(path==='/api/account/report'){const [profile,privateDocs,conversations]=await Promise.all([getDoc(doc(db,'users',user.uid)),getDocs(collection(db,'users',user.uid,'private')),getDocs(query(collection(db,'chats'),where('participants','array-contains',user.uid)))]);return result(accountReportData(user.uid,user.email,user.emailVerified,profile.data()||{},reportSettingsData(privateDocs.docs.map(d=>({id:d.id,data:d.data()}))),conversations.docs.map(d=>({id:d.id,data:d.data()}))));}

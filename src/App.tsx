@@ -1,3 +1,5 @@
+import {awaitGuestCreation} from './features/guestAccount';
+import {isGuestIdentity,needsEmailVerification} from './features/guestIdentity';
 import {editMessageContent,deleteMessageEverywhere} from './features/messageMutations';
 import {useChannelNotifications} from './features/channelNotifications';
 import ChannelAccess from './features/ChannelAccess';
@@ -84,7 +86,7 @@ export default function App() {
 
 
   const [showHub,setShowHub] = useState(false);
-  useEffect(()=>{if(!currentUser)return;const ping=()=>{if(document.visibilityState==='visible'){void touchGuestActivity(currentUser.uid,!!auth.currentUser?.isAnonymous,currentUser.lastActiveAt||0).catch(()=>{});void flushMediaDeletions().catch(()=>{});}};ping();const timer=setInterval(ping,3600000);document.addEventListener('visibilitychange',ping);return()=>{clearInterval(timer);document.removeEventListener('visibilitychange',ping);};},[currentUser?.uid]);
+  useEffect(()=>{if(!currentUser)return;const ping=()=>{if(document.visibilityState==='visible'){void touchGuestActivity(currentUser.uid,isGuestIdentity(auth.currentUser),currentUser.lastActiveAt||0).catch(()=>{});void flushMediaDeletions().catch(()=>{});}};ping();const timer=setInterval(ping,3600000);document.addEventListener('visibilitychange',ping);return()=>{clearInterval(timer);document.removeEventListener('visibilitychange',ping);};},[currentUser?.uid]);
   usePresence(currentUser);
   useEffect(()=>{if(currentUser)void recordVisit(currentUser.uid).catch(()=>{});},[currentUser?.uid]);
   // Global lists
@@ -149,7 +151,9 @@ export default function App() {
       try {
       setAuthUid(firebaseUser?.uid||'');setChatsLoaded(false);
       if (firebaseUser) {
-        if(firebaseUser.providerData.some(p=>p.providerId==='password')&&!firebaseUser.emailVerified)return;
+        firebaseUser=await awaitGuestCreation(firebaseUser);
+        if(!live||revision!==authRevision)return;
+        if(needsEmailVerification(firebaseUser))return;
         await admitAccount(firebaseUser);
         // Fetch custom user doc to re-establish state
         const userRef = doc(db, 'users', firebaseUser.uid);
@@ -397,7 +401,7 @@ export default function App() {
   if(accountRemoved)return <main className="account-removed" role="alert"><h1>Cuenta desactivada</h1><p>Tu cuenta se retiró tras recibir varios reportes.</p><button onClick={()=>signOut(auth)}>Cerrar sesión</button></main>;
   if (loading||currentUser&&!sessionError&&(!chatsLoaded||!usersLoaded||!personal.loaded)) return <StartupScreen phase={authUid?'conversations':'session'} progress={authUid?startupProgress:null}/>;
 
-  if(auth.currentUser?.providerData.some(p=>p.providerId==='password')&&(!auth.currentUser.emailVerified||sessionError.includes('Completa el registro')||sessionError.includes('ocupado')))return <EmailVerificationGate initialComplete={auth.currentUser.emailVerified}/>;
+  if(needsEmailVerification(auth.currentUser)||auth.currentUser?.providerData.some(p=>p.providerId==='password')&&!isGuestIdentity(auth.currentUser)&&(sessionError.includes('Completa el registro')||sessionError.includes('ocupado')))return <EmailVerificationGate initialComplete={auth.currentUser?.emailVerified||false}/>;
   if (sessionError) return <SessionUnavailable message={sessionError} onRetry={()=>setSessionAttempt(value=>value+1)} onLogout={async()=>{try{await disablePush().catch(()=>{});await signOut(auth);setSessionError('');}catch{setSessionError('No se pudo cerrar la sesión. Inténtalo de nuevo.');}}}/>;
 
   // Not logged in: Show pair instructions Auth Portal

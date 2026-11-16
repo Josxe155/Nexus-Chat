@@ -2,7 +2,7 @@
 const {initializeTestEnvironment,assertFails}=require('@firebase/rules-unit-testing');
 const fsdb=require('firebase/firestore'),{createMockUserToken}=require('@firebase/util'),{build}=require('esbuild'),fs=require('fs'),assert=require('assert/strict'),path=require('path');
 (async()=>{
- const env=await initializeTestEnvironment({projectId:'demo-nexus',firestore:{host:'127.0.0.1',port:8085,rules:fs.readFileSync('firestore.rules','utf8')},database:{host:'127.0.0.1',port:9015,rules:fs.readFileSync('database.rules.json','utf8')}});
+ const env=await initializeTestEnvironment({projectId:'demo-nexus',firestore:{host:'127.0.0.1',port:Number(process.env.FIRESTORE_EMULATOR_PORT||8085),rules:fs.readFileSync('firestore.rules','utf8')},database:{host:'127.0.0.1',port:9015,rules:fs.readFileSync('database.rules.json','utf8')}});
  const claims={email:'owner@example.test',email_verified:true,firebase:{sign_in_provider:'google.com'}},db=env.authenticatedContext('owner',claims).firestore(),rtdb={app:{},uid:'owner'};
  global.__cleanupDb=db;global.__cleanupRtdb=rtdb;global.__cleanupUid='owner';global.__cleanupOffset=0;global.__cleanupSkew=0;global.__cleanupDate=class extends Date{static now(){return Date.now()+global.__cleanupSkew}};
  const token=createMockUserToken({sub:'owner',...claims},'demo-nexus');

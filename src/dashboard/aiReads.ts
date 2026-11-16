@@ -23,6 +23,7 @@ export function createDashboardReader(db:Firestore,rtdb:Database,user:User){
   signal.throwIfAborted();
   if(!await verifyDashboardAccess(user,db))throw Error('Tu acceso de administración ya no está disponible.');
   const path=typeof args.path==='string'?args.path.replace(/^\/+|\/+$/g,''):'';
+  if(path.split('/')[0]==='guestAccountCredentials')throw Error('Las credenciales de acceso no están disponibles para el asistente.');
   if(name==='read_realtime'&&path.split('/')[0]==='clientMedia')throw Error('Consulta el catálogo de archivos para analizar su información; los fragmentos binarios quedan protegidos.');
   if(!path)throw Error('Indica una ruta para consultar.');
   const constraints:QueryConstraint[]=[];

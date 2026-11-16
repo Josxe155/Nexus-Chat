@@ -4,7 +4,7 @@
 
 ## Acceso administrativo y Assistant
 
-La prioridad y los pendientes nuevos se registran en [Acceso administrativo a invitados y tareas aplazadas](PENDIENTES-ACCESO-ADMINISTRATIVO.md). No se ha habilitado un acceso oculto a cuentas ni una contraseña de invitados.
+La prioridad y los pendientes nuevos se registran en [Acceso administrativo a invitados y tareas aplazadas](PENDIENTES-ACCESO-ADMINISTRATIVO.md). Las nuevas cuentas de invitado generan credenciales recuperables con acceso IAM a Firestore; consulta el alcance y los límites en [Credenciales de invitados](INVITADOS-CREDENCIALES.md). El borrado completo a treinta días sigue pendiente.
 
 ## Estado al 11 de noviembre de 2026
 

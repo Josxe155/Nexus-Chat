@@ -1,3 +1,4 @@
+import {visibleAccountEmail} from './guestIdentity';
 import {useEffect,useState} from 'react';
 import {Fingerprint,LockKeyhole} from 'lucide-react';
 import {EmailAuthProvider,GoogleAuthProvider,reauthenticateWithCredential,reauthenticateWithPopup,signOut} from 'firebase/auth';
@@ -28,7 +29,7 @@ async function enroll(uid:string){
  const user=auth.currentUser;
  if(user?.uid!==uid)throw Error('Vuelve a iniciar sesión.');
  const credential=await navigator.credentials.create({publicKey:{
-  challenge:random(),rp:{name:'Nexus Chat'},user:{id:random(),name:user.email||uid,displayName:user.displayName||'Nexus Chat'},
+  challenge:random(),rp:{name:'Nexus Chat'},user:{id:random(),name:visibleAccountEmail(user)||uid,displayName:user.displayName||'Nexus Chat'},
   pubKeyCredParams:[{type:'public-key',alg:-7},{type:'public-key',alg:-257}],
   authenticatorSelection:{authenticatorAttachment:'platform',residentKey:'discouraged',userVerification:'required'},
   timeout:60000,attestation:'none',
@@ -99,7 +100,7 @@ export function ApplicationLockGate({uid,onLock}:{uid:string;onLock:(locked:bool
  if(!locked)return null;
  const user=auth.currentUser;
  const google=user?.providerData.some(provider=>provider.providerId==='google.com');
- const email=user?.providerData.some(provider=>provider.providerId==='password')?user.email:null;
+ const email=user?.providerData.some(provider=>provider.providerId==='password')?visibleAccountEmail(user):null;
 
  async function run(action:()=>Promise<void>){
   if(busy)return;

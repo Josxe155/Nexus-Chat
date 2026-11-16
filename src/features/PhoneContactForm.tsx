@@ -1,3 +1,4 @@
+import {visibleAccountEmail} from './guestIdentity';
 import GoogleContactSync,{useGoogleContactSync} from './GoogleContactSync';
 import ContactQrOverlay from './ContactQrOverlay';
 import {ArrowLeft,AtSign,Phone,QrCode,User} from 'lucide-react';
@@ -38,7 +39,7 @@ export default function PhoneContactForm({user,onClose,contact}:{user:UserProfil
  <label className="pcm-contact-field pcm-handle">{phone&&<AtSign/>}<span>Nombre de usuario</span><input autoCapitalize="none" autoCorrect="off" spellCheck={false} maxLength={33} placeholder={phone?"Nombre de usuario":"@usuario"} value={username} onChange={e=>setUsername(e.target.value)} disabled={busy||googleSync.connecting}/></label>
  <div className="pcm-contact-number">{phone&&<Phone/>}<PhoneField compact={phone} country={country} number={number} onCountry={setCountry} onNumber={setNumber} disabled={busy||googleSync.connecting}/></div>
  <p className="pcm-number-help">Usa el número de Nexus que aparece en su perfil o su nombre de usuario. El nombre y apellido que guardes solo los verás tú.</p>
- <GoogleContactSync sync={googleSync} disabled={busy||googleSync.connecting}/><p className="pcm-sync-account"><small>Guardar en tu cuenta de Nexus Chat</small><span>{auth.currentUser?.email||'Tu cuenta de Nexus Chat'}</span></p>
+ <GoogleContactSync sync={googleSync} disabled={busy||googleSync.connecting}/><p className="pcm-sync-account"><small>Guardar en tu cuenta de Nexus Chat</small><span>{visibleAccountEmail(auth.currentUser)||'Tu cuenta de Nexus Chat'}</span></p>
  {error&&<p role="alert">{error}</p>}
  {invite&&<button type="button" disabled={busy||googleSync.connecting} onClick={async()=>{try{const text='Te invito a Nexus Chat: '+location.origin;if(navigator.share)await navigator.share({title:'Nexus Chat',text});else await navigator.clipboard.writeText(text);}catch(cause){if(!(cause instanceof DOMException&&cause.name==='AbortError'))setError('No se pudo compartir la invitación.');}}}>Invitar a Nexus Chat</button>}
  <button className="pcm-save-contact" disabled={busy||googleSync.connecting||!valid}>{busy?'Guardando…':phone?'Guardar':'Guardar contacto'}</button></form>{qrOpen&&open&&<ContactQrOverlay user={user} onClose={()=>setQrOpen(false)} onContact={async uid=>{await open(uid,false);setQrOpen(false);onClose();}}/>}</div>;
