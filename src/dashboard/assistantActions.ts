@@ -14,7 +14,7 @@ export const actionDeclarations=[
  {name:'prepare_firestore_action',description:'Prepara la creación, actualización o eliminación de documentos operativos de Nexus. Excluye cuentas, perfiles, identidad y seguridad. Las órdenes directas pueden ejecutarse al preparar; una petición de preparación devuelve una propuesta pendiente. Comprueba executed en la respuesta. Para update usa campos con puntos y JSON; {$serverTimestamp:true} asigna fecha del servidor y {$delete:true} elimina un campo. No guarda conversaciones del asistente en Firebase.',parameters:{type:'OBJECT',properties:{execution:{type:'STRING',enum:['execute','prepare']},path:string,operation:{type:'STRING',enum:['create','update','delete']},dataJson:string},required:['path','operation']}},
  {name:'prepare_realtime_action',description:'Prepara creación, actualización o eliminación de datos operativos de Realtime Database, Las órdenes directas pueden ejecutarse; comprueba executed. dataJson es JSON; update modifica las claves indicadas. No modifica cuentas, perfiles, identidad, moderación ni seguridad.',parameters:{type:'OBJECT',properties:{execution:{type:'STRING',enum:['execute','prepare']},path:string,operation:{type:'STRING',enum:['create','update','delete']},dataJson:string},required:['path','operation']}},
  {name:'prepare_cleanup_schedule',description:'Prepara activar, pausar o reprogramar la limpieza mensual de Firebase. Cuando enabled=true usa una fecha futura nextDueAt en milisegundos. Conserva cuentas y perfiles; la ejecución periódica sigue necesitando el dashboard abierto.',parameters:{type:'OBJECT',properties:{execution:{type:'STRING',enum:['execute','prepare']},enabled:{type:'BOOLEAN'},nextDueAt:{type:'NUMBER'}},required:['enabled']}},
- {name:'prepare_manual_cleanup',description:'Prepara una limpieza de contenido conservando cuentas, perfiles y medios protegidos. Solo se ejecuta tras recibir LIMPIAR AHORA y el identificador de confirmación.',parameters:{type:'OBJECT',properties:{}}},
+ {name:'prepare_manual_cleanup',description:'Prepara una limpieza de contenido conservando cuentas, perfiles y medios protegidos. Solo se ejecuta tras recibir CONFIRMAR como mensaje independiente del propietario para su última propuesta.',parameters:{type:'OBJECT',properties:{}}},
  {name:'navigate_dashboard',description:'Abre una pantalla del dashboard. No modifica datos.',parameters:{type:'OBJECT',properties:{page:{type:'STRING',enum:['resumen','reportes','avisos','mantenimiento','informes','modo-ia']}},required:['page']}},
 ];
 function materialize(value:any,realtime=false):any{
@@ -38,7 +38,7 @@ export function createAssistantActions(db:Firestore,rtdb:Database,user:User,onPl
    const enabled=args.enabled===true,nextDueAt=typeof args.nextDueAt==='number'?args.nextDueAt:before?.nextDueAt||createActions({db,rtdb}).nextMonth(Date.now());
    if(enabled&&(!Number.isFinite(nextDueAt)||nextDueAt<=Date.now()))throw Error('La fecha de limpieza debe ser futura.');
    const data={enabled,execution:'browser',nextDueAt,warningDays:3,status:'scheduled',leaseUntil:0,...(before?{manualCutoff:{$delete:true},runId:{$delete:true}}:{})};
-   const plan:AssistantAction={id:crypto.randomUUID(),actor:user.uid,createdAt:Date.now(),kind:'schedule',path,operation:before?'update':'create',data,before:normalizeRecord(before)};onPlan(plan);return {prepared:true,id:plan.id,path,data,confirmation:'CONFIRMAR '+plan.id};
+   const plan:AssistantAction={id:crypto.randomUUID(),actor:user.uid,createdAt:Date.now(),kind:'schedule',path,operation:before?'update':'create',data,before:normalizeRecord(before)};onPlan(plan);return {prepared:true,id:plan.id,path,data,confirmation:'CONFIRMAR'};
   }
   const messageArgs=name==='prepare_message_change'?args:null;
   if(messageArgs){args=messageChangeInput(messageArgs);name='prepare_firestore_action';}
@@ -67,7 +67,7 @@ export function createAssistantActions(db:Firestore,rtdb:Database,user:User,onPl
   if(operation==='update'&&before===null)throw Error('El destino no existe. Prepara una creación.');
   if(operation==='delete'&&before===null)throw Error('El destino ya está eliminado.');
   signal.throwIfAborted();const plan:AssistantAction={id:crypto.randomUUID(),actor:user.uid,createdAt:Date.now(),kind,path,operation:operation as AssistantAction['operation'],data,before:normalizeRecord(before)};onPlan(plan);
-  return {prepared:true,id:plan.id,path,operation,data,before:redactAssistantData(plan.before),confirmation:kind==='cleanup'?'LIMPIAR AHORA '+plan.id:'CONFIRMAR '+plan.id};
+  return {prepared:true,id:plan.id,path,operation,data,before:redactAssistantData(plan.before),confirmation:'CONFIRMAR'};
  };
  const execute=async(plan:AssistantAction,signal:AbortSignal,onCommit:()=>void)=>{
   await authorized(signal);

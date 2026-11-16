@@ -1,3 +1,4 @@
+import {isAssistantConfirmation,latestAssistantProposal,simpleConfirmationText,confirmationProposals as proposals} from './assistantConfirmation';
 import {createAssistantMediaReader,mediaDeclarations} from './assistantMedia';
 import {draftError,limitAnswer} from './assistantLimits';
 import {useEffect,useRef,useState} from 'react';
@@ -18,7 +19,6 @@ import {parseMessageEditCommand} from './messageEditCommand';
 import {editMessageByCommand} from './editMessage';
 import RichText from '../features/RichText';
 
-function proposals(plans:AssistantAction[]){return plans.filter(plan=>!plan.executedAt).map(plan=>'\n\nCambio preparado: **'+({create:'crear',update:'actualizar',delete:'eliminar',cleanup:'limpieza'}[plan.operation])+'** en `'+plan.path+'`.\n```json\n'+JSON.stringify(plan.data,null,2)+'\n```\nPara ejecutarlo escribe **'+(plan.kind==='cleanup'?'LIMPIAR AHORA ':'CONFIRMAR ')+plan.id+'**.').join('');}
 export default function DashboardAI({db,rtdb,user,snapshot}:{db:Firestore;rtdb:Database;user:User;snapshot?:OverviewSnapshot}){
  const [question,setQuestion]=useState(''),[error,setError]=useState('');
  const [turns,setTurns]=useState<StoredTurn[]>([]),[ready,setReady]=useState(false),[busy,setBusy]=useState(false),[committing,setCommitting]=useState(false);
@@ -36,18 +36,15 @@ export default function DashboardAI({db,rtdb,user,snapshot}:{db:Firestore;rtdb:D
   if(/^(?:borra|elimina|vac[ií]a|limpia)\s+(?:(?:el|este)\s+)?(?:historial|conversaci[oó]n)(?:\s+local)?(?:\s+(?:de\s+Nexus\s+Assistant|del\s+asistente))?\s*[.!]?$/iu.test(prompt)){clearAssistantHistory(user.uid);setQuestion('');return;}
   const controller=new AbortController();request.current=controller;
   let timer=setTimeout(()=>controller.abort('timeout'),600000);const index=turns.length,plans:AssistantAction[]=[],executed:string[]=[];
-  const complete=(text:string,actions:AssistantAction[]=plans)=>setTurns(previous=>previous.map((turn,i)=>i===index?{...turn,answer:limitAnswer(text).text,...(actions.length?{actions}:{} )}:turn));
+  const complete=(text:string,actions:AssistantAction[]=plans)=>setTurns(previous=>previous.map((turn,i)=>i===index?{...turn,answer:limitAnswer(simpleConfirmationText(text)).text,...(actions.length?{actions}:{} )}:turn));
   const commit=()=>{clearTimeout(timer);setCommitting(true);};
   setTurns(previous=>[...previous,{question:prompt,answer:'',at:Date.now()}]);setQuestion('');setBusy(true);setError('');
   try{
    if(!await verifyDashboardAccess(user,db))throw Error('Tu acceso de administración ya no está disponible.');
    const actions=createAssistantActions(db,rtdb,user,plan=>plans.push(plan));
-   const confirmation=/^(CONFIRMAR|LIMPIAR AHORA)\s+([a-f0-9-]{36})$/i.exec(prompt);
-   if(confirmation){
-    const action=turns.flatMap(turn=>(turn.actions||[]) as AssistantAction[]).find(plan=>plan.id===confirmation[2]);
-    if(!action)throw Error('No se encontró esa propuesta en el historial local. Solicita una nueva.');
-    if(action.executedAt)throw Error('Esa propuesta ya se ejecutó. Solicita otra si necesitas un nuevo cambio.');
-    if(action.kind==='cleanup'&&confirmation[1].toUpperCase()!=='LIMPIAR AHORA')throw Error('Para la limpieza escribe LIMPIAR AHORA seguido del identificador.');
+   if(/^(?:CONFIRMAR|LIMPIAR AHORA)\s+[a-f0-9-]{36}$/iu.test(prompt))throw Error('Ahora solo necesitas escribir CONFIRMAR para la última propuesta.');
+   if(isAssistantConfirmation(prompt)){
+    const action=latestAssistantProposal(turns,user.uid);
     complete(await actions.execute(action,controller.signal,commit));
     setTurns(previous=>previous.map(turn=>({...turn,...(turn.actions?{actions:(turn.actions as AssistantAction[]).map(plan=>plan.id===action.id?{...plan,executedAt:Date.now()}:plan)}:{})})));return;
    }
@@ -78,13 +75,13 @@ export default function DashboardAI({db,rtdb,user,snapshot}:{db:Firestore;rtdb:D
   <header className="dashboard-chat-header"><Sparkles size={20}/><div><h2>Nexus Assistant</h2><small>Administración de Nexus Chat</small></div></header>
   <div className="dashboard-ai-transcript" role="log" aria-label="Conversación de Nexus Assistant" aria-live="polite">
    {!ready?<p>Cargando historial local…</p>:!turns.length&&<div className="dashboard-chat-welcome"><Sparkles size={36}/><h3>¿En qué te ayudo?</h3><p>Consulta, crea o modifica los datos de Nexus.</p></div>}
-   {turns.map((turn,index)=><article key={index} className="dashboard-ai-turn"><div className="dashboard-ai-user-message"><RichText text={turn.question}/></div>{turn.answer&&<div className="report-preview" aria-label="Respuesta de Nexus Assistant"><strong>Nexus Assistant</strong><RichText text={turn.answer}/></div>}</article>)}
+   {turns.map((turn,index)=><article key={index} className="dashboard-ai-turn"><div className="dashboard-ai-user-message"><RichText text={turn.question}/></div>{turn.answer&&<div className="report-preview" aria-label="Respuesta de Nexus Assistant"><strong>Nexus Assistant</strong><RichText text={simpleConfirmationText(turn.answer)}/></div>}</article>)}
    {busy&&<p className="assistant-working" role="status">{committing?'Ejecutando la acción…':'Nexus Assistant está trabajando…'}</p>}
    <div ref={bottom}/>
   </div>
   <form className="dashboard-ai-composer" aria-label="Escribir una consulta" onSubmit={event=>{event.preventDefault();void ask();}}>
    <TransientNotice message={error} onClose={()=>setError('')}/>
-   <SpeakAnswer text={answer} compact/>
+   <SpeakAnswer text={simpleConfirmationText(answer)} compact/>
    <textarea aria-label="Escribe un mensaje" rows={1} value={question} disabled={busy||!ready} onChange={event=>{setQuestion(event.target.value);const invalid=draftError(event.target.value);if(invalid)setError(invalid);}} placeholder="Escribe un mensaje" title="Hasta 500 líneas. Usa Mayús + Intro para un salto de línea." onKeyDown={event=>{if(event.key==='Enter'&&!event.shiftKey&&!event.nativeEvent.isComposing){event.preventDefault();void ask();}}}/>
    {busy?<button type="button" className="dashboard-ai-composer-icon" disabled={committing} onClick={()=>request.current?.abort()} aria-label="Cancelar consulta"><Square size={18}/></button>:<button type="submit" className="dashboard-ai-composer-icon" disabled={!ready||!question.trim()||!!draftError(question)} aria-label="Enviar consulta"><Send size={18}/></button>}
   </form>

@@ -73,6 +73,8 @@ Capturas de la aplicación con **datos ficticios de demostración**. No incluyen
 
 Esta distribución es exclusiva de computadora. Nexus Messenger conserva sus pantallas móviles. Se usan los datos reales del chat y del proveedor; no se inventan nombres de paquetes de stickers.
 
+La corrección **v26.93.1** permite confirmar propuestas escribiendo solo **CONFIRMAR** y mejora la recuperación del acceso al dashboard con renovación de sesión y reintentos limitados. [Funcionamiento y comprobaciones](docs/CONFIRMACION-Y-ACCESO-26.93.1.md).
+
 La versión **v26.93.0** incorpora la pantalla de cuenta bloqueada, búsquedas y cambios auditados de mensajes, análisis real de imágenes, audio, video y PDF desde Nexus Assistant, y variantes del icono oficial sin fondo cuadrado. [Alcance, límites y comprobaciones](docs/CAPACIDADES-ASSISTANT-26.93.0.md).
 
 La versión **v26.92.0** prepara nuevas cuentas de invitado con correo técnico y contraseña aleatoria recuperables únicamente con acceso IAM a Firestore. Permite volver a la misma cuenta desde el formulario actual de correo y contraseña, sin un menú adicional. [Procedimiento, límites y borrado de treinta días pendiente](docs/INVITADOS-CREDENCIALES.md).

@@ -38,7 +38,8 @@
     "test:guest-identity": "node --import tsx scripts/guest-identity.test.ts",
     "test:guest:emulators": "node scripts/guest-account-emulator.test.cjs",
     "test:assistant-media": "node --import tsx scripts/assistant-media.test.ts",
-    "test:assistant-capabilities:emulators": "node scripts/assistant-capabilities-emulator.test.cjs"
+    "test:assistant-capabilities:emulators": "node scripts/assistant-capabilities-emulator.test.cjs",
+    "test:assistant-confirmation": "node --import tsx scripts/assistant-confirmation.test.ts"
   },
   "dependencies": {
     "firebase": "^12.13.0",

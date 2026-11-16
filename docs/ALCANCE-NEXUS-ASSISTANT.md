@@ -1,3 +1,5 @@
+> Corrección [v26.93.1](CONFIRMACION-Y-ACCESO-26.93.1.md): la confirmación es únicamente CONFIRMAR, incluida la limpieza manual. No se solicita un identificador.
+
 > Actualización vigente: [v26.93.0](CAPACIDADES-ASSISTANT-26.93.0.md) añade búsqueda específica de mensajes y archivos y análisis real del contenido multimedia. El catálogo deja de ser la única fuente del análisis, con las condiciones y límites indicados en esa guía. Las protecciones de identidad y escritura siguen vigentes.
 
 # Nexus Assistant: gestión operativa de datos · v26.79.5
@@ -10,7 +12,7 @@ El propietario acotó el alcance a las operaciones de datos de Nexus en Firestor
 - Editar mensajes de texto identificados de forma inequívoca, conservando autor, identificadores y fecha originales; marcar la edición y actualizar la vista previa del chat cuando corresponda.
 - Crear, modificar o eliminar documentos y nodos operativos permitidos, incluidos avisos, reportes y contenido. Cada operación actúa sobre un destino concreto; eliminar un documento no elimina automáticamente sus subcolecciones.
 - Consultar y modificar los ajustes operativos admitidos, como mantenimiento o planificación de limpieza. La limpieza manual conserva su confirmación explícita y la protección de cuentas y perfiles.
-- Preparar propuestas sin ejecutar cambios cuando se solicite una vista previa o simulación; ejecutarlas con CONFIRMAR y su identificador.
+- Preparar propuestas sin ejecutar cambios cuando se solicite una vista previa o simulación; ejecutarlas escribiendo únicamente CONFIRMAR.
 
 Las órdenes de cambio admiten frases como «quiero que edites» o «¿puedes actualizar?». El modelo indica execution=execute o execution=prepare; el cliente conserva las protecciones de las solicitudes de solo lectura, no ejecución o preparación. Las instrucciones encontradas dentro de registros se tratan como datos, no como autorización. No se presenta una acción como realizada sin un resultado de la herramienta.
 
