@@ -1,3 +1,5 @@
+> Lectura vigente: [KokoroJS v26.94.0](VOZ-KOKOROJS.md), con voz neuronal española local y descarga del modelo al usarla por primera vez.
+
 > Corrección [v26.93.1](CONFIRMACION-Y-ACCESO-26.93.1.md): la confirmación es únicamente CONFIRMAR, incluida la limpieza manual. No se solicita un identificador.
 
 > Actualización vigente: [v26.93.0](CAPACIDADES-ASSISTANT-26.93.0.md) añade búsqueda específica de mensajes y archivos y análisis real del contenido multimedia. El catálogo deja de ser la única fuente del análisis, con las condiciones y límites indicados en esa guía. Las protecciones de identidad y escritura siguen vigentes.

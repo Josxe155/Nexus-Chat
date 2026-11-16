@@ -1,13 +1,19 @@
 import {spanishSpeechChunks} from './speechChunks';
+let idleWorker:Worker|undefined,idleTimeout:ReturnType<typeof setTimeout>|undefined;
+let stopCurrent:(()=>void)|undefined;
 
 export function playSpanish(text:string,onState:(state:'preparing'|'playing'|'idle')=>void,onError:()=>void){
+ stopCurrent?.();
  const chunks=spanishSpeechChunks(text);
  let context:AudioContext|undefined,worker:Worker|undefined,stopped=false,index=0,busy=false,retries=0,nextStart=0;
  let timeout:ReturnType<typeof setTimeout>|undefined;
  const sources=new Set<AudioBufferSourceNode>();
  const resume=()=>{if(!stopped&&context&&context.state!=='closed')void context.resume().catch(()=>{});};
- const stop=()=>{
-  if(stopped)return;stopped=true;clearTimeout(timeout);worker?.terminate();
+ const stop=(keepModel=false)=>{
+  if(stopped){if(!keepModel&&idleWorker===worker){idleWorker?.terminate();idleWorker=undefined;clearTimeout(idleTimeout);}return;}stopped=true;clearTimeout(timeout);
+  if(stopCurrent===stop)stopCurrent=undefined;
+  if(keepModel&&worker&&!busy){const parked=worker;idleWorker?.terminate();clearTimeout(idleTimeout);idleWorker=parked;parked.onmessage=null;parked.onerror=()=>{if(idleWorker===parked){parked.terminate();idleWorker=undefined;}};idleTimeout=setTimeout(()=>{if(idleWorker===parked){parked.terminate();idleWorker=undefined;}},60000);}
+  else worker?.terminate();
   document.removeEventListener('visibilitychange',resume);window.removeEventListener('pointerdown',resume);
   for(const source of sources){source.onended=null;try{source.stop();}catch{/* already ended */}source.disconnect();}sources.clear();
   void context?.close().catch(()=>{});onState('idle');
@@ -16,9 +22,9 @@ export function playSpanish(text:string,onState:(state:'preparing'|'playing'|'id
  if(!chunks.length){queueMicrotask(stop);return stop;}
  const pump=()=>{
   if(stopped||busy||sources.size>=2)return;
-  if(index>=chunks.length){if(!sources.size)stop();return;}
+  if(index>=chunks.length){if(!sources.size)stop(true);return;}
   if(!sources.size)onState('preparing');
-  busy=true;clearTimeout(timeout);timeout=setTimeout(retry,30000);
+  busy=true;clearTimeout(timeout);timeout=setTimeout(retry,180000);
   worker!.postMessage(chunks[index]);
  };
  const retry=()=>{
@@ -28,14 +34,16 @@ export function playSpanish(text:string,onState:(state:'preparing'|'playing'|'id
   try{createWorker();pump();}catch{fail();}
  };
  const createWorker=()=>{
-  const generator=new Worker(new URL('../dashboard/reportVoice.worker.ts',import.meta.url),{type:'module'});worker=generator;
+  const generator=idleWorker??new Worker(new URL('../dashboard/reportVoice.worker.ts',import.meta.url),{type:'module'});idleWorker=undefined;clearTimeout(idleTimeout);worker=generator;
   generator.onerror=event=>{event.preventDefault();if(worker===generator)retry();};
-  generator.onmessage=async(event:MessageEvent<ArrayBuffer|null>)=>{
+  generator.onmessage=async(event:MessageEvent<ArrayBuffer|null|{type:'progress'}>)=>{
    if(stopped||worker!==generator)return;
+   const wav=event.data;
+   if(!wav){retry();return;}
+   if(!(wav instanceof ArrayBuffer)){clearTimeout(timeout);timeout=setTimeout(retry,180000);return;}
    clearTimeout(timeout);
-   if(!event.data){retry();return;}
    try{
-    const audio=context!;const buffer=await audio.decodeAudioData(event.data);
+    const audio=context!;const buffer=await audio.decodeAudioData(wav);
     if(stopped||worker!==generator)return;
     await audio.resume();if(stopped||worker!==generator)return;
     const source=audio.createBufferSource();source.buffer=buffer;source.connect(audio.destination);sources.add(source);
@@ -46,7 +54,7 @@ export function playSpanish(text:string,onState:(state:'preparing'|'playing'|'id
    }catch{retry();}
   };
  };
- onState('preparing');
+ stopCurrent=stop;onState('preparing');
  try{
   context=new AudioContext();createWorker();
   document.addEventListener('visibilitychange',resume);window.addEventListener('pointerdown',resume);

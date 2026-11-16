@@ -1,6 +1,6 @@
 # Acceso a invitados y tareas aplazadas
 
-Estado del código: v26.93.1, 16 de noviembre de 2026.
+Estado del código: v26.94.0, 16 de noviembre de 2026.
 
 ## Acceso implementado
 

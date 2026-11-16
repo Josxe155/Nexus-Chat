@@ -176,3 +176,7 @@ footer span{color:var(--accent)}
 .dashboard-chat .dashboard-ai-composer{position:relative}
 .assistant-transient{position:absolute!important;left:8px;right:8px;bottom:calc(100% + 8px);z-index:5;grid-area:auto!important;display:block;padding:12px 15px!important;border:1px solid #ff9f9f66;border-radius:12px;background:#472b30;color:#fff1f1!important;box-shadow:0 6px 24px #0005;font-size:.85rem;line-height:1.45;overflow-wrap:anywhere;pointer-events:none}
 .assistant-working{font-size:.85rem;color:var(--muted);padding:0 8px}
+
+.dashboard-voice-control .animate-spin,.icon-action .animate-spin{animation:nexus-speech-preparing 1s linear infinite}
+@keyframes nexus-speech-preparing{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.dashboard-voice-control .animate-spin,.icon-action .animate-spin{animation:none}}

@@ -11,6 +11,7 @@ export default defineConfig(() => {
     build:{rollupOptions:{input:{app:path.resolve(projectDirectory,'index.html'),dashboard:path.resolve(projectDirectory,'dashboard.html')}}},
     resolve: {
       alias: {
+        '@nexus-kokoro-wasm?url': path.resolve(projectDirectory,'node_modules/onnxruntime-web/dist/ort-wasm-simd-threaded.jsep.wasm')+'?url',
         '@': path.resolve(projectDirectory, '.'),
       },
     },

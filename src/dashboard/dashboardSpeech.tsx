@@ -1,5 +1,5 @@
 import {useEffect,useRef,useState} from 'react';
-import {Square,Volume2} from 'lucide-react';
+import {Square,Volume2,LoaderCircle} from 'lucide-react';
 import TransientNotice from './TransientNotice';
 import {playSpanish} from '../features/spanishSpeech';
 
@@ -12,8 +12,8 @@ export function SpeakAnswer({text,compact=false}:{text:string;compact?:boolean})
   setError('');cancel.current=playSpanish(text,setState,()=>setError('No se pudo reproducir la respuesta. Vuelve a intentarlo.'));
  }
  return <div className="dashboard-voice-control">
-  <button type="button" className={compact?'dashboard-ai-composer-icon dashboard-ai-speaker':'secondary icon-action'} aria-label={state!=='idle'?'Detener lectura':'Escuchar respuesta'} title={state!=='idle'?'Detener lectura':'Escuchar respuesta'} disabled={!text} onClick={toggle}>
-   {state!=='idle'?<Square size={15}/>:<Volume2 size={17}/>} {!compact&&(state!=='idle'?'Detener lectura':'Escuchar respuesta')}
+  <button type="button" className={compact?'dashboard-ai-composer-icon dashboard-ai-speaker':'secondary icon-action'} aria-label={state!=='idle'?'Detener lectura':'Escuchar respuesta'} title={state==='preparing'?'Preparando la voz. La primera lectura necesita descargar el modelo. Pulsa para cancelar.':state==='playing'?'Detener lectura':'Escuchar respuesta'} disabled={!text} onClick={toggle}>
+   {state==='preparing'?<LoaderCircle size={15} className="animate-spin"/>:state==='playing'?<Square size={15}/>:<Volume2 size={17}/>} {!compact&&(state!=='idle'?'Detener lectura':'Escuchar respuesta')}
   </button>
   <TransientNotice message={error} onClose={()=>setError('')}/>
  </div>;

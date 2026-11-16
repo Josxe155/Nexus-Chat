@@ -23,3 +23,6 @@ backups/
 src/public-services.json
 __*.html
 src/__*
+
+# Speech binaries are generated from pinned dependencies.
+public/tts/
