@@ -69,6 +69,7 @@ export default function DashboardReport({snapshot,plan}:{snapshot?:OverviewSnaps
   const request=new AbortController();
   controller.current=request;
   const deadline=setTimeout(()=>request.abort('timeout'),45000);
+  window.dispatchEvent(new Event('nexus:stop-assistant-speech'));
   setBusy(true);setMessage('');
   try{
    const {assistant}=await import('../features/staticServices');
@@ -94,7 +95,7 @@ export default function DashboardReport({snapshot,plan}:{snapshot?:OverviewSnaps
   }
  }
 
- return <section className="panel-card" aria-labelledby="dashboard-report-heading">
+ return <section className="panel-card dashboard-report-panel" aria-labelledby="dashboard-report-heading">
   <div className="panel-title"><div><span className="badge"><FileText size={15}/> INFORMES</span><h2 id="dashboard-report-heading">Guardar informe</h2></div></div>
   <p>Genera un resumen de actividad, moderación, almacenamiento y mantenimiento a partir de la última lectura del panel. Nexus AI recibe solo cifras agregadas, fechas y el estado del plan.</p>
   {!snapshot&&<p className="notice">Carga las estadísticas en Resumen para preparar el informe.</p>}
@@ -104,7 +105,7 @@ export default function DashboardReport({snapshot,plan}:{snapshot?:OverviewSnaps
     controller.current?.abort();setMessage('Generación cancelada.');
    }}><X size={17}/> Cancelar</button>}
    <button type="button" className="secondary" disabled={!snapshot||busy} onClick={()=>{
-    if(snapshot){setReport({text:localReport(formatInput(snapshot,plan)),source:'datos',at:snapshot.updatedAt});setMessage('');}
+    if(snapshot){window.dispatchEvent(new Event('nexus:stop-assistant-speech'));setReport({text:localReport(formatInput(snapshot,plan)),source:'datos',at:snapshot.updatedAt});setMessage('');}
    }}>Preparar informe de datos</button>
    <button type="button" className="secondary icon-action" disabled={!report||busy} onClick={()=>{
     if(reportElement.current)saveDashboardFile(
@@ -115,6 +116,6 @@ export default function DashboardReport({snapshot,plan}:{snapshot?:OverviewSnaps
    {report&&<ReportVoice key={report.text} report={reportElement} disabled={busy}/> }
   </div>
   {message&&<p className="notice" role="status">{message}</p>}
-  {report&&<><p className="metrics-updated">{report.source==='ia'?'Informe generado con Nexus AI':'Informe de datos'} · Lectura del {dateLabel(report.at)} (Ecuador)</p><ReportPreview text={report.text} element={reportElement}/></>}
+  {report&&<><p className="metrics-updated">{report.source==='ia'?'Informe generado con Nexus AI':'Informe de datos'} · Lectura del {dateLabel(report.at)} (Ecuador)</p><ReportPreview key={report.text} text={report.text} element={reportElement}/></>}
  </section>;
 }

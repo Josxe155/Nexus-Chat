@@ -73,6 +73,8 @@ Capturas de la aplicación con **datos ficticios de demostración**. No incluyen
 
 Esta distribución es exclusiva de computadora. Nexus Messenger conserva sus pantallas móviles. Se usan los datos reales del chat y del proveedor; no se inventan nombres de paquetes de stickers.
 
+La corrección **v26.94.1** limita la preparación inicial de voz a dos minutos, muestra progreso y aísla la pintura de informes. [Estado actual, verificación y pendientes](docs/ESTADO-ACTUAL-NEXUS.md).
+
 La versión **v26.94.0** sustituye meSpeak por KokoroJS para leer respuestas e informes con una voz neuronal española. La síntesis ocurre en el navegador y la primera lectura necesita descargar el modelo. [Funcionamiento, requisitos y comprobaciones](docs/VOZ-KOKOROJS.md).
 
 La corrección **v26.93.1** permite confirmar propuestas escribiendo solo **CONFIRMAR** y mejora la recuperación del acceso al dashboard con renovación de sesión y reintentos limitados. [Funcionamiento y comprobaciones](docs/CONFIRMACION-Y-ACCESO-26.93.1.md).

@@ -180,3 +180,7 @@ footer span{color:var(--accent)}
 .dashboard-voice-control .animate-spin,.icon-action .animate-spin{animation:nexus-speech-preparing 1s linear infinite}
 @keyframes nexus-speech-preparing{to{transform:rotate(360deg)}}
 @media(prefers-reduced-motion:reduce){.dashboard-voice-control .animate-spin,.icon-action .animate-spin{animation:none}}
+
+/* Keep growing reports in their own paint area; avoid sticky hover filter layers on touch. */
+.dashboard-report-panel{position:relative;isolation:isolate;contain:layout paint}
+.dashboard-report-panel .actions button,.dashboard-report-panel .actions button:hover{filter:none;transition:background-color .16s ease,color .16s ease}

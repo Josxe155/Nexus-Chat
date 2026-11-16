@@ -1,3 +1,5 @@
+> Corrección vigente v26.94.1: [estado actual y preparación limitada](ESTADO-ACTUAL-NEXUS.md). El primer audio tiene un límite absoluto de dos minutos aunque continúen los avisos de progreso.
+
 # Texto a voz con KokoroJS — v26.94.0
 
 La lectura de respuestas y de informes sustituye meSpeak por **KokoroJS 1.2.1**, modelo `onnx-community/Kokoro-82M-v1.0-ONNX`, cuantización `q8` y voz española `ef_dora`. Se ejecuta en un Web Worker mediante WebAssembly, sin servidor de síntesis, clave de voz ni envío del texto a una API de audio.

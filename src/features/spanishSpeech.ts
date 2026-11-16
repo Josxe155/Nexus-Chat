@@ -2,15 +2,15 @@ import {spanishSpeechChunks} from './speechChunks';
 let idleWorker:Worker|undefined,idleTimeout:ReturnType<typeof setTimeout>|undefined;
 let stopCurrent:(()=>void)|undefined;
 
-export function playSpanish(text:string,onState:(state:'preparing'|'playing'|'idle')=>void,onError:()=>void){
+export function playSpanish(text:string,onState:(state:'preparing'|'playing'|'idle')=>void,onError:()=>void,onProgress?:(percent:number|undefined)=>void){
  stopCurrent?.();
  const chunks=spanishSpeechChunks(text);
  let context:AudioContext|undefined,worker:Worker|undefined,stopped=false,index=0,busy=false,retries=0,nextStart=0;
- let timeout:ReturnType<typeof setTimeout>|undefined;
+ let timeout:ReturnType<typeof setTimeout>|undefined,firstAudioDeadline:ReturnType<typeof setTimeout>|undefined;
  const sources=new Set<AudioBufferSourceNode>();
  const resume=()=>{if(!stopped&&context&&context.state!=='closed')void context.resume().catch(()=>{});};
  const stop=(keepModel=false)=>{
-  if(stopped){if(!keepModel&&idleWorker===worker){idleWorker?.terminate();idleWorker=undefined;clearTimeout(idleTimeout);}return;}stopped=true;clearTimeout(timeout);
+  if(stopped){if(!keepModel&&idleWorker===worker){idleWorker?.terminate();idleWorker=undefined;clearTimeout(idleTimeout);}return;}stopped=true;clearTimeout(timeout);clearTimeout(firstAudioDeadline);
   if(stopCurrent===stop)stopCurrent=undefined;
   if(keepModel&&worker&&!busy){const parked=worker;idleWorker?.terminate();clearTimeout(idleTimeout);idleWorker=parked;parked.onmessage=null;parked.onerror=()=>{if(idleWorker===parked){parked.terminate();idleWorker=undefined;}};idleTimeout=setTimeout(()=>{if(idleWorker===parked){parked.terminate();idleWorker=undefined;}},60000);}
   else worker?.terminate();
@@ -36,11 +36,11 @@ export function playSpanish(text:string,onState:(state:'preparing'|'playing'|'id
  const createWorker=()=>{
   const generator=idleWorker??new Worker(new URL('../dashboard/reportVoice.worker.ts',import.meta.url),{type:'module'});idleWorker=undefined;clearTimeout(idleTimeout);worker=generator;
   generator.onerror=event=>{event.preventDefault();if(worker===generator)retry();};
-  generator.onmessage=async(event:MessageEvent<ArrayBuffer|null|{type:'progress'}>)=>{
+  generator.onmessage=async(event:MessageEvent<ArrayBuffer|null|{type:'progress';percent?:number}>)=>{
    if(stopped||worker!==generator)return;
    const wav=event.data;
    if(!wav){retry();return;}
-   if(!(wav instanceof ArrayBuffer)){clearTimeout(timeout);timeout=setTimeout(retry,180000);return;}
+   if(!(wav instanceof ArrayBuffer)){onProgress?.(wav.percent);clearTimeout(timeout);timeout=setTimeout(retry,180000);return;}
    clearTimeout(timeout);
    try{
     const audio=context!;const buffer=await audio.decodeAudioData(wav);
@@ -49,12 +49,14 @@ export function playSpanish(text:string,onState:(state:'preparing'|'playing'|'id
     const source=audio.createBufferSource();source.buffer=buffer;source.connect(audio.destination);sources.add(source);
     source.onended=()=>{source.disconnect();sources.delete(source);if(!stopped)pump();};
     // Prepare one job ahead and schedule it against the audio clock to avoid gaps.
-    const start=Math.max(audio.currentTime+0.025,nextStart);source.start(start);nextStart=start+buffer.duration;
+    const start=Math.max(audio.currentTime+0.025,nextStart);source.start(start);clearTimeout(firstAudioDeadline);nextStart=start+buffer.duration;
     index++;busy=false;retries=0;onState('playing');pump();
    }catch{retry();}
   };
  };
  stopCurrent=stop;onState('preparing');
+ // A fixed ceiling cannot be extended by progress events or an automatic retry.
+ firstAudioDeadline=setTimeout(fail,120000);
  try{
   context=new AudioContext();createWorker();
   document.addEventListener('visibilitychange',resume);window.addEventListener('pointerdown',resume);
