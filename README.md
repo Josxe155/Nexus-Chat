@@ -52,7 +52,9 @@ Nexus Chat reúne conversaciones, archivos, estados, comunidades y llamadas en u
 > [!NOTE]
 > Es un proyecto en desarrollo. Las funciones dependen de los permisos del navegador, la conexión y las cuotas de los proveedores. El alcance y las diferencias pendientes se describen en [PENDIENTES-WHATSAPP.md](docs/PENDIENTES-WHATSAPP.md).
 
-El próximo bloque pendiente incluye favicon e iconos transparentes, Ajustes, sus categorías e información de contacto. El estado y los criterios de cierre están en [la lista de pendientes](docs/PENDIENTES-WHATSAPP.md#prioridades-del-9-de-noviembre-de-2026).
+Los siguientes bloques de trabajo incluyen Ajustes, información de contacto, copias y restauración, y pruebas físicas de multimedia. El estado y los criterios de cierre están en [la lista de pendientes](docs/PENDIENTES-WHATSAPP.md#prioridades-del-9-de-noviembre-de-2026).
+
+La corrección **v26.101.1** añade los índices que faltaban al abrir el historial y corrige la recuperación de errores y solicitudes simultáneas de paginación. Incluye una revisión de Ajustes, voz, emojis, contactos, dashboard y permisos. [Causa, pruebas y límites](docs/AUDITORIA-26.101.1.md).
 
 La versión **v26.101.0** recuerda la cuenta y la opción de sincronizar contactos con Google. Usa el permiso del proveedor Google de Firebase y People API, evitando el recorrido de Apps Script con varias cuentas. [Comportamiento, autorización y pruebas pendientes](docs/CONTACTOS-PERSISTENTES-26.101.0.md).
 

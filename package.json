@@ -55,6 +55,8 @@
     "test:speech": "node --import tsx scripts/speech.test.ts",
     "test:google-contacts:apps-script": "node scripts/google-contacts-apps-script.test.cjs",
     "test:google-contacts:bridge": "node --import tsx scripts/google-contacts-bridge.test.ts",
+    "test:history:emulators": "node scripts/history-emulator.test.cjs",
+    "test:history": "node --import tsx scripts/paged-messages.test.ts",
     "test:browser-permissions": "node --import tsx scripts/browser-permissions.test.ts"
   },
   "dependencies": {

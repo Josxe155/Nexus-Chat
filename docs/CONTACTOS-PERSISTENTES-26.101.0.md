@@ -28,7 +28,7 @@ Las pantallas nativas de acceso y consentimiento pertenecen a Google: sus contro
 - 37 comprobaciones de navegador con servicios simulados (celular 13/13, tablet 12/12 y computadora 12/12: 100 % de estos casos en cada tamaño): formularios nuevo/editar a 390, 820 y 1440 px; crear, reutilizar acceso, recargar, desactivar, recuperar preferencias, invitado y distribución. No equivale a pruebas físicas.
 - Prueba de configuración real: la redirección existente abre la pantalla oficial de Google con el permiso de contactos, sin introducir credenciales ni escribir una agenda.
 
-La prueba física en Chrome y Samsung Internet con dos cuentas, el consentimiento completo y el primer guardado real permanecen pendientes del propietario. Google puede exigir que el permiso sensible de contactos esté publicado/verificado o que la cuenta esté incluida como usuario de prueba. Una pantalla de acceso correcta no acredita ese consentimiento completo.
+El propietario confirmó posteriormente un guardado real correcto en los contactos de Google desde Samsung Internet. La prueba física en Chrome con dos cuentas permanece pendiente. Google puede exigir que el permiso sensible de contactos esté publicado/verificado o que la cuenta esté incluida como usuario de prueba. Una pantalla de acceso correcta no acredita ese consentimiento completo.
 
 TypeScript, enlaces de documentación, 228 pruebas unitarias del proyecto y compilación de Hosting completados. Estos porcentajes no describen el avance total de Nexus ni sustituyen las pruebas físicas.
 

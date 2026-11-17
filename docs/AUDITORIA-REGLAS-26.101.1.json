@@ -1,0 +1,12 @@
+{
+  "score": 4,
+  "summary": "Evaluación acotada de las reglas publicadas, que coinciden con el repositorio, y de los recorridos cubiertos por los emuladores. No se reprodujeron accesos ajenos ni escaladas en esos casos. No es una garantía de seguridad absoluta ni una puntuación de avance del producto.",
+  "findings": [
+    {
+      "check": "Type Safety / Storage Abuse",
+      "severity": "minor",
+      "issue": "La regla genérica users/{uid}/private/{id} permite al titular autenticado escribir varios documentos de preferencias sin un esquema específico. El propietario puede introducir campos o tipos no previstos en sus propios ajustes. Esta observación no concede acceso a otros usuarios ni roles administrativos.",
+      "recommendation": "Inventariar los documentos privados y sus formatos anteriores; aplicar validación de tipo y tamaño por documento con pruebas de compatibilidad. Se conserva como mejora pendiente y no se cambian permisos durante la corrección del historial."
+    }
+  ]
+}
