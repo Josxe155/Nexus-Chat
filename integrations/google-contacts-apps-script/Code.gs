@@ -9,10 +9,24 @@ var NEXUS_USERNAME_ = 'Nexus Chat · usuario';
 function doGet() {
   try {
     nexusAccount_();
-    People.People.Connections.list('people/me', {pageSize: 1, personFields: 'names'});
-    return nexusJSON_({ok: true, protocolo: NEXUS_CONTACTS_PROTOCOL_, mensaje: 'Conexión con los contactos de Google correcta.'});
   } catch (error) {
-    return nexusJSON_({ok: false, protocolo: NEXUS_CONTACTS_PROTOCOL_, mensaje: 'No se pudo comprobar la cuenta o el permiso de contactos.'});
+    var code = error && error.message;
+    var messages = {
+      NEXUS_EMAIL_PERMISSION: 'Autoriza el permiso de correo de la cuenta. Revisa userinfo.email en appsscript.json.',
+      NEXUS_EMAIL_UNAVAILABLE: 'Google no devolvió el correo. Comprueba el permiso de correo y Ejecutar como: usuario que accede.',
+      NEXUS_ACCOUNT_MISMATCH: 'La cuenta activa no coincide con la que ejecuta el script. Configura Ejecutar como: usuario que accede.'
+    };
+    var known = Object.prototype.hasOwnProperty.call(messages, code);
+    return nexusJSON_({ok: false, protocolo: NEXUS_CONTACTS_PROTOCOL_, revision: 2, paso: 'cuenta', codigo: known ? code : 'ACCOUNT_CHECK_FAILED', mensaje: known ? messages[code] : 'No se pudo comprobar la cuenta. Revisa la autorización y la configuración de ejecución.'});
+  }
+  if (typeof People === 'undefined') {
+    return nexusJSON_({ok: false, protocolo: NEXUS_CONTACTS_PROTOCOL_, revision: 2, paso: 'contactos', codigo: 'PEOPLE_SERVICE_MISSING', mensaje: 'Añade People API v1 en Servicios del proyecto de Apps Script.'});
+  }
+  try {
+    People.People.Connections.list('people/me', {pageSize: 1, personFields: 'names'});
+    return nexusJSON_({ok: true, protocolo: NEXUS_CONTACTS_PROTOCOL_, revision: 2, mensaje: 'Conexión con los contactos de Google correcta.'});
+  } catch (error) {
+    return nexusJSON_({ok: false, protocolo: NEXUS_CONTACTS_PROTOCOL_, revision: 2, paso: 'contactos', codigo: 'CONTACTS_ACCESS_FAILED', mensaje: 'No se pudo leer la agenda. Comprueba People API habilitada y el permiso de contactos concedido.'});
   }
 }
 
@@ -79,11 +93,18 @@ function saveNexusContact(ticket) {
 }
 
 function nexusAccount_() {
-  var active = Session.getActiveUser().getEmail().toLowerCase();
-  var effective = Session.getEffectiveUser().getEmail().toLowerCase();
-  if (!active || active !== effective) throw new Error('ACCOUNT');
+  var active, effective;
+  try {
+    active = Session.getActiveUser().getEmail().trim().toLowerCase();
+    effective = Session.getEffectiveUser().getEmail().trim().toLowerCase();
+  } catch (error) {
+    throw new Error('NEXUS_EMAIL_PERMISSION');
+  }
+  if (!active) throw new Error('NEXUS_EMAIL_UNAVAILABLE');
+  if (active !== effective) throw new Error('NEXUS_ACCOUNT_MISMATCH');
   return active;
 }
+
 function nexusContact_(input) {
   if (!input || typeof input !== 'object' || Array.isArray(input)) throw new Error('CONTACT');
   var allowed = ['owner', 'uid', 'email', 'first', 'last', 'username', 'phone'];

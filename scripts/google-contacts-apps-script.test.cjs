@@ -34,3 +34,12 @@ test('el botón de vista previa confirma el guardado y permite reintentar tras e
   if(success){done({ok:true});assert.match(statusNode.textContent,/Contacto guardado/);assert.equal(button.disabled,true)}else{fail();assert.match(statusNode.textContent,/No se pudo confirmar/);assert.equal(button.disabled,false)}
  }
 });
+
+test('el diagnóstico separa correo ausente, permiso denegado y cuenta distinta sin exponer correos',()=>{
+ const cases=[['NEXUS_EMAIL_UNAVAILABLE',f=>{f.c.Session.getActiveUser=()=>({getEmail:()=>''})}],['NEXUS_EMAIL_PERMISSION',f=>{f.c.Session.getActiveUser=()=>{throw Error('token privado y correo owner@example.test')}}],['NEXUS_ACCOUNT_MISMATCH',f=>{f.c.Session.getEffectiveUser=()=>({getEmail:()=> 'other@example.test'})}]];
+ for(const[code,change]of cases){const f=fixture();change(f);const response=JSON.parse(f.c.doGet().text);assert.equal(response.ok,false);assert.equal(response.revision,2);assert.equal(response.paso,'cuenta');assert.equal(response.codigo,code);assert.equal(f.calls.length,0);assert.equal(f.writes.length,0);assert.ok(!JSON.stringify(response).includes('@'));assert.ok(!JSON.stringify(response).includes('token privado'))}
+});
+test('distingue People no añadido y fallo de agenda sin devolver errores internos',()=>{
+ const missing=fixture();delete missing.c.People;assert.equal(JSON.parse(missing.c.doGet().text).codigo,'PEOPLE_SERVICE_MISSING');
+ const denied=fixture({list:()=>{throw Error('secreto privado')}}),response=JSON.parse(denied.c.doGet().text);assert.equal(response.paso,'contactos');assert.equal(response.codigo,'CONTACTS_ACCESS_FAILED');assert.equal(denied.writes.length,0);assert.ok(!JSON.stringify(response).includes('secreto privado'));
+});

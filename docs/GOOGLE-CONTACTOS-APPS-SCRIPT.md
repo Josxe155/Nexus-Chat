@@ -19,7 +19,21 @@ La URL pública no permite editar el proyecto. No se dispone de acceso al editor
 3. Si el proyecto tiene permisos OAuth explícitos, incorporar los dos ámbitos del [manifiesto](../integrations/google-contacts-apps-script/appsscript.json): contactos y correo de la cuenta. El manifiesto completo es para este proyecto dedicado; no reemplazar el de otro proyecto que tenga servicios adicionales. Con detección automática, Apps Script infiere los permisos del código.
 4. Guardar. Abrir Implementar → Administrar implementaciones → lápiz → Nueva versión. **Ejecutar como: usuario que accede a la aplicación web**. Acceso: usuarios con cuenta de Google, según las opciones disponibles para esa cuenta.
 5. Implementar y abrir la URL `/exec`. Autorizar los permisos de contactos y correo si Google lo solicita. Si hay problemas con varias cuentas abiertas, probar en incógnito iniciando una sola cuenta.
-6. La respuesta correcta incluye `ok:true`, `protocolo:"nexus-contacts-preview-v1"` y el mensaje de conexión. No escribir contactos reales solo para obtener este estado: el GET no escribe nada.
+6. La respuesta correcta incluye `ok:true`, `protocolo:"nexus-contacts-preview-v1"`, `revision:2` y el mensaje de conexión. No escribir contactos reales solo para obtener este estado: el GET no escribe nada.
+
+## Diagnóstico del acceso (revisión 2)
+
+La captura posterior del propietario mostró `ok:false` con el protocolo esperado. Por tanto se publicó código nuevo, pero el mensaje inicial no permitía distinguir la comprobación de identidad de la lectura de contactos. No se ha confirmado la causa concreta en su proyecto.
+
+La revisión 2 separa `paso:cuenta` de `paso:contactos` y devuelve códigos constantes sin correos, tokens ni errores internos. El guardado conserva la comprobación de cuenta activa/efectiva; no se elimina para hacer pasar la prueba.
+
+- `NEXUS_EMAIL_PERMISSION`: la lectura de identidad lanzó un error; revisar el permiso `userinfo.email` y volver a autorizar.
+- `NEXUS_EMAIL_UNAVAILABLE`: Google devolvió el correo vacío; revisar autorización, políticas de cuenta y ejecución como usuario que accede.
+- `NEXUS_ACCOUNT_MISMATCH`: las cuentas activa y efectiva difieren; revisar la configuración de ejecución.
+- `PEOPLE_SERVICE_MISSING`: falta el servicio avanzado People en el proyecto.
+- `CONTACTS_ACCESS_FAILED`: falló la consulta; comprobar habilitación de People API y consentimiento de contactos. Este código no identifica por sí solo la causa exacta de un rechazo de Google.
+
+Para fijar permisos explícitos en este proyecto dedicado: engranaje **Configuración del proyecto** → activar **Mostrar el archivo de manifiesto appsscript.json en el editor** → volver a Archivos → abrir `appsscript.json` → copiar el manifiesto adjunto → guardar → publicar **Nueva versión**. Al autorizar, conceder los permisos de contactos y correo que requiere esta integración. El usuario puede denegarlos; si los deniega la sincronización permanece deshabilitada.
 
 ## Funciones preparadas
 
@@ -36,7 +50,7 @@ La comprobación de correo solo se refiere a la cuenta Google que ejecuta el scr
 
 Ejecutar desde la raíz: `node scripts/google-contacts-apps-script.test.cjs`.
 
-Se aprobaron 15 pruebas con servicios simulados: GET sin escritura ni datos personales, identidad efectiva, vista previa segura, validación, tickets, creación, actualización con conservación de campos, paginación, lecturas incompletas, duplicados/etag, respuesta perdida, recuperación y bloqueo/cambio de cuenta, y manifiesto limitado.
+Se aprobaron 17 pruebas con servicios simulados: GET sin escritura ni datos personales, identidad efectiva, vista previa segura, validación, tickets, creación, actualización con conservación de campos, paginación, lecturas incompletas, duplicados/etag, respuesta perdida, recuperación y bloqueo/cambio de cuenta, y manifiesto limitado.
 
 Pendientes necesarios antes de activar el nuevo recorrido:
 
@@ -56,3 +70,5 @@ Esta preparación no cambia Firebase Hosting, las reglas ni los datos de usuario
 - [Comunicación con funciones de Apps Script](https://developers.google.com/apps-script/guides/html/communication).
 - [Restricciones del entorno HTML](https://developers.google.com/apps-script/guides/html/restrictions).
 - [Problemas con varias cuentas abiertas](https://developers.google.com/apps-script/guides/support/troubleshooting#issues_with_multiple_google_accounts).
+
+Referencia de identidad y permisos: [Session](https://developers.google.com/apps-script/reference/base/session) y [ámbitos OAuth](https://developers.google.com/apps-script/concepts/scopes).
