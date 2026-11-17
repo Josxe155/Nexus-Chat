@@ -44,7 +44,8 @@
     "test:voice-download": "node --import tsx scripts/voice-download.test.ts",
     "test:call-audio-output": "node --import tsx scripts/call-audio-output.test.ts",
     "test:background-notifications": "node scripts/background-notifications.test.cjs",
-    "test:voice-media-session": "node --import tsx scripts/voice-media-session.test.ts"
+    "test:voice-media-session": "node --import tsx scripts/voice-media-session.test.ts",
+    "test:security:emulators": "node scripts/security-audit-emulator.test.cjs"
   },
   "dependencies": {
     "@huggingface/transformers": "3.8.1",

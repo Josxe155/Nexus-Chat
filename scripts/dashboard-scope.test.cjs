@@ -2,7 +2,7 @@ const {initializeTestEnvironment,assertFails,assertSucceeds}=require('@firebase/
 const {doc,setDoc,getDoc,writeBatch,serverTimestamp}=require('firebase/firestore');
 const {createMockUserToken}=require('@firebase/util');
 const fs=require('fs'),path=require('path'),assert=require('node:assert/strict');
-(async()=>{const env=await initializeTestEnvironment({projectId:'demo-nexus',firestore:{host:'127.0.0.1',port:8085,rules:fs.readFileSync(path.join(__dirname,'../firestore.rules'),'utf8')},database:{host:'127.0.0.1',port:9015,rules:fs.readFileSync(path.join(__dirname,'../database.rules.json'),'utf8')}});try{
+(async()=>{const env=await initializeTestEnvironment({projectId:'demo-nexus',firestore:{host:'127.0.0.1',port:Number(process.env.FIRESTORE_EMULATOR_PORT||8085),rules:fs.readFileSync(path.join(__dirname,'../firestore.rules'),'utf8')},database:{host:'127.0.0.1',port:9015,rules:fs.readFileSync(path.join(__dirname,'../database.rules.json'),'utf8')}});try{
  await env.clearFirestore();await env.withSecurityRulesDisabled(async c=>{await setDoc(doc(c.firestore(),'dashboardAdmins/owner'),{enabled:true});await setDoc(doc(c.firestore(),'dashboardSecurity/owner'),{uid:'owner',email:'owner@example.org',enabled:true});await setDoc(doc(c.firestore(),'users/person'),{uid:'person',nombre:'Original'});});
  const db=env.authenticatedContext('owner',{email:'owner@example.org',email_verified:true,firebase:{sign_in_provider:'google.com'}}).firestore();
  for(const destination of ['users/person','users/person/private/profile','usernames/protected','nexusNumbers/protected','contactCodes/protected','mediaFiles/protected','publicConfig/assistantAdmin']){

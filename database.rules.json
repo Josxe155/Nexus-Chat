@@ -3,7 +3,7 @@
     ".read": "auth != null && auth.token.email_verified === true && (auth.token.firebase.sign_in_provider === 'google.com' || auth.token.firebase.sign_in_provider === 'password') && (root.child('dashboardAdmins').child(auth.uid).val() === true && root.child('dashboardSecurity/owner/enabled').val() === true && root.child('dashboardSecurity/owner/uid').val() === auth.uid && auth.token.email === root.child('dashboardSecurity/owner/email').val())",
     ".write": false,
     "presence": {
-      ".read": "auth != null && (auth.token.firebase.sign_in_provider !== 'password' || auth.token.email_verified === true || auth.token.email === 'guest.' + auth.uid.toLowerCase() + '@guests.nexus-chat.invalid') && root.child('moderatedUsers').child(auth.uid).val() !== true",
+      ".read": false,
       "$uid": {
         ".write": "(auth != null && (auth.token.firebase.sign_in_provider !== 'password' || auth.token.email_verified === true || auth.token.email === 'guest.' + auth.uid.toLowerCase() + '@guests.nexus-chat.invalid') && root.child('moderatedUsers').child(auth.uid).val() !== true && auth.uid === $uid) && root.child('moderatedUsers').child($uid).val() !== true",
         ".validate": "newData.hasChildren(['online','lastSeen'])",
@@ -15,7 +15,8 @@
         },
         "$other": {
           ".validate": false
-        }
+        },
+        ".read": "(auth != null && (auth.token.firebase.sign_in_provider !== 'password' || auth.token.email_verified === true || auth.token.email === 'guest.' + auth.uid.toLowerCase() + '@guests.nexus-chat.invalid') && root.child('moderatedUsers').child(auth.uid).val() !== true && auth.uid === $uid) && root.child('moderatedUsers').child($uid).val() !== true"
       },
       ".write": false
     },
@@ -201,7 +202,7 @@
         },
         "chunks": {
           "$index": {
-            ".validate": "newData.hasChildren(['iv','cipher'])",
+            ".validate": "$index.matches(/^(0|[1-9]|1[0-9])$/) && newData.hasChildren(['iv','cipher'])",
             "iv": {
               ".validate": "newData.isString() && newData.val().length === 16"
             },
@@ -215,7 +216,8 @@
         },
         "$other": {
           ".validate": false
-        }
+        },
+        ".validate": "newData.hasChildren(['owner']) && newData.child('owner').isString() && newData.child('owner').val().length > 0 && newData.child('owner').val().length <= 128"
       },
       ".write": false
     },

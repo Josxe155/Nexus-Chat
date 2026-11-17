@@ -1,4 +1,4 @@
-# Estado actual de Nexus Chat — v26.95.0
+# Estado actual de Nexus Chat — v26.95.1
 
 ## Implementado
 
@@ -9,6 +9,10 @@
 - Pantalla de cuenta bloqueada, logo oficial, favicon e iconos transparentes.
 - Lectura neuronal española con KokoroJS; necesita descargar y ejecutar el modelo en el navegador.
 - Sincronización del código con GitHub y publicación de entregas verificadas en Firebase Hosting.
+
+## Corrección v26.95.1
+
+Se corrigen submenús vacíos al ampliar Ajustes y los avisos persistentes/silenciosos de contactos. Las reglas acotan el esquema público, preservan identidad, restringen presencia antigua y validan multimedia. Se incorporan pruebas de abuso y acceso válido con emuladores. [Resultados y limitaciones de seguridad](AUDITORIA-26.95.1.md). La caducidad completa de lectura del historial y la cuota por cuenta no se presentan como resueltas.
 
 ## Actualización v26.95.0
 

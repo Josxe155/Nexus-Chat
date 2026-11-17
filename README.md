@@ -73,6 +73,8 @@ Capturas de la aplicación con **datos ficticios de demostración**. No incluyen
 
 Esta distribución es exclusiva de computadora. Nexus Messenger conserva sus pantallas móviles. Se usan los datos reales del chat y del proveedor; no se inventan nombres de paquetes de stickers.
 
+La corrección **v26.95.1** repara la navegación de Ajustes al cambiar el tamaño, unifica avisos transitorios y endurece perfiles públicos, identidad, presencia antigua y multimedia en las reglas. Incluye pruebas de permisos y un informe con los límites que siguen pendientes. [Revisión general y auditoría](docs/AUDITORIA-26.95.1.md).
+
 La actualización **v26.95.0** reemplaza el silencio del audio recibido por selección real de salida en llamadas, ajusta los controles de celular según las referencias y centraliza los avisos de pestañas en segundo plano en el service worker. Las notas de voz incorporan controles de Media Session. [Alcance, pruebas y límites de navegador](docs/LLAMADAS-Y-SEGUNDO-PLANO-26.95.0.md).
 
 La corrección **v26.94.2** conserva los bloques descargados de voz y continúa desde el avance guardado al reintentar; el modelo sigue pesando unos 92 MB. [Descarga reanudable y límites](docs/DESCARGA-VOZ-REANUDABLE.md).

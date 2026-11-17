@@ -42,6 +42,8 @@ import {avatar} from './avatar';import AppearancePanel,{DesktopStylePreview} fro
 const audienceNames:Record<string,string>={everyone:'Todos',contacts:'Mis contactos',except:'Mis contactos excepto…',nobody:'Nadie',only:'Solo compartir con…',lastSeen:'Igual que la hora de última vez'};
 const durations=[[0,'Desactivados'],[86400000,'24 horas'],[604800000,'7 días'],[7776000000,'90 días']] as const;
 export function Toggle({label,description,value,onChange,disabled=false}:{label:string;description?:string;value:boolean;onChange:(value:boolean)=>void;disabled?:boolean}){return <label className="setting-toggle"><span><strong>{label}</strong>{description&&<small>{description}</small>}</span><input type="checkbox" role="switch" checked={value} disabled={disabled} onChange={event=>onChange(event.target.checked)}/></label>;}
+// Preserve navigation when a phone-only submenu outlives its narrow layout.
+const wideSettingsAliases:Record<string,string>={appIcon:'appAppearance',appStyle:'appAppearance',animation:'appAppearance',chatTransfer:'chats',chatHistory:'chats',privacyContacts:'contacts',privacyContact:'privacy',privacyInfo:'privacy',privacyChats:'privacy',privacyAccount:'privacy',livePrivacy:'privacy',noticeBadge:'notifications',focus:'notifications',storageTemporary:'storage',usage:'storage',helpCenter:'help',helpFeedback:'help',helpReports:'help',helpPolicy:'webPolicies',helpAbout:'aboutWeb',contactQr:'profile',profilePhoto:'profile',profilePhotoEdit:'profile',voiceTranscripts:'chats',settingsSearch:''};
 export default function SettingsCenter({user,users,chats,desktop=false,onUserChange,onLogout,onExit,onContact,onSelectChat,initialSection=''}:{user:UserProfile;users:UserProfile[];chats:Chat[];desktop?:boolean;onUserChange:(user:UserProfile)=>void;onLogout:()=>void;onExit:()=>void;onContact:(uid:string)=>Promise<void>;onSelectChat:(id:string)=>void;initialSection?:string}){
  const phone=usePhoneExpressions()&&!desktop,personal=usePersonal(),chatAppearance=useAppearance(user.uid);
  const phoneScroll=useRef<HTMLDivElement>(null);
@@ -55,7 +57,7 @@ export default function SettingsCenter({user,users,chats,desktop=false,onUserCha
  const [stack,setStack]=useState<string[]>(initialSection?[initialSection==='listCreate'?'lists':initialSection==='security'?'account':initialSection==='statusPrivacy'?'privacy':initialSection,...(initialSection==='security'?['security']:initialSection==='statusPrivacy'?['audience']:[])]:[]),[error,setError]=useState(''),[notice,setNotice]=useState(''),[busy,setBusy]=useState(false);
  const [privacy,setPrivacy]=useState(()=>normalizePrivacy(user.privacy,chats,user.uid)),[name,setName]=useState(user.nombre),[username,setUsername]=useState(user.username),[bio,setBio]=useState(user.bio),[photo,setPhoto]=useState(user.foto),[photoFile,setPhotoFile]=useState<File>(),[password,setPassword]=useState(''),[confirmation,setConfirmation]=useState(''),[selectedChats,setSelectedChats]=useState<string[]>([]),[push,setPush]=useState(()=>pushEnabled(user.uid));
  const [audience,setAudience]=useState<'lastSeen'|'photo'|'info'|'status'|'group'>(initialSection==='statusPrivacy'?'status':'lastSeen'),[mode,setMode]=useState(themePreference);
- const preferences=usePreferences(user.uid),page=stack.at(-1)||'',urls=useMediaURLs([{id:'profile',fileUrl:phone?user.foto:photo,fileSize:1,force:true}],user.uid),[preview,setPreview]=useState('');
+ const preferences=usePreferences(user.uid),rawPage=stack.at(-1)||'',page=phone?rawPage:(wideSettingsAliases[rawPage]??rawPage),urls=useMediaURLs([{id:'profile',fileUrl:phone?user.foto:photo,fileSize:1,force:true}],user.uid),[preview,setPreview]=useState('');
  useEffect(()=>{
   const expiry=user.bioExpiresAt||0;
   if(expiry<=Date.now())return;
@@ -63,6 +65,8 @@ export default function SettingsCenter({user,users,chats,desktop=false,onUserCha
   return()=>clearTimeout(timer);
  },[user.bioExpiresAt,bioClock]);
  usePhoneSettingsCover(phone&&!page,phoneScroll);
+ useEffect(()=>{if(phone)return;setStack(previous=>{const mapped=previous.map(value=>wideSettingsAliases[value]??value).filter((value,index,all)=>value&&(!index||value!==all[index-1]));return JSON.stringify(mapped)===JSON.stringify(previous)?previous:mapped;});},[phone]);
+ useEffect(()=>{if(!error&&!notice)return;const timer=setTimeout(()=>{setError('');setNotice('');},3000);return()=>clearTimeout(timer);},[error,notice]);
  const activeBio=user.bioExpiresAt&&user.bioExpiresAt<=Math.max(bioClock,Date.now())?'':user.bio;
  useEffect(()=>{if(phone)phoneScroll.current?.scrollTo(0,0);setExporting(false);setHistoryAction(null);},[phone,page]);
  useEffect(()=>{if(!photoFile){setPreview('');return;}const url=URL.createObjectURL(photoFile);setPreview(url);return()=>URL.revokeObjectURL(url);},[photoFile]);
