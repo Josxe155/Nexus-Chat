@@ -23,7 +23,8 @@ jobs:
       - run: npm run test:references
       - run: npm run test:contact-menu
       - run: npm run test:google-contacts
-      - run: node scripts/google-contacts-apps-script.test.cjs
+      - run: npm run test:google-contacts:apps-script
+      - run: npm run test:google-contacts:bridge
       - run: npm run test:contacts
       - run: npm run test:message-policy
       - run: npm run test:poll-privacy

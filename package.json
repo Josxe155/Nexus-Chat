@@ -50,7 +50,9 @@
     "test:retention:emulators": "node scripts/massive-retention-emulator.test.cjs && node scripts/massive-realtime-emulator.test.cjs",
     "test:country": "node --import tsx scripts/country-location.test.ts",
     "test:country:emulators": "node scripts/country-number-emulator.test.cjs",
-    "test:speech": "node --import tsx scripts/speech.test.ts"
+    "test:speech": "node --import tsx scripts/speech.test.ts",
+    "test:google-contacts:apps-script": "node scripts/google-contacts-apps-script.test.cjs",
+    "test:google-contacts:bridge": "node --import tsx scripts/google-contacts-bridge.test.ts"
   },
   "dependencies": {
     "firebase": "^12.13.0",

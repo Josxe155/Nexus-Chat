@@ -1,4 +1,4 @@
-# Estado actual de Nexus Chat — v26.99.0
+# Estado actual de Nexus Chat — código v26.100.0, preparado
 
 ## Implementado
 
@@ -9,6 +9,10 @@
 - Pantalla de cuenta bloqueada, logo oficial, favicon e iconos transparentes.
 - Lectura remota española sin modelo local. Envía el texto leído al servicio de voz de Google; requiere conexión.
 - Sincronización del código con GitHub y publicación de entregas verificadas en Firebase Hosting.
+
+## Entrega preparada v26.100.0
+
+Los formularios Nuevo/Editar contacto incorporan autorización, confirmación y retorno mediante Apps Script. La revisión 2 del script fue autorizada por el propietario; falta publicar la revisión 3 para emparejarla con esta entrega. La publicación web depende de ese paso. [Alcance y pruebas](CONTACTOS-APPS-SCRIPT-26.100.0.md).
 
 ## Actualización v26.99.0
 

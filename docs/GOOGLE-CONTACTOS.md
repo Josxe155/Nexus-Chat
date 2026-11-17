@@ -1,4 +1,6 @@
-# Contactos de Google — v26.87.0
+# Contactos de Google — integración directa v26.87.0
+
+La entrega preparada v26.100.0 conecta el formulario mediante la aplicación web de Apps Script del propietario. [Alcance y estado de publicación](CONTACTOS-APPS-SCRIPT-26.100.0.md). Esta guía conserva el funcionamiento de la integración directa anterior; el permiso de Apps Script no se transfiere a sus tokens de navegador.
 
 La solicitud del propietario de completar la integración sustituye la retirada provisional de sincronización. El control ocupa el lugar del interruptor de la captura 223048, adaptado explícitamente a Google. No se añade un menú nuevo sin referencia.
 

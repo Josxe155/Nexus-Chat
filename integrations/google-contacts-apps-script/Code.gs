@@ -6,7 +6,8 @@ var NEXUS_NUMBER_ = 'Nexus Chat · número';
 var NEXUS_USERNAME_ = 'Nexus Chat · usuario';
 
 // Abrir /exec solo comprueba acceso. Nunca escribe ni devuelve la agenda.
-function doGet() {
+function doGet(event) {
+  if (event && event.parameter && event.parameter.mode === 'connect') return nexusConnect_(event.parameter);
   try {
     nexusAccount_();
   } catch (error) {
@@ -17,16 +18,16 @@ function doGet() {
       NEXUS_ACCOUNT_MISMATCH: 'La cuenta activa no coincide con la que ejecuta el script. Configura Ejecutar como: usuario que accede.'
     };
     var known = Object.prototype.hasOwnProperty.call(messages, code);
-    return nexusJSON_({ok: false, protocolo: NEXUS_CONTACTS_PROTOCOL_, revision: 2, paso: 'cuenta', codigo: known ? code : 'ACCOUNT_CHECK_FAILED', mensaje: known ? messages[code] : 'No se pudo comprobar la cuenta. Revisa la autorización y la configuración de ejecución.'});
+    return nexusJSON_({ok: false, protocolo: NEXUS_CONTACTS_PROTOCOL_, revision: 3, paso: 'cuenta', codigo: known ? code : 'ACCOUNT_CHECK_FAILED', mensaje: known ? messages[code] : 'No se pudo comprobar la cuenta. Revisa la autorización y la configuración de ejecución.'});
   }
   if (typeof People === 'undefined') {
-    return nexusJSON_({ok: false, protocolo: NEXUS_CONTACTS_PROTOCOL_, revision: 2, paso: 'contactos', codigo: 'PEOPLE_SERVICE_MISSING', mensaje: 'Añade People API v1 en Servicios del proyecto de Apps Script.'});
+    return nexusJSON_({ok: false, protocolo: NEXUS_CONTACTS_PROTOCOL_, revision: 3, paso: 'contactos', codigo: 'PEOPLE_SERVICE_MISSING', mensaje: 'Añade People API v1 en Servicios del proyecto de Apps Script.'});
   }
   try {
     People.People.Connections.list('people/me', {pageSize: 1, personFields: 'names'});
-    return nexusJSON_({ok: true, protocolo: NEXUS_CONTACTS_PROTOCOL_, revision: 2, mensaje: 'Conexión con los contactos de Google correcta.'});
+    return nexusJSON_({ok: true, protocolo: NEXUS_CONTACTS_PROTOCOL_, revision: 3, mensaje: 'Conexión con los contactos de Google correcta.'});
   } catch (error) {
-    return nexusJSON_({ok: false, protocolo: NEXUS_CONTACTS_PROTOCOL_, revision: 2, paso: 'contactos', codigo: 'CONTACTS_ACCESS_FAILED', mensaje: 'No se pudo leer la agenda. Comprueba People API habilitada y el permiso de contactos concedido.'});
+    return nexusJSON_({ok: false, protocolo: NEXUS_CONTACTS_PROTOCOL_, revision: 3, paso: 'contactos', codigo: 'CONTACTS_ACCESS_FAILED', mensaje: 'No se pudo leer la agenda. Comprueba People API habilitada y el permiso de contactos concedido.'});
   }
 }
 
@@ -34,6 +35,7 @@ function doGet() {
 // Este POST muestra una vista previa: la escritura requiere pulsar Guardar.
 function doPost(event) {
   try {
+    var bridge = event && event.parameter && event.parameter.state ? nexusReturnContext_(event.parameter) : null;
     var account = nexusAccount_();
     var raw = event && event.parameter && event.parameter.contact;
     if (typeof raw !== 'string' || raw.length > 4096) throw new Error('CONTACT');
@@ -41,9 +43,11 @@ function doPost(event) {
     if (contact.email !== account) throw new Error('ACCOUNT');
     var ticket = Utilities.getUuid();
     CacheService.getUserCache().put('nexus-contact-draft:' + ticket, JSON.stringify(contact), 300);
-    return HtmlService.createHtmlOutput(nexusPreview_(contact, account, ticket)).setTitle('Guardar contacto · Nexus Chat');
+    if (bridge) CacheService.getUserCache().put('nexus-contact-return:' + ticket, JSON.stringify(bridge), 300);
+    return HtmlService.createHtmlOutput(nexusPreview_(contact, account, ticket, bridge)).setTitle('Guardar contacto · Nexus Chat');
   } catch (error) {
-    return HtmlService.createHtmlOutput('<!doctype html><html lang="es"><meta charset="utf-8"><p>No se pudo preparar el contacto. Comprueba tu cuenta de Google y vuelve a Nexus Chat.</p></html>').setTitle('Nexus Chat');
+    var back = bridge ? '<a target="_top" href="' + nexusEscape_(nexusReturnURL_(bridge, {operation: 'save', ok: false})) + '">Volver a Nexus Chat</a>' : '';
+    return HtmlService.createHtmlOutput('<!doctype html><html lang="es"><meta charset="utf-8"><meta name="referrer" content="no-referrer"><p>No se pudo preparar el contacto. Comprueba tu cuenta de Google y vuelve a Nexus Chat.</p>' + back + '</html>').setTitle('Nexus Chat');
   }
 }
 
@@ -83,7 +87,10 @@ function saveNexusContact(ticket) {
     }
     if (!saved || !/^people\/[a-zA-Z0-9_-]+$/.test(saved.resourceName)) throw new Error('No se pudo confirmar el contacto guardado.');
     properties.setProperty(key, saved.resourceName);
-    return {ok: true, creado: !person};
+    var result = {ok: true, creado: !person};
+    var returnContext = CacheService.getUserCache().get('nexus-contact-return:' + ticket);
+    if (returnContext) result.returnUrl = nexusReturnURL_(nexusReturnContext_(JSON.parse(returnContext)), {operation: 'save', ok: true, email: account, created: !person});
+    return result;
   } catch (error) {
     // No raw provider errors, contact content or tokens in browser responses/logs.
     throw new Error('No se pudo confirmar el guardado. Revisa tu agenda antes de volver a intentarlo.');
@@ -150,12 +157,41 @@ function nexusFind_(contact) {
 }
 function nexusJSON_(value) { return ContentService.createTextOutput(JSON.stringify(value)).setMimeType(ContentService.MimeType.JSON); }
 function nexusEscape_(value) { return String(value).replace(/[&<>"']/g, function(char) { return {'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[char]; }); }
-function nexusPreview_(contact, account, ticket) {
+function nexusPreview_(contact, account, ticket, bridge) {
   return '<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="referrer" content="no-referrer"><title>Guardar contacto · Nexus Chat</title></head><body>' +
     '<h1>Guardar contacto</h1><p>' + nexusEscape_([contact.first, contact.last].filter(Boolean).join(' ')) + '</p><p>Cuenta de destino: ' + nexusEscape_(account) + '</p>' +
-    '<button id="save" type="button">Guardar contacto</button><p id="status" role="status"></p><script>' +
-    'var button=document.getElementById("save"),statusNode=document.getElementById("status");button.onclick=function(){button.disabled=true;statusNode.textContent="Guardando…";' +
-    'google.script.run.withSuccessHandler(function(){statusNode.textContent="Contacto guardado en tu cuenta de Google. Puedes volver a Nexus Chat.";})' +
-    '.withFailureHandler(function(){statusNode.textContent="No se pudo confirmar el guardado. Revisa tu agenda antes de volver a intentarlo.";button.disabled=false;})' +
+    '<button id="save" type="button">Guardar contacto</button><p id="status" role="status"></p><a id="return" target="_top" hidden>Volver a Nexus Chat</a><script>' +
+    'var failureReturn=' + JSON.stringify(bridge ? nexusReturnURL_(bridge, {operation: 'save', ok: false}) : '') + ';var button=document.getElementById("save"),statusNode=document.getElementById("status");button.onclick=function(){button.disabled=true;statusNode.textContent="Guardando…";' +
+    'google.script.run.withSuccessHandler(function(result){statusNode.textContent="Contacto guardado en tu cuenta de Google. Puedes volver a Nexus Chat.";if(result.returnUrl){var link=document.getElementById("return");link.href=result.returnUrl;link.hidden=false;}})' +
+    '.withFailureHandler(function(){statusNode.textContent="No se pudo confirmar el guardado. Revisa tu agenda antes de volver a intentarlo.";button.disabled=false;if(failureReturn){var back=document.getElementById("return");back.href=failureReturn;back.hidden=false;}})' +
     '.saveNexusContact(' + JSON.stringify(ticket) + ');};</script></body></html>';
+}
+
+
+// Only these origins can receive confirmation; never accept an arbitrary return URL.
+function nexusReturnContext_(params) {
+  if (!params || !/^[a-f0-9-]{36}$/i.test(params.state || '') || params.origin !== 'https://nexus-chat-nc.web.app') throw new Error('RETURN');
+  return {state: params.state, origin: params.origin};
+}
+function nexusReturnURL_(context, result) {
+  return context.origin + '/google-contact-return.html#' + encodeURIComponent(JSON.stringify({protocol: 'nexus-contacts-bridge-v1', state: context.state, operation: result.operation, ok: result.ok, email: result.email, created: result.created}));
+}
+function nexusConnect_(params) {
+  var bridge;
+  try { bridge = nexusReturnContext_(params); } catch (error) { return HtmlService.createHtmlOutput('<p>La solicitud de Nexus Chat no es válida.</p>'); }
+  var result;
+  try {
+    var account = nexusAccount_();
+    People.People.Connections.list('people/me', {pageSize: 1, personFields: 'names'});
+    result = {operation: 'connect', ok: true, email: account};
+  } catch (error) { result = {operation: 'connect', ok: false}; }
+  var message = result.ok ? 'Cuenta autorizada. Continúa para comprobarla en Nexus Chat.' : 'No se pudo autorizar la cuenta. Vuelve a Nexus Chat para intentarlo de nuevo.';
+  return HtmlService.createHtmlOutput('<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="referrer" content="no-referrer"></head><body><h1>Contactos · Nexus Chat</h1><p>' + message + '</p><a target="_top" href="' + nexusEscape_(nexusReturnURL_(bridge, result)) + '">Continuar en Nexus Chat</a></body></html>').setTitle('Contactos · Nexus Chat');
+}
+
+// Manual editor-only permission check. Never prints the account email or writes contacts.
+function autorizarYComprobarCuenta() {
+  ScriptApp.requireScopes(ScriptApp.AuthMode.FULL, ['https://www.googleapis.com/auth/contacts', 'https://www.googleapis.com/auth/userinfo.email']);
+  if (!Session.getActiveUser().getEmail()) throw new Error('Google no devolvió el correo de la cuenta.');
+  console.log('Permisos y acceso al correo comprobados.');
 }

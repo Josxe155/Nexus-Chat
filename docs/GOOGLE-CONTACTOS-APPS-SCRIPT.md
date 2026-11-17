@@ -1,6 +1,6 @@
 # Preparación de contactos mediante Apps Script
 
-Estado del 17 de noviembre de 2026: código preparado y probado localmente; pendiente de publicar en el proyecto del propietario y conectar el recorrido de navegador. La web publicada sigue en v26.99.0 con su integración directa de People API. No se presenta el nuevo enlace como una sincronización activa.
+Estado del 17 de noviembre de 2026: el propietario comprobó `ok:true` en la revisión 2. Se prepara v26.100.0 con conexión desde los formularios y revisión 3 del script. La revisión 3 incorpora el retorno confirmado necesario para la web; debe publicarse en Apps Script antes de activar la entrega en Hosting. [Implementación web y pruebas](CONTACTOS-APPS-SCRIPT-26.100.0.md).
 
 ## Evidencia y alcance
 
@@ -19,9 +19,9 @@ La URL pública no permite editar el proyecto. No se dispone de acceso al editor
 3. Si el proyecto tiene permisos OAuth explícitos, incorporar los dos ámbitos del [manifiesto](../integrations/google-contacts-apps-script/appsscript.json): contactos y correo de la cuenta. El manifiesto completo es para este proyecto dedicado; no reemplazar el de otro proyecto que tenga servicios adicionales. Con detección automática, Apps Script infiere los permisos del código.
 4. Guardar. Abrir Implementar → Administrar implementaciones → lápiz → Nueva versión. **Ejecutar como: usuario que accede a la aplicación web**. Acceso: usuarios con cuenta de Google, según las opciones disponibles para esa cuenta.
 5. Implementar y abrir la URL `/exec`. Autorizar los permisos de contactos y correo si Google lo solicita. Si hay problemas con varias cuentas abiertas, probar en incógnito iniciando una sola cuenta.
-6. La respuesta correcta incluye `ok:true`, `protocolo:"nexus-contacts-preview-v1"`, `revision:2` y el mensaje de conexión. No escribir contactos reales solo para obtener este estado: el GET no escribe nada.
+6. La respuesta correcta incluye `ok:true`, `protocolo:"nexus-contacts-preview-v1"`, `revision:3` y el mensaje de conexión. No escribir contactos reales solo para obtener este estado: el GET no escribe nada.
 
-## Diagnóstico del acceso (revisión 2)
+## Diagnóstico del acceso (desde la revisión 2)
 
 La captura posterior del propietario mostró `ok:false` con el protocolo esperado. Por tanto se publicó código nuevo, pero el mensaje inicial no permitía distinguir la comprobación de identidad de la lectura de contactos. No se ha confirmado la causa concreta en su proyecto.
 
@@ -50,15 +50,14 @@ La comprobación de correo solo se refiere a la cuenta Google que ejecuta el scr
 
 Ejecutar desde la raíz: `node scripts/google-contacts-apps-script.test.cjs`.
 
-Se aprobaron 17 pruebas con servicios simulados: GET sin escritura ni datos personales, identidad efectiva, vista previa segura, validación, tickets, creación, actualización con conservación de campos, paginación, lecturas incompletas, duplicados/etag, respuesta perdida, recuperación y bloqueo/cambio de cuenta, y manifiesto limitado.
+Se aprobaron 20 pruebas con servicios simulados: GET sin escritura ni datos personales, identidad efectiva, vista previa segura, validación, tickets, creación, actualización con conservación de campos, paginación, lecturas incompletas, duplicados/etag, respuesta perdida, recuperación y bloqueo/cambio de cuenta, y manifiesto limitado.
 
-Pendientes necesarios antes de activar el nuevo recorrido:
+Estado de los pasos necesarios:
 
-- Publicación de este archivo por el propietario y comprobación de su marcador de protocolo.
-- Probar con dos cuentas que el destino es la cuenta del visitante, no la del propietario del script.
-- Implementar y probar en Nexus el envío por formulario y el retorno de resultado. No basta con sustituir la URL de People API por `/exec`; deben resolverse autorización, ventanas bloqueadas, cancelación, errores y estado del formulario sin afirmar un guardado no confirmado.
-- Escritura real de un contacto de prueba autorizada por su propietario, repetición sin duplicado y conservación de sus otros campos. No se han realizado escrituras reales de agenda en esta preparación.
-- Recorrido de navegador y pruebas físicas. Avance de la integración del enlace por dispositivo: celular, tablet y computadora pendientes; no hay un porcentaje de funcionamiento real acreditado.
+- Publicación por el propietario: revisión 2 confirmada. Pendiente revisión 3, que añade las pantallas de confirmación y enlaces de retorno.
+- Conexión web implementada: transporte POST, reserva de ventana, retorno validado, cancelación y estado del formulario. Sus pruebas de navegador utilizan Google/Firebase simulados; no sustituyen publicar el script real.
+- Pendiente prueba con dos cuentas de Google y guardado real de un contacto autorizado, repetición sin duplicados y conservación de sus otros campos.
+- Pruebas físicas pendientes. La matriz de navegador de v26.100.0 tiene celular 9/9, tablet 9/9 y computadora 9/9 (100 % de esos nueve casos por tamaño).
 
 Esta preparación no cambia Firebase Hosting, las reglas ni los datos de usuarios. No requiere contratar un servidor ni activar Blaze. Apps Script ejecuta código en la infraestructura de Google y tiene sus propias cuotas y requisitos de consentimiento/verificación.
 
