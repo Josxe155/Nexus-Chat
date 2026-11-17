@@ -1,5 +1,7 @@
 # Preparación de contactos mediante Apps Script
 
+**Histórico:** v26.101.0 sustituye este recorrido en los formularios por [autorización con Firebase y People API](CONTACTOS-PERSISTENTES-26.101.0.md). No es necesario volver a implementar este script para la integración actual.
+
 Estado del 17 de noviembre de 2026: el propietario confirmó `ok:true` y `revision:3` en el script. v26.100.0 se publicó en Firebase Hosting con conexión desde los formularios y retorno comprobado. Las escrituras reales y el recorrido con una segunda cuenta siguen pendientes de pruebas. [Implementación web y pruebas](CONTACTOS-APPS-SCRIPT-26.100.0.md).
 
 ## Evidencia y alcance

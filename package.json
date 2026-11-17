@@ -21,6 +21,8 @@
     "test:dashboard-actions": "node scripts/dashboard-actions.test.cjs",
     "test:dashboard-owner": "node --import tsx scripts/dashboard-owner.test.ts",
     "test:account-references": "node --import tsx scripts/account-references.test.ts",
+    "test:google-contacts:preference": "node --import tsx scripts/google-contacts-preference.test.ts",
+    "test:google-contacts:privacy": "node scripts/google-contacts-privacy-emulator.test.cjs",
     "test:google-contacts": "node --import tsx scripts/google-contacts.test.ts",
     "test:contacts": "node --import tsx scripts/contacts.test.ts",
     "test:cleanup": "node --import tsx scripts/cleanup.test.ts",

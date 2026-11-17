@@ -1,6 +1,6 @@
 # Contactos de Google — integración directa v26.87.0
 
-La entrega v26.100.0 conecta el formulario mediante la aplicación web de Apps Script del propietario. [Alcance y estado de publicación](CONTACTOS-APPS-SCRIPT-26.100.0.md). Esta guía conserva el funcionamiento de la integración directa anterior; el permiso de Apps Script no se transfiere a sus tokens de navegador.
+La entrega actual v26.101.0 utiliza esta integración directa con autorización del proveedor Google de Firebase y preferencia privada persistente. [Recorrido actual y límites](CONTACTOS-PERSISTENTES-26.101.0.md). Apps Script queda como implementación histórica.
 
 La solicitud del propietario de completar la integración sustituye la retirada provisional de sincronización. El control ocupa el lugar del interruptor de la captura 223048, adaptado explícitamente a Google. No se añade un menú nuevo sin referencia.
 
@@ -18,16 +18,12 @@ Este alcance es sincronización **por contacto, desde Nexus hacia Google**. No i
 
 ## Configuración y autorización
 
-People API se habilitó y su estado `ENABLED` se verificó en el proyecto `nexus-chat-56d9d` (1003799815307), el 10 de noviembre de 2026. Se reutiliza el identificador público de cliente web de `src/drive-client.json`; no se necesitan un secreto de cliente, un servidor propio ni Firebase Blaze.
+People API se habilitó en el proyecto `nexus-chat-56d9d` (1003799815307). La autorización actual utiliza el proveedor Google ya configurado en Firebase Authentication mediante `reauthenticateWithPopup`; no utiliza Google Identity Services ni el cliente de Drive como módulo de autorización. No se necesitan un secreto nuevo, un servidor propio ni Firebase Blaze.
 
-El proyecto de Google Cloud debe mantener configurados:
+El proyecto debe mantener People API habilitada, el dominio de Nexus autorizado en Firebase Authentication, la redirección del proveedor Google y el permiso sensible `https://www.googleapis.com/auth/contacts` disponible en la configuración de consentimiento. La disponibilidad para usuarios externos depende de las condiciones de prueba/publicación y verificación de Google. Habilitar la API no completa esas condiciones por sí solo.
 
-1. People API habilitada.
-2. Cliente OAuth web con los orígenes JavaScript autorizados que se utilicen, incluido `https://nexus-chat-nc.web.app`.
-3. Pantalla de consentimiento y permiso `https://www.googleapis.com/auth/contacts`, además de `openid email` para verificar la cuenta. El permiso de contactos es sensible: la disponibilidad para usuarios externos depende de las condiciones de prueba/publicación y verificación de Google. Habilitar la API no completa esas condiciones por sí solo.
-4. Consentimiento individual desde el interruptor de la página. Un permiso denegado, una cuenta distinta o un error de configuración no activa la sincronización.
-
-Los tokens duran como máximo una hora y solo se conservan en memoria. Se descartan al cambiar la sesión; no se guardan en Firestore, Realtime Database, archivos, cookies, almacenamiento local ni GitHub. El recibo local contiene identificadores del vínculo, sin token ni datos de agenda. La renovación del permiso requiere una acción del usuario. Desactivar el interruptor detiene los siguientes guardados en Google; no revoca los permisos de otras funciones que utilicen el mismo cliente.
+La conexión comprueba el correo y el acceso a People API antes de activar el interruptor. Un permiso denegado, una cuenta distinta o un error de configuración no lo activa. La preferencia activada puede obtener un token nuevo al pulsar Guardar, sin forzar otra vez el consentimiento.
+Los tokens se conservan como máximo cincuenta minutos y solo se conservan en memoria. Se descartan al cambiar la sesión; no se guardan en Firestore, Realtime Database, archivos, cookies, almacenamiento local ni GitHub. El recibo local contiene identificadores del vínculo, sin token ni datos de agenda. La renovación del permiso requiere una acción del usuario. Desactivar el interruptor detiene los siguientes guardados en Google; no revoca los permisos de otras funciones que utilicen el mismo cliente.
 
 ## Fuentes oficiales
 

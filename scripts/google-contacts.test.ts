@@ -4,11 +4,11 @@ import {build} from 'esbuild';
 import {runInNewContext} from 'node:vm';
 const SCOPE='https://www.googleapis.com/auth/contacts';
 const draft={uid:'peer',first:'Alias',last:'Personal',username:'peer',phone:'+593991234567'};
-const bundle=build({entryPoints:['src/features/googleContacts.ts'],bundle:true,write:false,format:'cjs',platform:'browser',plugins:[{name:'isolated-auth',setup(builder){builder.onResolve({filter:/^(firebase\/auth|\.\.\/firebase|\.\.\/drive-client\.json)$/},args=>({path:args.path,namespace:'fixture'}));builder.onLoad({filter:/.*/,namespace:'fixture'},args=>({contents:args.path==='firebase/auth'?'export function onAuthStateChanged(auth,cb){globalThis.__authChanged=cb;}':args.path==='../firebase'?'export const auth=globalThis.__auth;':'export default {clientId:"public-test-client"};',loader:'js'}));}}]});
+const bundle=build({entryPoints:['src/features/googleContacts.ts'],bundle:true,write:false,format:'cjs',platform:'browser',plugins:[{name:'isolated-auth',setup(builder){builder.onResolve({filter:/^(firebase\/auth|\.\.\/firebase|\.\.\/drive-client\.json)$/},args=>({path:args.path,namespace:'fixture'}));builder.onLoad({filter:/.*/,namespace:'fixture'},args=>({contents:args.path==='firebase/auth'?`export function onAuthStateChanged(auth,cb){globalThis.__authChanged=cb;}export class GoogleAuthProvider{addScope(scope){this.scope=scope}setCustomParameters(params){this.params=params}static credentialFromResult(r){return r.credential}}export const reauthenticateWithPopup=(u,p)=>globalThis.__reauthenticate(u,p);`:args.path==='../firebase'?'export const auth=globalThis.__auth;':'export default {clientId:"public-test-client"};',loader:'js'}));}}]});
 async function fixture(options:any={}){
  const records:any[]=options.records||[],calls:any[]=[],storage=options.storage||new Map(),state={time:Date.now(),subject:'google-owner',email:'owner@example.test',scope:SCOPE,...options.state};
- const context:any={__auth:{currentUser:{uid:'owner',email:'owner@example.test',emailVerified:true,providerData:[{providerId:'google.com',uid:'google-owner'}]}},URL,URLSearchParams,Blob,AbortSignal,Response,setTimeout,clearTimeout,console,module:{exports:{}},exports:{},navigator:{locks:{request:async(name:string,action:()=>Promise<unknown>)=>action()}},localStorage:{getItem:(key:string)=>storage.get(key)||null,setItem:(key:string,value:string)=>storage.set(key,value),removeItem:(key:string)=>storage.delete(key)},Date:class extends Date{static now(){return state.time;}}};
- context.window={google:{accounts:{oauth2:{initTokenClient:(settings:any)=>{context.__oauth=settings;return {requestAccessToken:()=>settings.callback({access_token:'temporary-access-token',expires_in:3600,scope:state.scope})};}}}}};
+ const context:any={__auth:{currentUser:{uid:'owner',email:'owner@example.test',emailVerified:true,providerData:[{providerId:'google.com',uid:'google-owner'}]}},URL,URLSearchParams,Blob,AbortSignal,AbortController,Response,setTimeout,clearTimeout,console,module:{exports:{}},exports:{},navigator:{locks:{request:async(name:string,options:any,action?:()=>Promise<unknown>)=>(action||options)()}},localStorage:{getItem:(key:string)=>storage.get(key)||null,setItem:(key:string,value:string)=>storage.set(key,value),removeItem:(key:string)=>storage.delete(key)},Date:class extends Date{static now(){return state.time;}}};
+ context.__reauthenticate=(user:any,provider:any)=>{context.__provider=provider;context.__requests=(context.__requests||[]).concat(provider);return new Promise(resolve=>{context.__oauth={callback:(response:any)=>resolve({user,credential:response.scope?.includes(SCOPE)?{accessToken:response.access_token}:null})};if(!options.deferOAuth)context.__oauth.callback({access_token:'temporary-access-token',scope:state.scope});});};
  context.fetch=async(url:string,init:RequestInit={})=>{
   calls.push({url,init});
   if(options.fetch){const overridden=await options.fetch(url,init,records,context);if(overridden)return overridden;}
@@ -30,7 +30,7 @@ test('Google exige consentimiento, correo verificado y la cuenta vinculada a Nex
  const denied=await fixture({state:{scope:'openid email'}});await assert.rejects(denied.api.connectGoogleContacts('owner'),/Autoriza/);assert.equal(denied.calls.length,0);
 });
 test('la conexión comprueba People API sin escribir y no guarda el token en almacenamiento',async()=>{
- const f=await fixture();assert.equal(await f.api.connectGoogleContacts('owner'),'owner@example.test');assert.equal(f.api.googleContactsAccount('owner'),'owner@example.test');assert.equal(writes(f).length,0);assert.equal(f.storage.size,0);assert.equal(f.context.__oauth.include_granted_scopes,false);
+ const f=await fixture();assert.equal(await f.api.connectGoogleContacts('owner'),'owner@example.test');assert.equal(f.api.googleContactsAccount('owner'),'owner@example.test');assert.equal(writes(f).length,0);assert.equal(f.storage.size,0);assert.equal(f.context.__provider.scope,SCOPE);
 });
 test('un error de configuración no se presenta como conexión completada',async()=>{
  const f=await fixture({fetch:async(url:string)=>url.includes('/connections?')?new Response('{}',{status:403}):undefined});await assert.rejects(f.api.connectGoogleContacts('owner'),/Google no permitió/);assert.equal(f.api.googleContactsAccount('owner'),undefined);assert.equal(writes(f).length,0);
@@ -50,7 +50,7 @@ test('una lectura incompleta o permisos vencidos impiden nuevas escrituras',asyn
  const f=await fixture({fetch:async(url:string)=>url.includes('pageSize=1000')?new Response('{}',{status:401}):undefined});await f.api.connectGoogleContacts('owner');await assert.rejects(f.api.syncContactToGoogle('owner',draft),/Vuelve a conectar/);await assert.rejects(f.api.syncContactToGoogle('owner',draft),/Vuelve a conectar/);assert.equal(writes(f).length,0);
 });
 test('una respuesta perdida al crear bloquea otro POST incluso tras recargar',async()=>{
- const f=await fixture({fetch:async(url:string,init:any)=>{if(init.method==='POST')throw Error('connection lost');}});await f.api.connectGoogleContacts('owner');await assert.rejects(f.api.syncContactToGoogle('owner',draft),/connection lost/);await assert.rejects(f.api.syncContactToGoogle('owner',draft),/guardado anterior/);assert.equal(writes(f).length,1);
+ const f=await fixture({fetch:async(url:string,init:any)=>{if(init.method==='POST')throw Error('connection lost');}});await f.api.connectGoogleContacts('owner');await assert.rejects(f.api.syncContactToGoogle('owner',draft),/No se pudo confirmar|connection lost/);await assert.rejects(f.api.syncContactToGoogle('owner',draft),/guardado anterior/);assert.equal(writes(f).length,1);
  const reload=await fixture({storage:f.storage});await reload.api.connectGoogleContacts('owner');await assert.rejects(reload.api.syncContactToGoogle('owner',draft),/guardado anterior/);assert.equal(writes(reload).length,0);
 });
 test('recupera un contacto creado cuando se perdió la respuesta sin crear otro',async()=>{
@@ -76,4 +76,20 @@ test('vínculos duplicados, páginas repetidas y versiones ausentes bloquean esc
 });
 test('un cambio de sesión durante la consulta impide crear el contacto',async()=>{
  const f=await fixture({fetch:async(url:string,init:any,records:any[],context:any)=>{if(url.includes('pageSize=1000')){context.__auth.currentUser={uid:'other'};context.__authChanged();return Response.json({connections:[]});}}});await f.api.connectGoogleContacts('owner');await assert.rejects(f.api.syncContactToGoogle('owner',draft),/sesión cambió/);assert.equal(writes(f).length,0);
+});
+test('reutiliza el permiso sin forzar consentimiento y dirige a la cuenta vinculada',async()=>{
+ const f=await fixture();await f.api.connectGoogleContacts('owner');assert.equal(f.context.__provider.params.login_hint,'owner@example.test');assert.equal(f.context.__provider.params.prompt,undefined);
+ await f.api.syncContactToGoogle('owner',draft);await f.api.connectGoogleContacts('owner');await f.api.syncContactToGoogle('owner',{...draft,uid:'second'});assert.equal(f.context.__requests.length,1);
+ f.state.time+=3600001;await f.api.connectGoogleContacts('owner');assert.equal(f.context.__requests.length,2);assert.equal(f.context.__requests[1].params.prompt,undefined);
+});
+test('cancelar la autorización ignora respuestas tardías y permite reintentar',async()=>{
+ const f=await fixture({deferOAuth:true});const pending=f.api.connectGoogleContacts('owner'),late=f.context.__oauth;f.api.cancelGoogleContacts('owner');await assert.rejects(pending,/canceló/);await late.callback({access_token:'late-token',expires_in:3600,scope:SCOPE});assert.equal(f.api.googleContactsAccount('owner'),undefined);assert.equal(f.calls.length,0);
+ const retry=f.api.connectGoogleContacts('owner');await f.context.__oauth.callback({access_token:'new-token',expires_in:3600,scope:SCOPE});assert.equal(await retry,'owner@example.test');
+});
+test('la cancelación durante el guardado no confirma ni repite un POST incierto',async()=>{
+ let release:any;const f=await fixture({fetch:async(url:string,init:any)=>{if(init.method==='POST')return await new Promise(resolve=>release=()=>resolve(Response.json({resourceName:'people/late'})));}});await f.api.connectGoogleContacts('owner');const save=f.api.syncContactToGoogle('owner',draft);while(!release)await new Promise(resolve=>setTimeout(resolve,0));f.api.cancelGoogleContacts('owner');release();await assert.rejects(save,/canceló/);await assert.rejects(f.api.syncContactToGoogle('owner',draft),/guardado anterior/);assert.equal(writes(f).length,1);
+});
+test('la autorización comprueba el UID de reautenticación y distingue una ventana bloqueada',async()=>{
+ const f=await fixture();f.context.__reauthenticate=async()=>({user:{uid:'other'},credential:{accessToken:'must-not-use'}});await assert.rejects(f.api.connectGoogleContacts('owner'),/sesión cambió/);assert.equal(f.calls.length,0);assert.equal(f.context.__auth.currentUser.uid,'owner');
+ f.context.__reauthenticate=async()=>{throw {code:'auth/popup-blocked'}};await assert.rejects(f.api.connectGoogleContacts('owner'),/bloqueó la ventana/);assert.equal(f.api.googleContactsAccount('owner'),undefined);
 });

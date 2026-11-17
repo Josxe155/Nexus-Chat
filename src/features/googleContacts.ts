@@ -1,6 +1,6 @@
-import {onAuthStateChanged} from 'firebase/auth';
+import {onAuthStateChanged,GoogleAuthProvider,reauthenticateWithPopup} from 'firebase/auth';
 import {auth} from '../firebase';
-import config from '../drive-client.json';
+import {isGuestIdentity} from './guestIdentity';
 
 export const GOOGLE_CONTACTS_SCOPE='https://www.googleapis.com/auth/contacts';
 const PEOPLE='https://people.googleapis.com/v1/';
@@ -8,31 +8,20 @@ const FIELDS='names,metadata,clientData,userDefined';
 const LINK_KEY='nexusChat.contact.v1';
 const NUMBER_KEY='Nexus Chat · número';
 const USERNAME_KEY='Nexus Chat · usuario';
-type TokenResponse={access_token?:string;expires_in?:number;scope?:string;error?:string};
-type Identity={accounts:{oauth2:{initTokenClient:(options:{client_id:string;scope:string;hint?:string;include_granted_scopes:boolean;callback:(response:TokenResponse)=>void;error_callback:()=>void})=>{requestAccessToken:(options:{prompt:string})=>void}}}};
 type Connection={uid:string;subject:string;email:string;value:string;expires:number};
 type Person={resourceName?:string;etag?:string;metadata?:{deleted?:boolean;sources?:{type:string;id?:string;etag?:string}[]};names?:{givenName?:string;familyName?:string}[];clientData?:{key:string;value:string}[];userDefined?:{key:string;value:string}[]};
 export type GoogleNexusContact={uid:string;first:string;last:string;username?:string;phone?:string};
-let identity:Promise<Identity>|undefined,connection:Connection|undefined,epoch=0;
+let connection:Connection|undefined,epoch=0;
 let queue:Promise<unknown>=Promise.resolve();
-onAuthStateChanged(auth,()=>{epoch++;connection=undefined;});
+let authorization:{uid:string;cancel:()=>void}|undefined,operation:{uid:string;controller:AbortController}|undefined;
+export function cancelGoogleContacts(uid:string){if(authorization?.uid===uid)authorization.cancel();if(operation?.uid===uid)operation.controller.abort();}
+onAuthStateChanged(auth,()=>{epoch++;connection=undefined;authorization?.cancel();operation?.controller.abort();});
 function active(uid:string){if(auth.currentUser?.uid!==uid)throw Error('La sesión cambió. Vuelve a conectar tus contactos.');}
 function connected(uid:string){active(uid);if(!connection||connection.uid!==uid||connection.expires<=Date.now()+10000)throw Error('Vuelve a conectar tus contactos de Google antes de guardar.');return connection;}
 export function googleContactsAccount(uid:string){try{return connected(uid).email;}catch{return undefined;}}
-export function prepareGoogleContacts(){
- if(identity)return identity;
- identity=new Promise<Identity>((resolve,reject)=>{
-  const google=(window as Window&{google?:Identity}).google;if(google?.accounts?.oauth2){resolve(google);return;}
-  const element=document.createElement('script');element.src='https://accounts.google.com/gsi/client';element.async=true;
-  const fail=()=>{element.remove();identity=undefined;reject(Error('No se pudo preparar la conexión con Google. Revisa tu conexión.'));};
-  const timer=setTimeout(fail,20000);
-  element.onload=()=>{clearTimeout(timer);const loaded=(window as Window&{google?:Identity}).google;if(loaded?.accounts?.oauth2)resolve(loaded);else fail();};
-  element.onerror=()=>{clearTimeout(timer);fail();};document.head.append(element);
- });return identity;
-}
 async function jsonResponse(response:Response){
  if(!response.ok){
-  if(response.status===401)connection=undefined;
+  if(response.status===401||response.status===403)connection=undefined;
   if(response.status===401)throw Error('Vuelve a conectar tus contactos de Google antes de guardar.');
   if(response.status===403)throw Error('Google no permitió acceder a los contactos. Revisa el permiso concedido y la configuración de la aplicación.');
   if(response.status===409||response.status===412||response.status===400)throw Error('No se pudo actualizar el contacto de Google. Revisa sus datos y vuelve a intentarlo.');
@@ -43,38 +32,46 @@ async function jsonResponse(response:Response){
 }
 export async function connectGoogleContacts(uid:string){
  active(uid);const user=auth.currentUser!;
- if(!user.email||!user.emailVerified)throw Error('Verifica el correo de tu cuenta Nexus antes de conectar los contactos.');
+ if(isGuestIdentity(user)||!user.email||!user.emailVerified)throw Error('Verifica el correo de tu cuenta Nexus antes de conectar los contactos.');
  if(googleContactsAccount(uid))return connection!.email;
- const capturedEpoch=epoch,google=await prepareGoogleContacts();active(uid);
- if(epoch!==capturedEpoch)throw Error('La sesión cambió. Vuelve a conectar tus contactos.');
+ const capturedEpoch=epoch;
+ if(authorization)throw Error('Termina la autorización anterior antes de continuar.');
  const candidate=await new Promise<Connection>((resolve,reject)=>{
   let settled=false;
-  const fail=(error:Error)=>{if(settled)return;settled=true;clearTimeout(timer);reject(error);};
+  const fail=(error:Error)=>{if(settled)return;settled=true;clearTimeout(timer);if(authorization===job)authorization=undefined;reject(error);};
   const timer=setTimeout(()=>fail(Error('La conexión de contactos caducó. Vuelve a intentarlo.')),120000);
-  try{const client=google.accounts.oauth2.initTokenClient({client_id:config.clientId,scope:GOOGLE_CONTACTS_SCOPE+' openid email',hint:user.email!,include_granted_scopes:false,
-   callback:async response=>{try{
+  const job={uid,cancel:()=>fail(Error('Se canceló la conexión con Google.'))};authorization=job;
+  const provider=new GoogleAuthProvider();provider.addScope(GOOGLE_CONTACTS_SCOPE);
+  provider.setCustomParameters({login_hint:user.email!});
+  // Reauthentication preserves the Firebase UID and uses its already configured redirect origin.
+  void reauthenticateWithPopup(user,provider).then(async result=>{
+   if(settled)return;
+   try{
+    active(uid);if(epoch!==capturedEpoch||result.user.uid!==uid)throw Error('La sesión cambió. Vuelve a conectar tus contactos.');
+    const value=GoogleAuthProvider.credentialFromResult(result)?.accessToken;
+    if(!value)throw Error('Autoriza el acceso a tus contactos de Google para sincronizar.');
+    const profile=await jsonResponse(await fetch('https://openidconnect.googleapis.com/v1/userinfo',{headers:{Authorization:'Bearer '+value},redirect:'error',signal:AbortSignal.timeout(30000)}));
     active(uid);if(epoch!==capturedEpoch)throw Error('La sesión cambió. Vuelve a conectar tus contactos.');
-    if(response.error||!response.access_token||!response.scope?.split(' ').includes(GOOGLE_CONTACTS_SCOPE)||!(Number(response.expires_in)>60))throw Error('Autoriza el acceso a tus contactos de Google para sincronizar.');
-    const profile=await jsonResponse(await fetch('https://openidconnect.googleapis.com/v1/userinfo',{headers:{Authorization:'Bearer '+response.access_token},redirect:'error',signal:AbortSignal.timeout(30000)}));
-    active(uid);if(epoch!==capturedEpoch)throw Error('La sesión cambió. Vuelve a conectar tus contactos.');
-    const googleId=user.providerData.find(provider=>provider.providerId==='google.com')?.uid;
+    const googleId=user.providerData.find(p=>p.providerId==='google.com')?.uid;
     if(!profile.sub||!profile.email_verified||typeof profile.email!=='string'||(googleId?profile.sub!==googleId:profile.email.toLowerCase()!==user.email!.toLowerCase()))throw Error('Elige la cuenta de Google asociada al correo de tu sesión de Nexus.');
-    if(settled)return;settled=true;clearTimeout(timer);
-    resolve({uid,subject:profile.sub,email:profile.email,value:response.access_token!,expires:Date.now()+Math.min(Number(response.expires_in),3600)*1000});
-   }catch(error){fail(error instanceof TypeError||error?.name==='TimeoutError'?Error('No se pudo conectar la cuenta de Google. Revisa tu conexión.'):error instanceof Error?error:Error('No se pudo conectar la cuenta de Google.'));}},
-   error_callback:()=>fail(Error('Se cerró la conexión de contactos o el navegador bloqueó la ventana. Vuelve a intentarlo.'))});
-  client.requestAccessToken({prompt:'consent'});}catch{fail(Error('No se pudo abrir la conexión de contactos de Google.'));}
+    if(settled)return;settled=true;clearTimeout(timer);if(authorization===job)authorization=undefined;
+    resolve({uid,subject:profile.sub,email:profile.email,value,expires:Date.now()+50*60000});
+   }catch(error){fail(error instanceof Error?error:Error('No se pudo conectar la cuenta de Google.'));}
+  }).catch(error=>{
+   const code=error?.code;
+   fail(Error(code==='auth/user-mismatch'?'Elige la cuenta de Google asociada al correo de tu sesión de Nexus.':code==='auth/popup-blocked'?'El navegador bloqueó la ventana de Google. Permite abrirla y vuelve a intentarlo.':code==='auth/popup-closed-by-user'||code==='auth/cancelled-popup-request'?'Se cerró la conexión de contactos. Vuelve a intentarlo.':'No se pudo conectar la cuenta de Google. Revisa el permiso de contactos y vuelve a intentarlo.'));
+  });
  });
  active(uid);if(epoch!==capturedEpoch)throw Error('La sesión cambió. Vuelve a conectar tus contactos.');
- connection=candidate;
- try{await jsonResponse(await request(uid,'people/me/connections?personFields=metadata&pageSize=1'));}catch(error){if(connection===candidate)connection=undefined;throw error;}
+ connection=candidate;const controller=new AbortController();operation={uid,controller};
+ try{await jsonResponse(await request(uid,'people/me/connections?personFields=metadata&pageSize=1'));}catch(error){if(connection===candidate)connection=undefined;if(controller.signal.aborted)throw Error('Se canceló la conexión con Google.');throw error;}finally{if(operation?.controller===controller)operation=undefined;}
  return candidate.email;
 }
 async function request(uid:string,path:string,init:RequestInit={}){
  const token=connected(uid),capturedEpoch=epoch;
  if(!/^(people\/me\/connections\?|people:createContact\?|people\/[a-zA-Z0-9_-]+(?:\?|:updateContact\?))/.test(path))throw Error('No se pudo comprobar el destino del contacto.');
- const response=await fetch(PEOPLE+path,{...init,headers:{'Content-Type':'application/json',...init.headers,Authorization:'Bearer '+token.value},redirect:'error',signal:AbortSignal.timeout(30000)});
- active(uid);if(epoch!==capturedEpoch||connection!==token)throw Error('La sesión cambió. Vuelve a conectar tus contactos.');
+ const response=await fetch(PEOPLE+path,{...init,headers:{'Content-Type':'application/json',...init.headers,Authorization:'Bearer '+token.value},redirect:'error',signal:operation?.uid===uid?AbortSignal.any([AbortSignal.timeout(30000),operation.controller.signal]):AbortSignal.timeout(30000)});
+ active(uid);if(operation?.uid===uid&&operation.controller.signal.aborted)throw Error('Se canceló la espera del guardado. Comprueba la agenda antes de repetirlo.');if(epoch!==capturedEpoch||connection!==token)throw Error('La sesión cambió. Vuelve a conectar tus contactos.');
  return response;
 }
 function link(person:Person,owner:string,uid:string){return !person.metadata?.deleted&&person.clientData?.some(field=>{try{const value=JSON.parse(field.value);return field.key===LINK_KEY&&value.owner===owner&&value.uid===uid;}catch{return false;}});}
@@ -130,9 +127,13 @@ async function synchronize(owner:string,contact:GoogleNexusContact){
  return {resourceName:name,created:!person,email:connected(owner).email};
 }
 export function syncContactToGoogle(owner:string,contact:GoogleNexusContact){
+ const controller=new AbortController();
  const run=async()=>{
-  if(navigator.locks)return navigator.locks.request('nexus-google-contacts:'+owner,()=>synchronize(owner,contact));
-  throw Error('Actualiza tu navegador para sincronizar contactos de forma segura.');
+  active(owner);operation={uid:owner,controller};
+  try{
+   if(navigator.locks)return await navigator.locks.request('nexus-google-contacts:'+owner,{signal:controller.signal},()=>synchronize(owner,contact));
+   throw Error('Actualiza tu navegador para sincronizar contactos de forma segura.');
+  }finally{if(operation?.controller===controller)operation=undefined;}
  };
- const pending=queue.then(run,run).catch(error=>{if(error instanceof TypeError||error?.name==='TimeoutError'||error?.name==='AbortError')throw Error('No se pudo confirmar la sincronización. Revisa tu conexión y vuelve a intentarlo.');throw error;});queue=pending.catch(()=>undefined);return pending;
+ const pending=queue.then(run,run).catch(error=>{if(error instanceof TypeError||error?.name==='TimeoutError'||error?.name==='AbortError')throw Error('No se pudo confirmar la sincronización. Revisa tu agenda antes de volver a intentarlo.');throw error;});queue=pending.catch(()=>undefined);return pending;
 }

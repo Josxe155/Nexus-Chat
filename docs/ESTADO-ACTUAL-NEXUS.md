@@ -1,4 +1,4 @@
-# Estado actual de Nexus Chat — v26.100.3
+# Estado actual de Nexus Chat — v26.101.0
 
 ## Implementado
 
@@ -9,6 +9,10 @@
 - Pantalla de cuenta bloqueada, logo oficial, favicon e iconos transparentes.
 - Lectura remota española sin modelo local. Envía el texto leído al servicio de voz de Google; requiere conexión.
 - Sincronización del código con GitHub y publicación de entregas verificadas en Firebase Hosting.
+
+## Actualización v26.101.0
+
+Los contactos recuerdan la cuenta de Google y el interruptor. La autorización utiliza el proveedor Google de Firebase y People API directamente; se conserva la cuenta actual, se reutiliza el token en memoria y se puede cancelar la espera. La preferencia privada persiste en Firestore y una caché local, sin almacenar tokens. [Alcance y verificación](CONTACTOS-PERSISTENTES-26.101.0.md). La prueba física de varias cuentas y el primer guardado real siguen pendientes.
 
 ## Corrección v26.100.3
 

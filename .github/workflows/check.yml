@@ -23,6 +23,7 @@ jobs:
       - run: npm run test:references
       - run: npm run test:contact-menu
       - run: npm run test:google-contacts
+      - run: npm run test:google-contacts:preference
       - run: npm run test:google-contacts:apps-script
       - run: npm run test:google-contacts:bridge
       - run: npm run test:contacts
@@ -47,4 +48,4 @@ jobs:
         with:
           distribution: temurin
           java-version: "21"
-      - run: npx --yes firebase-tools@15.35.0 emulators:exec --project demo-nexus --config firebase.emulators.json --only auth,firestore,database "npm run test:guest:emulators && npm run test:security:emulators && npm run test:retention:emulators && npm run test:message-policy:emulators && npm run test:anonymous-polls:emulators && npm run test:channels:emulators && npm run test:country:emulators"
+      - run: npx --yes firebase-tools@15.35.0 emulators:exec --project demo-nexus --config firebase.emulators.json --only auth,firestore,database "npm run test:google-contacts:privacy && npm run test:guest:emulators && npm run test:security:emulators && npm run test:retention:emulators && npm run test:message-policy:emulators && npm run test:anonymous-polls:emulators && npm run test:channels:emulators && npm run test:country:emulators"

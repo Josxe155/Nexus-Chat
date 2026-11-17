@@ -27,7 +27,7 @@ export default function PhoneContactForm({user,onClose,contact}:{user:UserProfil
  return <div className="feature-backdrop"><form className={"feature-dialog contact-editor new-contact-form"+(phone?" pcm-new-contact":"")} role="dialog" aria-modal="true" aria-label="Nuevo contacto" onSubmit={async event=>{
   event.preventDefault();if(lock.current||googleSync.connecting)return;lock.current=true;setBusy(true);setError('');setInvite(false);
   try{
-   googleSync.reserve();
+   await googleSync.reserve();
    if(!open)throw Error('Abre Contactos desde la página principal para iniciar una conversación.');
    await submitContactDraft({first,last,username,country,number},{assertActive,
     resolve:async input=>{const token=await auth.currentUser?.getIdToken();assertActive();if(!token)throw Error('Vuelve a iniciar sesión.');const response=await apiFetch('/api/contacts/resolve',{method:'POST',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify(input)});const result=await response.json();if(!response.ok)throw Error(result.error||'No se pudo comprobar el contacto.');return result;},
@@ -45,5 +45,5 @@ export default function PhoneContactForm({user,onClose,contact}:{user:UserProfil
  <GoogleContactSync sync={googleSync} disabled={busy||googleSync.connecting}/>
  {error&&<p role="alert">{error}</p>}
  {invite&&<button type="button" disabled={busy||googleSync.connecting} onClick={async()=>{try{const text='Te invito a Nexus Chat: '+location.origin;if(navigator.share)await navigator.share({title:'Nexus Chat',text});else await navigator.clipboard.writeText(text);}catch(cause){if(!(cause instanceof DOMException&&cause.name==='AbortError'))setError('No se pudo compartir la invitación.');}}}>Invitar a Nexus Chat</button>}
- <button className="pcm-save-contact" disabled={busy||googleSync.connecting||!valid}>{busy?'Guardando…':phone?'Guardar':'Guardar contacto'}</button></form>{qrOpen&&open&&<ContactQrOverlay user={user} onClose={()=>setQrOpen(false)} onContact={async uid=>{await open(uid,false);setQrOpen(false);onClose();}}/>}</div>;
+ <button className="pcm-save-contact" disabled={busy||googleSync.connecting||googleSync.loading||!valid}>{busy?'Guardando…':phone?'Guardar':'Guardar contacto'}</button></form>{qrOpen&&open&&<ContactQrOverlay user={user} onClose={()=>setQrOpen(false)} onContact={async uid=>{await open(uid,false);setQrOpen(false);onClose();}}/>}</div>;
 }
