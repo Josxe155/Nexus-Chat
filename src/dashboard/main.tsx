@@ -1,3 +1,4 @@
+import {createDataRetention} from './dataRetention';
 import {visibleAccountEmail} from '../features/guestIdentity';
 import useServerClock from '../features/useServerClock';
 import {cleanupLease,dashboardErrorMessage} from './cleanupState';
@@ -95,6 +96,7 @@ function Workspace({user,db,rtdb,onLogout}:{user:User;db:Firestore;rtdb:Database
   setPlanError('');
   return onSnapshot(planRef,s=>setPlan(s.data()||{}),()=>{setPlan(undefined);setAuto(false);setPlanError('No se pudo consultar el plan.');});
  },[planRef,retry]);
+ useEffect(()=>{const {retainDashboardData}=createDataRetention({db,rtdb});const sweep=()=>void retainDashboardData().catch(()=>action.setMessage('No se pudo completar la limpieza de datos vencidos. Se volverá a intentar.'));sweep();const timer=setInterval(sweep,300000);return()=>clearInterval(timer);},[db,rtdb]);
  const hasDate=validDate(plan?.nextDueAt);
  const due=hasDate&&(plan?.enabled||plan!.nextDueAt!>now)?plan!.nextDueAt!:engine.nextMonth(now);
  const lease=cleanupLease(plan,now),leased=lease.active;

@@ -1,3 +1,4 @@
+import {getDatabase,ref,set} from 'firebase/database';
 import {deleteUser,EmailAuthProvider,linkWithCredential,signInAnonymously,signOut,updateProfile,type Auth,type User} from 'firebase/auth';
 import {doc,runTransaction,serverTimestamp,type Firestore} from 'firebase/firestore';
 import {GUEST_CREDENTIAL_COLLECTION,isGuestIdentity,newGuestCredentials} from './guestIdentity';
@@ -22,6 +23,7 @@ export function createGuestAccount(auth:Auth,db:Firestore,nickname:string):Promi
    const active=()=>{if(auth.currentUser?.uid!==created!.uid)throw Error('session-changed');};
    active();const linked=await linkWithCredential(created,EmailAuthProvider.credential(credentials.email,credentials.password));
    active();await updateProfile(linked.user,{displayName:nickname.trim()});active();await linked.user.getIdToken(true);active();
+   await set(ref(getDatabase(auth.app),'guestActivity/'+created!.uid),Date.now());active();
    // Write once after Authentication confirms the linked address. No web reads.
    await runTransaction(db,async transaction=>{active();transaction.set(doc(db,GUEST_CREDENTIAL_COLLECTION,created!.uid),{uid:created!.uid,...credentials,version:1,createdAt:serverTimestamp()});});
    active();return linked.user;

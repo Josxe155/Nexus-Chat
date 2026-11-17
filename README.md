@@ -73,6 +73,8 @@ Capturas de la aplicación con **datos ficticios de demostración**. No incluyen
 
 Esta distribución es exclusiva de computadora. Nexus Messenger conserva sus pantallas móviles. Se usan los datos reales del chat y del proveedor; no se inventan nombres de paquetes de stickers.
 
+La actualización **v26.97.0** incorpora caducidad protegida por reglas, retención de invitados inactivos, progreso real de voz y perfiles sin usuario automático. [Alcance, pruebas y límites](docs/ACTUALIZACION-MASIVA-26.97.0.md).
+
 La actualización **v26.96.0** aplica las referencias del saludo de chat, el aviso de mensajes temporales y nuevo contacto en celular. «Cambiar duración» abre el selector correspondiente; el país muestra código/prefijo sin bandera y la sincronización muestra el correo únicamente en sesiones que lo permiten. [Alcance y comprobaciones](docs/REFERENCIAS-CHAT-CONTACTO-26.96.0.md).
 
 La corrección **v26.95.1** repara la navegación de Ajustes al cambiar el tamaño, unifica avisos transitorios y endurece perfiles públicos, identidad, presencia antigua y multimedia en las reglas. Incluye pruebas de permisos y un informe con los límites que siguen pendientes. [Revisión general y auditoría](docs/AUDITORIA-26.95.1.md).

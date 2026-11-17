@@ -1,18 +1,19 @@
+import {byteProgress,type DownloadProgress} from '../features/resumableVoice';
 import {prepareKokoroDownload} from '../features/kokoroDownload';
 import wasmURL from '@nexus-kokoro-wasm?url';
 import {KokoroTTS,env as kokoroEnv,type GenerateOptions} from 'kokoro-js';
 import {RawAudio,env} from '@huggingface/transformers';
 import {initialize,setVoice,getPhonemes} from 'espeak-phonemizer';
 import {KOKORO_MODEL,KOKORO_VOICE,KOKORO_LANGUAGE,splitSpanishPhonemes} from '../features/kokoroSpanish';
-const scope=self as unknown as {onmessage:((event:MessageEvent<string>)=>void)|null;postMessage:(value:ArrayBuffer|null|{type:'progress';percent?:number},transfer?:Transferable[])=>void};
+const scope=self as unknown as {onmessage:((event:MessageEvent<string>)=>void)|null;postMessage:(value:ArrayBuffer|null|{type:'progress';percent?:number;bytes?:DownloadProgress},transfer?:Transferable[])=>void};
 kokoroEnv.wasmPaths={mjs:new URL('/tts/v1/ort-wasm-simd-threaded.jsep.mjs',self.location.origin).href,wasm:new URL(wasmURL,self.location.origin).href};
 if(env.backends.onnx.wasm)env.backends.onnx.wasm.numThreads=1;
 let ready:Promise<KokoroTTS>|undefined;
 function load(){return ready??=(async()=>{
- await prepareKokoroDownload(percent=>scope.postMessage({type:'progress',percent}));
+ await prepareKokoroDownload((percent,bytes)=>scope.postMessage({type:'progress',percent,bytes}));
  await initialize({wasm:'/tts/v1/espeak/wasm/espeak-ng.wasm',manifest:'/tts/v1/espeak/data/manifest.json',data:'/tts/v1/espeak/data/data.data'});
  await setVoice(KOKORO_LANGUAGE);
- return KokoroTTS.from_pretrained(KOKORO_MODEL,{dtype:'q8',device:'wasm',progress_callback:(info)=>{if('progress' in info&&'file' in info&&String(info.file).endsWith('.onnx'))scope.postMessage({type:'progress',percent:Math.max(0,Math.min(100,Math.floor(Number(info.progress))))});}});
+ return KokoroTTS.from_pretrained(KOKORO_MODEL,{dtype:'q8',device:'wasm',progress_callback:(info)=>{if('loaded' in info&&'total' in info&&'file' in info&&String(info.file).endsWith('.onnx')){const bytes=byteProgress(Number(info.loaded),Number(info.total));if(bytes)scope.postMessage({type:'progress',percent:bytes.percent,bytes});}}});
 })();}
 let chain=Promise.resolve();
 scope.onmessage=event=>{chain=chain.then(async()=>{

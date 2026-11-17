@@ -1,3 +1,4 @@
+import {purgeExpiredMessages} from './features/messageRetention';
 import BlockedAccount from './features/BlockedAccount';
 import {awaitGuestCreation} from './features/guestAccount';
 import {isGuestIdentity,needsEmailVerification} from './features/guestIdentity';
@@ -391,6 +392,7 @@ export default function App() {
 
   useEffect(()=>{const shortcuts=(event:KeyboardEvent)=>{if(event.key==='F12'||(event.ctrlKey||event.metaKey)&&event.shiftKey&&['I','J','C'].includes(event.key.toUpperCase()))event.preventDefault();};document.addEventListener('keydown',shortcuts,true);return()=>document.removeEventListener('keydown',shortcuts,true);},[]);
   const activeChat = chats.find(c => c.id === activeChatId && !c.moderationRemoved);
+  useEffect(()=>{if(!currentUser)return;const sweep=()=>void purgeExpiredMessages(currentUser.uid,chats).catch(()=>{});sweep();const timer=setInterval(sweep,60000);return()=>clearInterval(timer);},[currentUser?.uid,chats]);
   const visibleChats=(personal.loaded?chats:[]).filter(chat=>visibleChat(chat,personal.conversations[chat.id])).filter(chat=>chat.kind==='group'||!chat.participants.some(id=>currentUser?.privacy?.blockedIds?.includes(id))).map(c=>({...c,...(c.lastMessage?.expiresAt&&c.lastMessage.expiresAt<=Date.now()?{lastMessage:{...c.lastMessage,content:'Mensaje temporal caducado',type:'text' as const}}:{}),pinned:{...c.pinned,[currentUser?.uid||'']:pinnedIds.includes(c.id)}}));
   const protectedUsers=useAccessibleProfiles(users,currentUser?.uid||'',currentUser?.privacy);
   const projectedUsers=protectedUsers.map(person=>person.uid===currentUser?.uid?currentUser:contactNames[person.uid]&&currentUser?.privacy?.contactIds?.includes(person.uid)?{...person,nombre:[contactNames[person.uid].first,contactNames[person.uid].last].filter(Boolean).join(' ')}:person);

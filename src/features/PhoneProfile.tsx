@@ -25,7 +25,7 @@ export default function PhoneProfile({user, photo, bio, number, busy, error, go,
     </div>
     <SettingsRow label="Nombre" detail={user.nombre} icon={User} onClick={()=>edit('name')}/>
     <SettingsRow label="Info." detail={bio||'Completar sección Info.'} icon={Info} onClick={()=>go('info')}/>
-    <SettingsRow label={user.usernameProvisional?'Nombre de usuario':'Nombre de usuario reservado'} detail={'@'+user.username} icon={AtSign} onClick={()=>edit('username')}/>
+    <SettingsRow label="Nombre de usuario" detail={user.username?'@'+user.username:''} icon={AtSign} onClick={()=>edit('username')}/>
     <SettingsRow label="Número de Nexus" detail={number||'Número todavía no asignado'} icon={Phone} onClick={()=>{setNumberOpen(true);setCopied(false);}}/>
     {field&&<SettingsDialog title={field==='name'?'Editar nombre':'Nombre de usuario'} onClose={()=>{if(!busy)setField(undefined);}} actions={<>
       <button type="button" disabled={busy} onClick={()=>setField(undefined)}>Cancelar</button>

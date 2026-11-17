@@ -35,7 +35,7 @@ export default function PhoneSettingsHome({user, photo, bio, search, go}: {
       <button className="phone-settings-identity-profile" type="button" aria-label="Abrir perfil" onClick={()=>go('profile')}>
         <img src={photo} alt=""/>
         <strong>{user.nombre}<ChevronDown size={18} aria-hidden="true"/></strong>
-        <small>@{user.username}</small>
+        <small>{user.username?'@'+user.username:''}</small>
       </button>
     </div>}
     <div className="phone-settings-index">

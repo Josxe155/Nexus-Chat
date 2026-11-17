@@ -42,7 +42,7 @@ export default function AuthScreen({ onAuthSuccess, theme, onToggleTheme }: Auth
       const userRef = doc(db, 'users', firebaseUser.uid);
       const userDoc = await getDoc(userRef);
 
-      const username=(customName||firebaseUser.email?.split('@')[0]||'usuario').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9_.]/g,'_').slice(0,18)+'_'+firebaseUser.uid.slice(0,10).toLowerCase();
+      const username='';
 
       const finalName = customName || firebaseUser.displayName || 'Usuario Nexus';
       const finalFoto = firebaseUser.photoURL || DEFAULT_AVATAR;
@@ -52,8 +52,8 @@ export default function AuthScreen({ onAuthSuccess, theme, onToggleTheme }: Auth
       } : {
         uid: firebaseUser.uid,
         nombre: finalName,
-        username: registration?.username||username,
-        usernameProvisional: !registration&&!isGuestIdentity(firebaseUser),
+        username,
+        usernameProvisional: false,
         foto: '',
         bio: '',
         estado: 'Disponible',
@@ -64,7 +64,7 @@ export default function AuthScreen({ onAuthSuccess, theme, onToggleTheme }: Auth
 
       if(isGuestIdentity(firebaseUser)&&customName){userData.nombre=customName;await setDoc(doc(db,'users',firebaseUser.uid,'private','profile'),{nombre:customName},{merge:true});}
       if(!userDoc.exists())Object.assign(userData,{isGuest:isGuestIdentity(firebaseUser),lastActiveAt:Date.now()});
-      if(userDoc.exists()){if(isGuestIdentity(firebaseUser)&&customName)await setDoc(userRef,{nombre:customName},{merge:true});}else{const batch=writeBatch(db);batch.set(userRef,userData);batch.set(doc(db,'users',firebaseUser.uid,'private','profile'),{nombre:finalName,username,foto:finalFoto,bio:'¡Hola! Estoy usando Nexus Chat.'});batch.set(doc(db,'usernames',username),{uid:firebaseUser.uid});try{await batch.commit();}catch(error:any){if(error.code!=='permission-denied')throw error;let legacy=false;try{await getDoc(doc(db,'usernames',username));}catch(check:any){legacy=check.code==='permission-denied';}if(!legacy)throw error;const compatible=writeBatch(db);compatible.set(userRef,userData);compatible.set(doc(db,'users',firebaseUser.uid,'private','profile'),{nombre:finalName,username,foto:finalFoto,bio:'¡Hola! Estoy usando Nexus Chat.'});await compatible.commit();}}
+      if(userDoc.exists()){if(isGuestIdentity(firebaseUser)&&customName)await setDoc(userRef,{nombre:customName},{merge:true});}else{const batch=writeBatch(db);batch.set(userRef,userData);batch.set(doc(db,'users',firebaseUser.uid,'private','profile'),{nombre:finalName,username,foto:finalFoto,bio:'¡Hola! Estoy usando Nexus Chat.'});try{await batch.commit();}catch(error:any){if(error.code!=='permission-denied')throw error;let legacy=false;try{await getDoc(doc(db,'usernames',username));}catch(check:any){legacy=check.code==='permission-denied';}if(!legacy)throw error;const compatible=writeBatch(db);compatible.set(userRef,userData);compatible.set(doc(db,'users',firebaseUser.uid,'private','profile'),{nombre:finalName,username,foto:finalFoto,bio:'¡Hola! Estoy usando Nexus Chat.'});await compatible.commit();}}
       const privateProfile=await getDoc(doc(db,'users',firebaseUser.uid,'private','profile'));
       const profile={...userData,...(privateProfile.exists()?privateProfile.data():{}),username:userData.username,usernameChangedAt:userDoc.exists()?userDoc.data().usernameChangedAt:undefined} as any;try{onAuthSuccess(await migrateOwnProfile(profile));}catch(error:any){if(error.code!=='permission-denied')throw error;console.warn('Las nuevas opciones de privacidad requieren publicar las reglas actualizadas.');onAuthSuccess(profile);}
     } catch (err: any) {
@@ -106,7 +106,7 @@ export default function AuthScreen({ onAuthSuccess, theme, onToggleTheme }: Auth
 
   const handleEmail=async(e:React.FormEvent)=>{e.preventDefault();setLoading(true);setError('');setNotice('');try{
     let registration: {username:string;phone:string}|undefined;
-    if(signUp){if(password!==confirmPassword)throw Error('Las contraseñas no coinciden.');if(password.length<12||!/[a-zA-Z]/.test(password)||!/[0-9]/.test(password))throw Object.assign(Error(),{code:'auth/weak-password'});if(!/^[a-z0-9_.]{3,32}$/.test(usernameInput.trim().toLowerCase()))throw Error('El usuario debe tener entre 3 y 32 letras, números, puntos o guiones bajos.');registration={username:usernameInput.trim().toLowerCase(),phone:''};}
+    if(signUp){if(password!==confirmPassword)throw Error('Las contraseñas no coinciden.');if(password.length<12||!/[a-zA-Z]/.test(password)||!/[0-9]/.test(password))throw Object.assign(Error(),{code:'auth/weak-password'});if(!usernameInput.trim())throw Error('Escribe tu nombre.');registration={username:usernameInput.trim(),phone:''};}
     if(signUp)reportRegistrationStatus('Estamos preparando tu cuenta y el correo de verificación.');const result=signUp?await createUserWithEmailAndPassword(auth,email.trim(),password):await signInWithEmailAndPassword(auth,email.trim(),password);
     if(signUp){await admitAccount(result.user,registration);auth.languageCode='es';await sendEmailVerification(result.user);setNotice('Te enviamos un correo para verificar tu cuenta.');reportRegistrationStatus('Te enviamos un correo para verificar tu cuenta.');}else await registerUserInDB(result.user);
   }catch(e:any){if(e?.code==='auth/user-disabled')setBlocked(true);const message=e?.code?authErrorMessage(e):e.message||'No se pudo continuar.';setError(message);if(signUp&&auth.currentUser&&needsEmailVerification(auth.currentUser))reportRegistrationStatus(message);}finally{setLoading(false);}};
@@ -137,7 +137,7 @@ export default function AuthScreen({ onAuthSuccess, theme, onToggleTheme }: Auth
           {error && <div role="alert" className="auth-error">{error}</div>}
           {recovering?<PasswordRecovery initialEmail={email} onBack={()=>{setRecovering(false);setEmailMode(true);setError('');}}/>:emailMode ? <form className="guest-form" onSubmit={handleEmail} aria-label={signUp?'Registro por correo':'Acceso por correo'}>
             <h3>{signUp?'Regístrate en Nexus Chat':'Entrar con correo'}</h3>
-            {signUp&&<><label htmlFor="signup-username">Nombre de usuario</label><input id="signup-username" required minLength={3} maxLength={32} autoComplete="username" autoCapitalize="none" value={usernameInput} onChange={e=>setUsernameInput(e.target.value)}/></>}
+            {signUp&&<><label htmlFor="signup-username">Nombre</label><input id="signup-username" required minLength={1} maxLength={128} autoComplete="name" value={usernameInput} onChange={e=>setUsernameInput(e.target.value)}/></>}
             <label htmlFor="email-input">Correo electrónico</label><input id="email-input" type="email" autoComplete="email" required value={email} onChange={e=>setEmail(e.target.value)}/>
             
             <label htmlFor="password-input">Contraseña</label><input id="password-input" type="password" autoComplete={signUp?'new-password':'current-password'} required minLength={signUp?12:undefined} value={password} onChange={e=>setPassword(e.target.value)}/>

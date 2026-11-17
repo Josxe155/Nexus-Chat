@@ -658,7 +658,7 @@ export default function ChatWindow({
                         )}
 
                         
-                        {msg.type==='contact'&&msg.contact&&<button className="shared-contact-card" onClick={()=>onOpenContact?.(msg.contact!.uid)}><UserRound size={30}/><span><strong>{msg.contact.name}</strong><small>@{msg.contact.username}</small><small>Abrir conversación</small></span></button>}
+                        {msg.type==='contact'&&msg.contact&&<button className="shared-contact-card" onClick={()=>onOpenContact?.(msg.contact!.uid)}><UserRound size={30}/><span><strong>{msg.contact.name}</strong><small>{msg.contact.username?'@'+msg.contact.username:''}</small><small>Abrir conversación</small></span></button>}
                         {msg.locationShare&&<LiveLocationCard message={msg} uid={currentUser.uid}/>}
                         {msg.type==='poll'&&<PollCard message={msg} userId={currentUser.uid} users={users}/>}
                         {isViewOnceVisual(msg)&&!isDeleted?<SingleViewMedia key={msg.id} message={msg} uid={currentUser.uid}/>:['image','sticker','video','video-note','document'].includes(msg.type)&&<AttachmentCard message={msg} url={phoneExpressions&&(msg.type==='sticker'&&mediaMotion?.sticker===false||msg.type==='image'&&/\.gif$/i.test(msg.fileName||'')&&mediaMotion?.gif===false)?undefined:mediaURL} onOpen={()=>{setClipboardMessage(msg);setImageViewer(msg.id);}}/>}

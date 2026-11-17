@@ -65,7 +65,7 @@ export function ContactCodeConfirmation({token, uid, onClose, onContact}: {
       }
     }}>{busy?'Abriendo…':'Abrir chat'}</button>}
   </>}>
-    {person?.username&&<p>@{person.username}</p>}
+    {person?.username&&<p>{person.username?'@'+person.username:''}</p>}
     {!person&&!error&&<p role="status">Consultando contacto…</p>}
     {error&&<p role="alert">{error}</p>}
   </SettingsDialog>;

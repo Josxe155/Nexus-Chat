@@ -38,10 +38,11 @@ jobs:
       - run: npm run test:voice-media-session
       - run: npm run test:call-audio-output
       - run: npm run test:voice-download
+      - run: npm run test:massive
       - run: npm run test:rich-text
       - run: npm run build:hosting
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: "21"
-      - run: npx --yes firebase-tools@15.35.0 emulators:exec --project demo-nexus --config firebase.emulators.json --only firestore,database "npm run test:security:emulators"
+      - run: npx --yes firebase-tools@15.35.0 emulators:exec --project demo-nexus --config firebase.emulators.json --only auth,firestore,database "npm run test:guest:emulators && npm run test:security:emulators && npm run test:retention:emulators && npm run test:message-policy:emulators && npm run test:anonymous-polls:emulators && npm run test:channels:emulators"

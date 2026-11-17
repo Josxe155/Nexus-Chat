@@ -1,6 +1,7 @@
+import {liveMessages} from './liveMessages';
 import {useEffect,useState} from 'react';
 import {ArrowLeft,ArrowDownWideNarrow,Bell,Bookmark,Check,Clock,FileText,Flag,Folder,Headphones,Heart,Image,Images,Languages,ListPlus,Lock,Pencil,Phone,Search,Shield,Trash2,UserPlus,Users,Video} from 'lucide-react';
-import {doc,updateDoc,collection,query,where,onSnapshot} from 'firebase/firestore';
+import {doc,updateDoc,collection,query,where,onSnapshot,orderBy} from 'firebase/firestore';
 import {db} from '../firebase';
 import type {Chat,Message,UserProfile} from '../types';
 import {avatar} from './avatar';
@@ -20,7 +21,7 @@ export default function PhoneContactInfo({chat,user,person,users,chats,messages,
  const kept=(keptRecords||messages).filter(m=>m.keptBy&&visibleMessage(m,personal.conversations[chat.id],personal.flags)&&!m.deletedAt&&!isOneTimeMedia(m)&&String(m.content||'').toLocaleLowerCase().includes(search.toLocaleLowerCase()));
  const groups=chats.filter(c=>c.kind==='group'&&c.participants.includes(user.uid)&&!!person?.uid&&c.participants.includes(person.uid));
  const local=media.filter(m=>cached.has(m.fileUrl||'')||cached.has(m.transferId||'')||cached.has('cached:'+(m.fileUrl||'').split('/').at(-1)));const sorted=[...local].sort((a,b)=>sort==='size'?(b.fileSize||0)-(a.fileSize||0):sort==='recent'?b.timestamp-a.timestamp:a.timestamp-b.timestamp);
- useEffect(()=>{if(page!=='kept')return;setKeptRecords(null);return onSnapshot(query(collection(db,'chats',chat.id,'messages'),where('keptBy','>','')),snapshot=>setKeptRecords(snapshot.docs.map(record=>({...record.data(),id:record.id,chatId:chat.id} as Message))),()=>setError('No se pudieron consultar todos los mensajes conservados.'));},[page,chat.id]);
+ useEffect(()=>{if(page!=='kept')return;setKeptRecords(null);return onSnapshot(liveMessages(collection(db,'chats',chat.id,'messages'),where('timestamp','>=',chat.historyStartsAt?.[user.uid]||0),where('keptBy','>',''),orderBy('timestamp','desc')),snapshot=>setKeptRecords(snapshot.docs.map(record=>({...record.data(),id:record.id,chatId:chat.id} as Message))),()=>setError('No se pudieron consultar todos los mensajes conservados.'));},[page,chat.id]);
  useEffect(()=>{if(page!=='storage')return;let active=true;readMedia(user.uid).then(rows=>{if(active)setCached(new Set(rows.map(r=>r.id)))}).catch(()=>setError('No se pudo consultar el almacenamiento local.'));return()=>{active=false}},[page,user.uid]);
  useEffect(()=>{if(!error)return;const timer=setTimeout(()=>setError(''),3000);return()=>clearTimeout(timer)},[error]);
  useMobileBack(page!=='info'||sortOpen,()=>{if(sortOpen)setSortOpen(false);else{setSelected([]);setPage('info')}},65);

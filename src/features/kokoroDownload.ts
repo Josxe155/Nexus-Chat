@@ -1,4 +1,4 @@
-import {downloadVoice,type DownloadInfo,type VoiceDownloadStore} from './resumableVoice';
+import {downloadVoice,type DownloadInfo,type VoiceDownloadStore,type DownloadProgress,byteProgress} from './resumableVoice';
 import {KOKORO_MODEL} from './kokoroSpanish';
 // Immutable official revision: never combine ranges from different model versions.
 const revision='1939ad2a8e416c0acfeecc08a694d14ef25f2231',size=92361116;
@@ -11,11 +11,11 @@ async function openStore(){
  const store:VoiceDownloadStore={info:()=>read<DownloadInfo|undefined>('meta'),parts:()=>read<ArrayBuffer[]>('chunks',true),reset:()=>write(tx=>{tx.objectStore('meta').clear();tx.objectStore('chunks').clear();}),append:(index,data,info)=>write(tx=>{tx.objectStore('chunks').put(data,index);tx.objectStore('meta').put(info,'download');})};
  return {store,close:()=>db.close()};
 }
-export async function prepareKokoroDownload(onProgress:(percent:number)=>void){
+export async function prepareKokoroDownload(onProgress:(percent:number,bytes?:DownloadProgress)=>void){
  // Missing storage/locking APIs retain the SDK's complete-file download behavior.
  if(typeof caches==='undefined'||typeof indexedDB==='undefined'||!navigator.locks)return;
  await navigator.locks.request('nexus-kokoro-model-download',async()=>{
-  const cache=await caches.open('transformers-cache');if(await cache.match(cacheURL)){onProgress(100);return;}
+  const cache=await caches.open('transformers-cache');if(await cache.match(cacheURL)){onProgress(100,byteProgress(size,size));return;}
   const {store,close}=await openStore();
   try{const blob=await downloadVoice(sourceURL,size,store,onProgress);await cache.put(cacheURL,new Response(blob,{headers:{'Content-Type':'application/octet-stream','Content-Length':String(size)}}));await store.reset();}
   finally{close();}
