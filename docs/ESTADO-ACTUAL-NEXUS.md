@@ -1,4 +1,4 @@
-# Estado actual de Nexus Chat — v26.100.2
+# Estado actual de Nexus Chat — v26.100.3
 
 ## Implementado
 
@@ -9,6 +9,10 @@
 - Pantalla de cuenta bloqueada, logo oficial, favicon e iconos transparentes.
 - Lectura remota española sin modelo local. Envía el texto leído al servicio de voz de Google; requiere conexión.
 - Sincronización del código con GitHub y publicación de entregas verificadas en Firebase Hosting.
+
+## Corrección v26.100.3
+
+La comprobación automática detectó que el muestreo aleatorio de algunos planes móviles estrechos podía agotar los intentos de asignación. Se amplía el muestreo manteniendo un prefijo móvil verificado y se incluye una búsqueda final acotada. Se conservan validación de país/tipo y reservas contra duplicados. La prueba con aleatoriedad adversa recorre todos los países con ejemplo móvil.
 
 ## Corrección v26.100.2
 

@@ -54,6 +54,8 @@ Nexus Chat reúne conversaciones, archivos, estados, comunidades y llamadas en u
 
 El próximo bloque pendiente incluye favicon e iconos transparentes, Ajustes, sus categorías e información de contacto. El estado y los criterios de cierre están en [la lista de pendientes](docs/PENDIENTES-WHATSAPP.md#prioridades-del-9-de-noviembre-de-2026).
 
+La corrección **v26.100.3** evita agotar la asignación de números de Nexus en planes móviles estrechos, manteniendo la validación internacional y las reservas existentes.
+
 La corrección **v26.100.2** permite cerrar o reintentar la revisión de permisos y evita que respuestas tardías vuelvan a bloquearla. Añade recuperación manual de la conexión de contactos y explica el límite de Apps Script con varias cuentas. [Alcance y verificación](docs/PERMISOS-Y-CUENTAS-26.100.2.md).
 
 La corrección **v26.100.1** mejora la tipografía de «Nexus Chat» en el encabezado del celular con Outfit alojada localmente; respeta los colores de cada tema y conserva los controles. [Licencia de la fuente](public/fonts/Outfit-OFL.txt).

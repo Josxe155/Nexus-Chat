@@ -28,7 +28,7 @@ El propietario precisó que se refiere al rótulo WhatsApp de la cabecera, no al
 
 ## Verificación
 
-Se aprobaron 217 pruebas unitarias del proyecto, incluidas seis de permisos, doce de transporte y veintiuna de Apps Script. Se verificaron 42 recorridos de navegador: por tamaño, diez de contactos y cuatro de permisos. Celular 14/14, tablet 14/14 y computadora 14/14 (100 % de esos casos simulados, no de la aplicación completa). Se comprobaron el cierre antes de solicitar permisos, el plazo sin respuesta, reintento, cierre con respuestas tardías, streams liberados y finalización correcta; en contactos, además, el reintento mientras Google no responde sin que el intento cancelado cierre el nuevo. TypeScript, enlaces de documentación y compilación de Hosting correctos. Las pruebas utilizan permisos y servicios simulados, sin abrir cámaras reales, escribir agendas ni modificar Firebase. La comprobación del primer contacto real y el caso físico de Chrome con dos cuentas siguen pendientes.
+Se aprobaron 218 pruebas unitarias del proyecto, incluidas seis de permisos, doce de transporte y veintiuna de Apps Script. Se verificaron 42 recorridos de navegador: por tamaño, diez de contactos y cuatro de permisos. Celular 14/14, tablet 14/14 y computadora 14/14 (100 % de esos casos simulados, no de la aplicación completa). Se comprobaron el cierre antes de solicitar permisos, el plazo sin respuesta, reintento, cierre con respuestas tardías, streams liberados y finalización correcta; en contactos, además, el reintento mientras Google no responde sin que el intento cancelado cierre el nuevo. TypeScript, enlaces de documentación y compilación de Hosting correctos. Las pruebas utilizan permisos y servicios simulados, sin abrir cámaras reales, escribir agendas ni modificar Firebase. La comprobación del primer contacto real y el caso físico de Chrome con dos cuentas siguen pendientes.
 
 ## Fuentes oficiales
 
@@ -37,3 +37,5 @@ Se aprobaron 217 pruebas unitarias del proyecto, incluidas seis de permisos, doc
 - [GeolocationPositionOptions.timeout](https://developer.mozilla.org/en-US/docs/Web/API/PositionOptions/timeout).
 - [Recursos de marca de WhatsApp](https://www.meta.com/brand/resources/whatsapp/whatsapp-brand/).
 - [WhatsApp oficial](https://www.whatsapp.com/).
+
+La entrega final v26.100.3 incluye la corrección de asignación de números detectada por GitHub durante la publicación. Una prueba determinista con aleatoriedad adversa reproduce el agotamiento del muestreo anterior y valida todos los países disponibles. Las reservas de Firebase permanecen vigentes.
