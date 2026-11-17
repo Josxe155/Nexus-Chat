@@ -39,6 +39,7 @@ jobs:
       - run: npm run test:call-audio-output
       - run: npm run test:voice-download
       - run: npm run test:country
+      - run: npm run test:browser-permissions
       - run: npm run test:massive
       - run: npm run test:rich-text
       - run: npm run build:hosting

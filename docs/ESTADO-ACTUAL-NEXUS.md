@@ -1,4 +1,4 @@
-# Estado actual de Nexus Chat — v26.100.1
+# Estado actual de Nexus Chat — v26.100.2
 
 ## Implementado
 
@@ -9,6 +9,10 @@
 - Pantalla de cuenta bloqueada, logo oficial, favicon e iconos transparentes.
 - Lectura remota española sin modelo local. Envía el texto leído al servicio de voz de Google; requiere conexión.
 - Sincronización del código con GitHub y publicación de entregas verificadas en Firebase Hosting.
+
+## Corrección v26.100.2
+
+La revisión de permisos se puede cerrar en todo momento, permite continuar sin revisarlos y ofrece reintento al terminar su plazo. La geolocalización de entrada tiene un plazo independiente. La conexión a Google incorpora ayuda tras una espera y un reintento explícito; las escrituras no se repiten automáticamente. El propietario comprobó asociación de correo en otro navegador; el primer guardado real sigue pendiente. [Alcance y pruebas](PERMISOS-Y-CUENTAS-26.100.2.md).
 
 ## Corrección v26.100.1
 

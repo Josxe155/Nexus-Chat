@@ -48,7 +48,7 @@ function exchange(owner:string,operation:'connect'|'save',reservation:ContactWin
  if(reservation.popup.closed)throw Error('Se cerró la ventana de Google. Vuelve a pulsar Guardar.');
  if(pending||reservation.owner!==owner){closeGoogleContactWindow(reservation);throw Error('Termina la conexión de contactos anterior antes de continuar.');}
  const state=crypto.randomUUID(),requestKey=PREFIX+state,resultKey=RESULT+state;
- const expires=Date.now()+300000;
+ const duration=operation==='connect'?120000:300000,expires=Date.now()+duration;
  try{localStorage.setItem(requestKey,JSON.stringify({operation,expires}));}catch{closeGoogleContactWindow(reservation);throw Error('Permite el almacenamiento del sitio para conectar tus contactos.');}
  return new Promise<Result>((resolve,reject)=>{
   let finished=false;let poll:ReturnType<typeof setInterval>|undefined,timeout:ReturnType<typeof setTimeout>|undefined;
@@ -75,7 +75,7 @@ function exchange(owner:string,operation:'connect'|'save',reservation:ContactWin
    }catch(error){finish(undefined,error instanceof Error?error:Error('No se pudo comprobar la conexión con Google.'));}
   };
   pending={owner,cancel};window.addEventListener('storage',check);poll=setInterval(check,500);
-  timeout=setTimeout(()=>finish(undefined,Error('La conexión caducó. Vuelve a intentarlo y completa la confirmación en la ventana de Google.')),300000);
+  timeout=setTimeout(()=>finish(undefined,Error('La conexión caducó. Vuelve a intentarlo y completa la confirmación en la ventana de Google.')),duration);
   try{
    if(operation==='connect'){
     const url=new URL(CONTACTS_SCRIPT_URL);url.search=new URLSearchParams({mode:'connect',state,origin:location.origin}).toString();

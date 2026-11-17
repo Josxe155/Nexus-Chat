@@ -52,7 +52,8 @@
     "test:country:emulators": "node scripts/country-number-emulator.test.cjs",
     "test:speech": "node --import tsx scripts/speech.test.ts",
     "test:google-contacts:apps-script": "node scripts/google-contacts-apps-script.test.cjs",
-    "test:google-contacts:bridge": "node --import tsx scripts/google-contacts-bridge.test.ts"
+    "test:google-contacts:bridge": "node --import tsx scripts/google-contacts-bridge.test.ts",
+    "test:browser-permissions": "node --import tsx scripts/browser-permissions.test.ts"
   },
   "dependencies": {
     "firebase": "^12.13.0",
