@@ -1,4 +1,4 @@
-# Estado actual de Nexus Chat — v26.100.0
+# Estado actual de Nexus Chat — v26.100.1
 
 ## Implementado
 
@@ -9,6 +9,10 @@
 - Pantalla de cuenta bloqueada, logo oficial, favicon e iconos transparentes.
 - Lectura remota española sin modelo local. Envía el texto leído al servicio de voz de Google; requiere conexión.
 - Sincronización del código con GitHub y publicación de entregas verificadas en Firebase Hosting.
+
+## Corrección v26.100.1
+
+El encabezado de chats en celular usa una tipografía geométrica local con pesos diferenciados para Nexus y Chat. Mantiene el nombre y los controles; el título respeta el color de texto del tema para ser legible en claro y oscuro. La fuente contiene únicamente los caracteres del título (3124 bytes) y conserva su licencia OFL. Tablet y computadora mantienen su tipografía. Se verificaron 12 configuraciones en claro/oscuro: celular 6/6, tablet 4/4 y computadora 2/2 (100 % de esos casos), sin desbordamiento y con los menús operativos. La fuente solo se solicita en celular y el contraste del título supera 4.5:1 en ambos temas.
 
 ## Actualización v26.100.0
 

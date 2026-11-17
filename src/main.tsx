@@ -83,3 +83,5 @@ import './features/phone-contacts-menu.css';
 import './reference-20261110.css';
 
 import './features/chat-contact-references.css';
+
+import './mobile-wordmark.css';

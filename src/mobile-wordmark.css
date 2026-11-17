@@ -1,0 +1,26 @@
+@font-face {
+ font-family: "Nexus Outfit";
+ font-style: normal;
+ font-weight: 400 700;
+ font-display: swap;
+ src: url('/fonts/nexus-outfit.woff2') format('woff2');
+ unicode-range: U+20, U+43, U+4E, U+61, U+65, U+68, U+73-75, U+78;
+}
+
+@media (max-width: 599px) {
+ .mobile-shell:not(.desktop-shell) .mobile-header h1 > button.nexus-rgb-trigger.nexus-mobile-wordmark {
+  font-family: "Nexus Outfit", system-ui, sans-serif !important;
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -.8px;
+ }
+ html[data-nexus-mode="light"] .mobile-shell:not(.desktop-shell) .mobile-header h1 > button.nexus-mobile-wordmark {
+  color: var(--nx-text, #111b21);
+ }
+ .mobile-shell:not(.desktop-shell) .mobile-header .nexus-mobile-wordmark .nexus-wordmark-chat {
+  font-weight: 500;
+  margin-inline-start: 2px;
+  letter-spacing: -.5px;
+ }
+}
