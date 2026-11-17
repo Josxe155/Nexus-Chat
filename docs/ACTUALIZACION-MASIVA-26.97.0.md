@@ -38,10 +38,14 @@ Los números Nexus nuevos usan generación criptográfica, validación completa 
 
 `maintenance/prepare-message-expiry.cjs` permite preparar metadatos de historiales existentes antes de publicar las consultas: normaliza fechas ausentes, protege las vistas previas y vincula archivos de referencia única. Solo selecciona metadatos; usa precondiciones de versión para no sobrescribir cambios concurrentes. Los archivos compartidos por varias referencias antiguas no se reasignan de manera arbitraria.
 
-Se verifican TypeScript, compilación de Hosting, las 167 pruebas anteriores y ocho pruebas nuevas de políticas, números, descarga y migración. Las 110 comprobaciones con emuladores prueban lecturas y borrados autorizados/denegados, inactividad, envío multimedia, conservación y las regresiones de edición y encuestas. No realizan escrituras de producción.
+Se verifican TypeScript, compilación de Hosting, las 167 pruebas anteriores y ocho pruebas nuevas de políticas, números, descarga y migración. Las 111 comprobaciones con emuladores prueban lecturas y borrados autorizados/denegados, inactividad, envío multimedia, conservación y las regresiones de edición y encuestas. No realizan escrituras de producción.
 
 La matriz visual de esta entrega reúne 64 casos nuevos de perfil y descarga, y 78 de regresión de las referencias anteriores: celular 74/74, tablet 36/36 y computadora 32/32. Son tamaños simulados, en claro y oscuro; no equivalen a pruebas físicas ni a un porcentaje global de finalización de Nexus.
 
 Fuentes: [WhatsApp: mensajes temporales](https://faq.whatsapp.com/673193694148537/), [WhatsApp: duraciones](https://blog.whatsapp.com/more-control-and-privacy-with-default-disappearing-messages-and-multiple-durations), [Firebase: reglas y consultas](https://firebase.google.com/docs/firestore/security/rules-query), [Firebase: condiciones de seguridad](https://firebase.google.com/docs/firestore/security/rules-conditions), [Firebase: límites](https://firebase.google.com/docs/firestore/quotas).
 
 Copias y restauración, pantallas sin referencia, pruebas físicas y mejoras posteriores de llamadas/comunidades mantienen sus pendientes. Los retoques de logo y la eliminación de la dependencia del dashboard para la limpieza mensual siguen fuera del alcance, conforme a la decisión del propietario.
+
+## Corrección v26.97.1
+
+La creación de invitados exige fechas de creación y actividad cercanas a la hora del servidor. Las fechas futuras o ausentes no permiten prolongar artificialmente el plazo de inactividad. Se añade una prueba negativa de ambas fechas manipuladas y una positiva de alta válida; la matriz de emuladores queda en 111 comprobaciones.
