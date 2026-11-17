@@ -54,6 +54,8 @@ Nexus Chat reúne conversaciones, archivos, estados, comunidades y llamadas en u
 
 El próximo bloque pendiente incluye favicon e iconos transparentes, Ajustes, sus categorías e información de contacto. El estado y los criterios de cierre están en [la lista de pendientes](docs/PENDIENTES-WHATSAPP.md#prioridades-del-9-de-noviembre-de-2026).
 
+La alternativa de contactos con Apps Script tiene [código preparado e instrucciones de instalación](docs/GOOGLE-CONTACTOS-APPS-SCRIPT.md). Su publicación en el proyecto del propietario y la conexión desde Nexus siguen pendientes; no sustituye todavía la integración directa de People API.
+
 ## Vista previa
 
 Capturas de la aplicación con **datos ficticios de demostración**. No incluyen conversaciones ni fotos personales del propietario.

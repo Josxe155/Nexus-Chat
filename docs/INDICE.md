@@ -6,6 +6,7 @@ El [README principal](../README.md) describe las funciones y el modelo de seguri
 
 | Documento | Contenido |
 | --- | --- |
+| [Preparación de Apps Script para contactos](GOOGLE-CONTACTOS-APPS-SCRIPT.md) | Código instalable, permisos, 15 pruebas y conexión web pendiente. |
 | [Acceso administrativo y tareas aplazadas](PENDIENTES-ACCESO-ADMINISTRATIVO.md) | Acceso implementado, borrado a treinta días pendiente y tareas de moderación y Assistant. |
 | [Llamadas y segundo plano v26.95.0](LLAMADAS-Y-SEGUNDO-PLANO-26.95.0.md) | Salidas reales de audio, referencias móviles, notificaciones del worker y límites sin servidor. |
 | [Revisión general v26.95.1](AUDITORIA-26.95.1.md) | Correcciones de Ajustes/contactos, pruebas de permisos, reglas endurecidas y limitaciones pendientes. |
