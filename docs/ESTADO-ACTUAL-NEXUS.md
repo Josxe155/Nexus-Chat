@@ -1,4 +1,4 @@
-# Estado actual de Nexus Chat — v26.98.0
+# Estado actual de Nexus Chat — v26.99.0
 
 ## Implementado
 
@@ -7,10 +7,14 @@
 - Dashboard con acceso restringido al propietario, estadísticas, informes, avisos, mantenimiento y limpieza manual confirmada.
 - Nexus Assistant con historial local, búsqueda, lectura multimedia y cambios operativos auditados. CONFIRMAR no requiere códigos. Se conservan las protecciones de cuentas, permisos y credenciales.
 - Pantalla de cuenta bloqueada, logo oficial, favicon e iconos transparentes.
-- Lectura neuronal española con KokoroJS; necesita descargar y ejecutar el modelo en el navegador.
+- Lectura remota española sin modelo local. Envía el texto leído al servicio de voz de Google; requiere conexión.
 - Sincronización del código con GitHub y publicación de entregas verificadas en Firebase Hosting.
 
-## Actualización v26.98.0
+## Actualización v26.99.0
+
+Se sustituye KokoroJS en todos los controles de lectura por audio remoto en español, sin Python ni servidor propio. Se eliminan los binarios y dependencias de síntesis local, se conserva el texto completo mediante segmentos y se detiene la espera a los veinte segundos sin reintentos automáticos. [Implementación, privacidad y límites](VOZ-GOOGLE-26.99.0.md).
+
+## Actualización v26.98.0 (histórica)
 
 La ubicación con permiso identifica el país también en computadora. Se corrigen números antiguos sin perder sus vínculos y nuevo contacto usa el país de la cuenta. Kokoro consume el archivo persistido y distingue descarga de preparación; el fallo no reinicia el motor automáticamente. Se verifica generación de audio real en tres lecturas con una sola transferencia del modelo. [Alcance y límites](PAIS-Y-VOZ-26.98.0.md).
 

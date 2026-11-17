@@ -1,25 +1,13 @@
-Nexus Chat — componentes de lectura de voz (v26.94.0)
+Nexus Chat — lectura de voz v26.99.0
 
-El audio se genera con KokoroJS y el modelo Kokoro-82M, voz española ef_dora.
-KokoroJS: Apache-2.0. Licencia: /tts/v1/kokoro-js-LICENSE.txt
-Código fuente: https://github.com/hexgrad/kokoro/tree/main/kokoro.js
-Modelo y voces: https://huggingface.co/onnx-community/Kokoro-82M-v1.0-ONNX
-Modelo original y licencia Apache-2.0: https://huggingface.co/hexgrad/Kokoro-82M
+Esta versión reproduce audio MP3 del servicio de voz de Google Translate.
+No distribuye KokoroJS, Transformers, ONNX Runtime ni eSpeak como motor de voz.
+No ejecuta Python ni instala la biblioteca gTTS dentro del navegador.
 
-Transformers.js: Apache-2.0. Licencia: /tts/v1/transformers-LICENSE.txt
-Código fuente: https://github.com/huggingface/transformers.js
+Documentación de gTTS, biblioteca Python que utiliza el servicio de Translate:
+https://gtts.readthedocs.io/en/stable/
+Integración web, privacidad y límites:
+https://github.com/Josxe155/Nexus-Chat/blob/main/docs/VOZ-GOOGLE-26.99.0.md
 
-ONNX Runtime: MIT. Licencia y aviso de copyright: /onnxruntime-license.txt
-Código fuente: https://github.com/microsoft/onnxruntime
-
-Los fonemas españoles se obtienen con espeak-phonemizer 0.2.0 y eSpeak NG.
-Este componente no genera el audio final de Nexus Chat.
-Licencia GPL-3.0-only: /tts/v1/espeak-phonemizer-LICENSE.txt
-Avisos: /tts/v1/phonemizer-NOTICES.md
-Paquete, fuentes e instrucciones de construcción:
-https://www.npmjs.com/package/espeak-phonemizer
-https://github.com/espeak-ng/espeak-ng
-
-Los binarios locales se preparan mediante scripts/prepare-tts.cjs desde las
-versiones fijadas en package-lock.json. El código de integración de Nexus está en:
-https://github.com/Josxe155/Nexus-Chat
+El texto seleccionado para escuchar se envía al servicio externo y requiere
+conexión. Este endpoint web no ofrece un contrato de disponibilidad de API.

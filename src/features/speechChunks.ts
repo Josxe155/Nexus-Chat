@@ -1,4 +1,4 @@
-/** Keep synthesis jobs short; the player only holds two decoded jobs at once. */
+/** Normalize text for speech without truncating long reports. */
 export function spanishSpeechChunks(text:string){
  const clean=text.replace(/https?:\/\/\S+/g,'enlace').replace(/[\p{Extended_Pictographic}\p{Regional_Indicator}\uFE0F\u200D#*`_]/gu,'').replace(/\s+/g,' ').trim();
  const chunks:string[]=[];let remaining=clean;

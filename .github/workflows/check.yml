@@ -7,8 +7,6 @@ permissions:
 jobs:
   check:
     runs-on: ubuntu-latest
-    env:
-      ONNXRUNTIME_NODE_INSTALL_CUDA: skip
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -33,7 +31,7 @@ jobs:
       - run: npm run test:guest-identity
       - run: npm run test:assistant-media
       - run: npm run test:assistant-confirmation
-      - run: npm run test:kokoro-speech
+      - run: npm run test:speech
       - run: npm run test:background-notifications
       - run: npm run test:voice-media-session
       - run: npm run test:call-audio-output
