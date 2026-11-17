@@ -34,6 +34,9 @@ jobs:
       - run: npm run test:assistant-media
       - run: npm run test:assistant-confirmation
       - run: npm run test:kokoro-speech
+      - run: npm run test:background-notifications
+      - run: npm run test:voice-media-session
+      - run: npm run test:call-audio-output
       - run: npm run test:voice-download
       - run: npm run test:rich-text
       - run: npm run build:hosting

@@ -1,5 +1,6 @@
+import {showBackgroundNotice,closeBackgroundNotice} from './backgroundNotifications';
 import {mobileSettingsActive,vibrationPattern} from './mobileSettingsModel';
-import {noticePreview,notificationClientId} from './notificationPreview';
+import {noticePreview} from './notificationPreview';
 import {useEffect,useRef,useState} from 'react';
 import {createPortal} from 'react-dom';
 import {Phone,PhoneOff,Video,Mic,MicOff,GripVertical} from 'lucide-react';
@@ -7,9 +8,9 @@ import {avatar} from './avatar';import {useMediaURLs} from './mediaTransfer';imp
 export function IncomingCallNotice({uid,id,name,photo,video,onAccept,onDecline}:{uid:string;id:string;name:string;photo?:string;video:boolean;onAccept:()=>Promise<void>;onDecline:()=>Promise<void>}){
  const urls=useMediaURLs([{id,fileUrl:photo,force:true,fileSize:1}],uid),[busy,setBusy]=useState(false),[error,setError]=useState('');
  useEffect(()=>{
-  let notice:Notification|undefined,live=true,registration:ServiceWorkerRegistration|undefined,revision=0;
+  let notice:Notification|undefined,live=true,revision=0;
   const tag='nexus-incoming-'+id;
-  const clear=()=>{notice?.close();registration?.getNotifications({tag}).then(items=>items.forEach(item=>item.close())).catch(()=>{});};
+  const clear=()=>{notice?.close();void closeBackgroundNotice(tag).catch(()=>{});};
   const show=async()=>{
    const current=++revision,prefs=getPreferences(uid).notifications;
    const eligible=()=>live&&current===revision&&document.visibilityState==='hidden';
@@ -18,13 +19,9 @@ export function IncomingCallNotice({uid,id,name,photo,video,onAccept,onDecline}:
    const preview=noticePreview(name,type,prefs.preview);
    const options:NotificationOptions={body:prefs.preview?preview.body:type,icon:'/nexus-icon.svg',tag,requireInteraction:true,silent:true};
    try{
-    registration=await navigator.serviceWorker?.getRegistration();
     if(!eligible())return;
-    if(registration?.active){
-     const clientId=await notificationClientId(registration.active);
-     if(!eligible())return;
-     await registration.showNotification(preview.title,{...options,data:{url:'/',clientId}});
-    }else{notice=new Notification(preview.title,options);notice.onclick=()=>{window.focus();notice?.close();};}
+    if('serviceWorker'in navigator){await showBackgroundNotice({title:preview.title,body:options.body||type,path:'/',tag,category:'calls',requireInteraction:true});}
+    else{notice=new Notification(preview.title,options);notice.onclick=()=>{window.focus();notice?.close();};}
     if(!live||document.visibilityState==='visible')clear();
    }catch{}
   };

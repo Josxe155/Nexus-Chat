@@ -1,8 +1,9 @@
+import {activateVoiceMediaSession,updateVoiceMediaSession,releaseVoiceMediaSession} from './voiceMediaSession';
 export type VoiceTrack={key:string;uid:string;chatId:string;messageId:string;src:string;label:string;photo?:string;expiresAt?:number};
 type Playback={track:VoiceTrack|null;playing:boolean;time:number;duration:number;speed:number;error:string};
 let state:Playback={track:null,playing:false,time:0,duration:0,speed:1,error:''},audio:HTMLAudioElement|undefined,session='',queue:VoiceTrack[]=[],revision=0;
 const listeners=new Set<()=>void>(),positions=new Map<string,number>();
-const emit=(patch:Partial<Playback>)=>{state={...state,...patch};listeners.forEach(listener=>listener());};
+const emit=(patch:Partial<Playback>)=>{state={...state,...patch};updateVoiceMediaSession(state.playing,state.time,state.duration,state.speed);listeners.forEach(listener=>listener());};
 export const voiceSnapshot=()=>state;
 let idle:Playback={...state};export function voiceTrackSnapshot(key:string){if(state.track?.key===key)return state;if(idle.speed!==state.speed)idle={track:null,playing:false,time:0,duration:0,speed:state.speed,error:''};return idle;}
 export const subscribeVoice=(listener:()=>void)=>{listeners.add(listener);return()=>{listeners.delete(listener);};};
@@ -13,20 +14,21 @@ function player(){if(audio)return audio;audio=new Audio();audio.preload='metadat
  audio.ondurationchange=()=>{if(Number.isFinite(audio!.duration)&&audio!.duration>0)emit({duration:audio!.duration});};
  audio.onplay=()=>{emit({playing:true,error:''});window.dispatchEvent(new CustomEvent('nexus:audio-start',{detail:'global-voice'}));};
  audio.onpause=()=>{if(audio!.paused){remember();emit({playing:false});}};
- audio.onerror=()=>emit({playing:false,error:'No se pudo reproducir el audio. Vuelve a intentarlo.'});
- audio.onended=()=>{if(state.track)positions.delete(state.track.key);const next=queue.shift();if(next&&next.uid===session&&(!next.expiresAt||next.expiresAt>Date.now()))void playVoice(next,queue);else{queue=[];emit({track:null,playing:false,time:0,duration:0,error:''});}};
+ audio.onerror=()=>{releaseVoiceMediaSession();emit({playing:false,error:'No se pudo reproducir el audio. Vuelve a intentarlo.'});};
+ audio.onended=()=>{if(state.track)positions.delete(state.track.key);const next=queue.shift();if(next&&next.uid===session&&(!next.expiresAt||next.expiresAt>Date.now()))void playVoice(next,queue);else{queue=[];releaseVoiceMediaSession();emit({track:null,playing:false,time:0,duration:0,error:''});}};
  window.addEventListener('nexus:audio-start',event=>{if((event as CustomEvent).detail!=='global-voice')pauseVoice();});
  return audio;
 }
 export function setVoiceSession(uid:string){if(uid!==session){resetVoicePlayback();session=uid;}}
 export function pauseVoice(){revision++;audio?.pause();}
-export function resetVoicePlayback(){revision++;queue=[];positions.clear();audio?.pause();if(audio){audio.removeAttribute('src');audio.load();}session='';emit({track:null,playing:false,time:0,duration:0,speed:1,error:''});}
-export function closeVoice(){revision++;remember();queue=[];audio?.pause();if(audio){audio.removeAttribute('src');audio.load();}emit({track:null,playing:false,time:0,duration:0,error:''});}
+export function resetVoicePlayback(){releaseVoiceMediaSession();revision++;queue=[];positions.clear();audio?.pause();if(audio){audio.removeAttribute('src');audio.load();}session='';emit({track:null,playing:false,time:0,duration:0,speed:1,error:''});}
+export function closeVoice(){releaseVoiceMediaSession();revision++;remember();queue=[];audio?.pause();if(audio){audio.removeAttribute('src');audio.load();}emit({track:null,playing:false,time:0,duration:0,error:''});}
 export async function playVoice(track:VoiceTrack,following:VoiceTrack[]=[]){
  if(!track.src||!track.uid||track.expiresAt&&track.expiresAt<=Date.now())return;
  if(!session)session=track.uid;if(session!==track.uid)return;
  const node=player();queue=following.filter(value=>value.uid===session);const current=++revision;
  if(state.track?.key!==track.key||state.track.src!==track.src){remember();node.pause();emit({track,playing:false,time:positions.get(track.key)||0,duration:0,error:''});node.src=track.src;}else emit({error:''});
+ activateVoiceMediaSession({play:()=>{if(!state.playing)void toggleVoice();},pause:pauseVoice,stop:closeVoice,seek:seekVoice,time:()=>state.time});
  node.playbackRate=state.speed;try{await node.play();}catch{if(current===revision)emit({playing:false,error:'No se pudo iniciar el audio. Pulsa reproducir para reintentarlo.'});}
 }
 export function reportVoiceDuration(key:string,duration:number){const nativeDuration=audio&&Number.isFinite(audio.duration)&&audio.duration>0?audio.duration:0,value=nativeDuration||duration;if(state.track?.key===key&&Number.isFinite(value)&&value>0&&state.duration!==value)emit({duration:value});}

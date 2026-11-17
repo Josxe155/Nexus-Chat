@@ -41,7 +41,10 @@
     "test:assistant-capabilities:emulators": "node scripts/assistant-capabilities-emulator.test.cjs",
     "test:assistant-confirmation": "node --import tsx scripts/assistant-confirmation.test.ts",
     "test:kokoro-speech": "node --import tsx scripts/kokoro-speech.test.ts",
-    "test:voice-download": "node --import tsx scripts/voice-download.test.ts"
+    "test:voice-download": "node --import tsx scripts/voice-download.test.ts",
+    "test:call-audio-output": "node --import tsx scripts/call-audio-output.test.ts",
+    "test:background-notifications": "node scripts/background-notifications.test.cjs",
+    "test:voice-media-session": "node --import tsx scripts/voice-media-session.test.ts"
   },
   "dependencies": {
     "@huggingface/transformers": "3.8.1",

@@ -1,4 +1,4 @@
-# Estado actual de Nexus Chat — v26.94.2
+# Estado actual de Nexus Chat — v26.95.0
 
 ## Implementado
 
@@ -9,6 +9,10 @@
 - Pantalla de cuenta bloqueada, logo oficial, favicon e iconos transparentes.
 - Lectura neuronal española con KokoroJS; necesita descargar y ejecutar el modelo en el navegador.
 - Sincronización del código con GitHub y publicación de entregas verificadas en Firebase Hosting.
+
+## Actualización v26.95.0
+
+El botón de salida deja de silenciar el audio recibido y selecciona salidas autorizadas cuando el navegador lo permite. Los controles de voz en celular siguen las referencias de esta entrega. Los avisos de una pestaña que continúa ejecutándose se envían al service worker, con limpieza y navegación internas; las notas de voz incorporan Media Session. No se incorpora un emisor Push remoto ni ejecución continua con la pestaña cerrada. [Implementación, pruebas y límites](LLAMADAS-Y-SEGUNDO-PLANO-26.95.0.md).
 
 ## Corrección v26.94.2
 
@@ -24,7 +28,7 @@ El usuario describió líneas que desaparecen al desplazar la página: no se ha 
 
 - Borrado completo de invitados y todos sus datos a los treinta días, manteniendo la restricción de no utilizar servidor ni Blaze.
 - Estabilidad y rendimiento de voz en dispositivos físicos, especialmente equipos con poca memoria y audio de iPhone en segundo plano.
-- Revisión física de notificaciones con la pestaña cerrada, llamadas, biometría y multimedia.
+- Emisor automático de notificaciones remotas con la pestaña cerrada, bajo la restricción de no usar servidor. Comprobación física de notificaciones, audio y llamadas con pantalla bloqueada; selección de auricular interno según soporte del navegador, biometría y multimedia.
 - Completar Ajustes, contacto, grupos y menús conforme a referencias pendientes. No se afirma una equivalencia total con WhatsApp.
 - Completar copias/restauración y verificar las autorizaciones e integraciones externas que correspondan. Preparar un módulo no equivale a confirmar su funcionamiento real.
 - Documentos adicionales y archivos mayores de 8 MB por consulta del Assistant.
