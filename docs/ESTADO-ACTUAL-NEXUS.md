@@ -1,4 +1,4 @@
-# Estado actual de Nexus Chat — v26.95.1
+# Estado actual de Nexus Chat — v26.96.0
 
 ## Implementado
 
@@ -9,6 +9,10 @@
 - Pantalla de cuenta bloqueada, logo oficial, favicon e iconos transparentes.
 - Lectura neuronal española con KokoroJS; necesita descargar y ejecutar el modelo en el navegador.
 - Sincronización del código con GitHub y publicación de entregas verificadas en Firebase Hosting.
+
+## Actualización v26.96.0
+
+Se aplican las referencias del saludo y del aviso temporal del chat, así como de nuevo contacto en celular. La sincronización muestra la cuenta autorizada y se oculta para invitados; el país conserva el selector completo y utiliza código/prefijo sin bandera en el campo. [Detalles y pruebas](REFERENCIAS-CHAT-CONTACTO-26.96.0.md). Las tareas de datos de la actualización masiva siguen pendientes de la fase posterior a referencias.
 
 ## Corrección v26.95.1
 
@@ -30,12 +34,13 @@ El usuario describió líneas que desaparecen al desplazar la página: no se ha 
 
 ## Pendientes
 
-- Borrado completo de invitados y todos sus datos a los treinta días, manteniendo la restricción de no utilizar servidor ni Blaze.
+- Actualización masiva posterior a referencias: progreso de descarga con bytes reales, usuario inicialmente vacío y revisión de la generación de números de Nexus.
+
+- Borrado completo de invitados y todos sus datos tras treinta días de inactividad, manteniendo la restricción de no utilizar servidor ni Blaze.
 - Estabilidad y rendimiento de voz en dispositivos físicos, especialmente equipos con poca memoria y audio de iPhone en segundo plano.
 - Emisor automático de notificaciones remotas con la pestaña cerrada, bajo la restricción de no usar servidor. Comprobación física de notificaciones, audio y llamadas con pantalla bloqueada; selección de auricular interno según soporte del navegador, biometría y multimedia.
 - Completar Ajustes, contacto, grupos y menús conforme a referencias pendientes. No se afirma una equivalencia total con WhatsApp.
 - Completar copias/restauración y verificar las autorizaciones e integraciones externas que correspondan. Preparar un módulo no equivale a confirmar su funcionamiento real.
 - Documentos adicionales y archivos mayores de 8 MB por consulta del Assistant.
-- Refinamiento de los bordes del logo en tamaños pequeños.
 
 Los porcentajes de cada entrega se refieren a sus casos comprobados por tamaño simulado; no son porcentajes de finalización global ni pruebas en Android o iPhone físicos.

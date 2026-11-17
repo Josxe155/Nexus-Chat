@@ -24,7 +24,7 @@ import SingleListenAudio from '../features/SingleListenAudio';
 import SingleViewMedia from '../features/SingleViewMedia';
 import {isViewOnceVisual,isOneTimeMedia} from '../features/viewOnce';
 import {beginMobileVoice} from '../features/mobileVoiceGesture';
-import {MessageCircle as ConversationIcon} from 'lucide-react';
+import {ConversationStartNotice,DisappearingDurationNotice} from '../features/ChatConversationNotices';
 import DesktopStickerViewer from '../features/DesktopStickerViewer';
 import MobileContacts from '../features/MobileContacts';
 import {useDesktopWeb} from '../features/useDesktopWeb';import {DesktopAttachmentReview,DesktopContacts,DesktopCamera,DesktopFileAudio} from '../features/DesktopAttachments';import DesktopEvent from '../features/DesktopEvent';
@@ -606,15 +606,8 @@ export default function ChatWindow({
           </div>
         )}
 
-        {messages.length === 0 && (
-          <div className="h-32 flex items-center justify-center">
-            <span className={`text-[11px] px-3 py-1.5 rounded-lg shadow-sm font-medium ${theme === 'dark' ? 'bg-[#1a1e27] text-[#727cf5]' : 'bg-[#ffeec1] text-amber-900'}`}>
-              {desktopWeb?'Este puede ser el comienzo de una buena conversación.':<><ConversationIcon size={16}/>Este puede ser el comienzo de una buena conversación. Comparte un saludo, una foto o una nota de voz para empezar a conectar.</>}
-            </span>
-          </div>
-        )}
-
-        {!desktopWeb&&!!activeChat.disappearingMs&&<div className="mobile-temporary-notice temporary-duration-notice"><span><strong>Mensajes temporales</strong>Los mensajes nuevos desaparecen después de {activeChat.disappearingMs===86400000?'24 horas':activeChat.disappearingMs===604800000?'7 días':'90 días'}.</span><button onClick={()=>{setContactView('info');setShowContact(true);}}>Ver ajuste</button></div>}
+        {messages.length===0&&(desktopWeb?<div className="h-32 flex items-center justify-center"><span className={`text-[11px] px-3 py-1.5 rounded-lg shadow-sm font-medium ${theme==='dark'?'bg-[#1a1e27] text-[#727cf5]':'bg-[#ffeec1] text-amber-900'}`}>Este puede ser el comienzo de una buena conversación.</span></div>:<ConversationStartNotice/>)}
+        {!desktopWeb&&<DisappearingDurationNotice duration={activeChat.disappearingMs||0} onChange={()=>setConversationTool('temporary')}/>}
         {hasOlder&&<button className="load-older" disabled={loadingOlder} onClick={()=>{previousHeight.current=messageAreaRef.current?.scrollHeight||0;onLoadOlder?.();}}>{loadingOlder?'Cargando mensajes…':'Cargar mensajes anteriores'}</button>}
         {Object.keys(messageGroups).map(dateStr => (
           <div key={dateStr} className="space-y-3">
