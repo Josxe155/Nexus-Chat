@@ -6,7 +6,8 @@ import PasswordRecovery from './PasswordRecovery';
 import {useMobileBack} from '../features/useMobileBack';
 import {reportRegistrationStatus} from '../features/registrationStatus';
 import PhoneField,{internationalPhone} from '../features/PhoneField';
-import {admitAccount} from '../features/admission';
+import {entryPermissions} from '../features/entryPermissions';
+import {admitAccount,suggestedCountry} from '../features/admission';
 import {authErrorMessage} from '../features/authErrors';
 import {migrateOwnProfile} from '../features/privacy';
 import {avatar,DEFAULT_AVATAR} from '../features/avatar';
@@ -94,6 +95,7 @@ export default function AuthScreen({ onAuthSuccess, theme, onToggleTheme }: Auth
     setLoading(true);
     setError('');
     try {
+      await entryPermissions(suggestedCountry());
       const user = await createGuestAccount(auth,db,guestName.trim());
       await registerUserInDB(user, guestName.trim());
     } catch (err: any) {

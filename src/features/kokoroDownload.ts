@@ -1,4 +1,4 @@
-import {downloadVoice,type DownloadInfo,type VoiceDownloadStore,type DownloadProgress,byteProgress} from './resumableVoice';
+import {downloadVoice,type DownloadInfo,type VoiceDownloadStore,type DownloadProgress} from './resumableVoice';
 import {KOKORO_MODEL} from './kokoroSpanish';
 // Immutable official revision: never combine ranges from different model versions.
 const revision='1939ad2a8e416c0acfeecc08a694d14ef25f2231',size=92361116;
@@ -11,13 +11,26 @@ async function openStore(){
  const store:VoiceDownloadStore={info:()=>read<DownloadInfo|undefined>('meta'),parts:()=>read<ArrayBuffer[]>('chunks',true),reset:()=>write(tx=>{tx.objectStore('meta').clear();tx.objectStore('chunks').clear();}),append:(index,data,info)=>write(tx=>{tx.objectStore('chunks').put(data,index);tx.objectStore('meta').put(info,'download');})};
  return {store,close:()=>db.close()};
 }
-export async function prepareKokoroDownload(onProgress:(percent:number,bytes?:DownloadProgress)=>void){
- // Missing storage/locking APIs retain the SDK's complete-file download behavior.
- if(typeof caches==='undefined'||typeof indexedDB==='undefined'||!navigator.locks)return;
- await navigator.locks.request('nexus-kokoro-model-download',async()=>{
-  const cache=await caches.open('transformers-cache');if(await cache.match(cacheURL)){onProgress(100,byteProgress(size,size));return;}
+async function assetStore(){try{return typeof caches==='undefined'?undefined:await caches.open('transformers-cache');}catch{return undefined;}}
+let pending:Promise<Response|undefined>|undefined;
+export function prepareKokoroDownload(onProgress:(percent:number,bytes?:DownloadProgress)=>void):Promise<Response|undefined>{
+ if(pending)return pending;
+ const load=async()=>{
+  const cache=await assetStore();
+  const cached=await cache?.match(cacheURL);
+  if(cached){const blob=await cached.blob();if(blob.size===size)return new Response(blob,{headers:{'Content-Type':'application/octet-stream','Content-Length':String(size)}});await cache?.delete(cacheURL);}
+  if(typeof indexedDB==='undefined')return;
   const {store,close}=await openStore();
-  try{const blob=await downloadVoice(sourceURL,size,store,onProgress);await cache.put(cacheURL,new Response(blob,{headers:{'Content-Type':'application/octet-stream','Content-Length':String(size)}}));await store.reset();}
-  finally{close();}
- });
+  try{const existing=await store.info(),report=existing?.bytes===size?()=>{}:onProgress;const blob=await downloadVoice(sourceURL,size,store,report);
+   // The completed blocks remain canonical. The SDK consumes this response directly;
+   // it must not start another fetch or discard a verified download after cache eviction.
+   return new Response(blob,{headers:{'Content-Type':'application/octet-stream','Content-Length':String(size)}});
+  }finally{close();}
+ };
+ pending=(navigator.locks?navigator.locks.request('nexus-kokoro-model-download',load):load()).catch(error=>{pending=undefined;throw error;});
+ return pending;
+}
+export async function kokoroAssetCache(model:Response|undefined){
+ const cache=await assetStore();
+ return {releaseModel:()=>{model=undefined;pending=undefined;},match:async(key:string|Request)=>{const url=typeof key==='string'?key:key.url;if(url===cacheURL&&model)return model.clone();return cache?.match(key);},put:async(key:string|Request,response:Response)=>{const url=typeof key==='string'?key:key.url;if(url!==cacheURL)await cache?.put(key,response);}};
 }

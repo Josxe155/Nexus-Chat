@@ -73,6 +73,8 @@ Capturas de la aplicación con **datos ficticios de demostración**. No incluyen
 
 Esta distribución es exclusiva de computadora. Nexus Messenger conserva sus pantallas móviles. Se usan los datos reales del chat y del proveedor; no se inventan nombres de paquetes de stickers.
 
+La actualización **v26.98.0** identifica el país con permiso también en computadora y corrige la reutilización del modelo de voz y el reinicio de preparación. [Implementación y pruebas reales](docs/PAIS-Y-VOZ-26.98.0.md).
+
 La actualización **v26.97.1** incorpora caducidad protegida por reglas, retención de invitados inactivos, progreso real de voz y perfiles sin usuario automático. [Alcance, pruebas y límites](docs/ACTUALIZACION-MASIVA-26.97.0.md).
 
 La actualización **v26.96.0** aplica las referencias del saludo de chat, el aviso de mensajes temporales y nuevo contacto en celular. «Cambiar duración» abre el selector correspondiente; el país muestra código/prefijo sin bandera y la sincronización muestra el correo únicamente en sesiones que lo permiten. [Alcance y comprobaciones](docs/REFERENCIAS-CHAT-CONTACTO-26.96.0.md).

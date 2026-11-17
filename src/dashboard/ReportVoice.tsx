@@ -17,7 +17,7 @@ export default function ReportVoice({report,disabled}:{report:RefObject<HTMLElem
   if(state!=='idle'){release();return;}
   const content=report.current?.innerText.split(/\n+/).map(line=>line.trim()).filter(Boolean).map(line=>/[.!?]$/.test(line)?line:line+'.').join(' ');
   if(!content)return;
-  setError('');setProgress(undefined);setBytes(undefined);active.current=playSpanish(content,setState,()=>setError('No se pudo preparar la voz a tiempo o reproducir el informe. La descarga guardada puede continuar al reintentar.'),setProgress,setBytes);
+  setError('');setProgress(undefined);setBytes(undefined);active.current=playSpanish(content,setState,()=>setError('No se pudo preparar la voz a tiempo o reproducir el informe. Comprueba tu conexión y el espacio disponible antes de volver a intentarlo.'),setProgress,setBytes);
  }
  return <div className="dashboard-voice-control report-voice-control">
   <button type="button" className="secondary icon-action" title={state==='preparing'?'Preparando la voz. La primera lectura necesita descargar el modelo. Pulsa para cancelar.':undefined} disabled={disabled} onClick={listen}>

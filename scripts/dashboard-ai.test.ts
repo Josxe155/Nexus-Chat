@@ -156,7 +156,7 @@ test('divide audio largo por frases sin perder palabras, acentos ni comillas',as
  assert.deepEqual(spanishSpeechChunks('**Hola** `Nexus` https://example.org'),['Hola Nexus enlace']);
 });
 
-test('reintenta un fallo de audio sin repetir fragmentos y cancela sin alertas',async()=>{
+test('no reinicia la preparación fallida y permite un nuevo intento explícito',async()=>{
  const {playSpanish}=await import('../src/features/spanishSpeech.ts');
  const original={Worker:globalThis.Worker,AudioContext:globalThis.AudioContext,document:globalThis.document,window:globalThis.window};
  const workers:any[]=[],sources:any[]=[],states:string[]=[];let errors=0,closed=0;
@@ -173,9 +173,10 @@ test('reintenta un fallo de audio sin repetir fragmentos y cancela sin alertas',
  const flush=()=>new Promise(resolve=>setImmediate(resolve));
  try{
   const stop=playSpanish(Array(30).fill('Una frase breve en español.').join(' '),s=>states.push(s),()=>errors++);await flush();
-  assert.equal(workers[0].jobs.length,1);workers[0].onmessage({data:null});assert.equal(workers[0].terminated,true);assert.equal(workers.length,2);
+  assert.equal(workers[0].jobs.length,1);workers[0].onmessage({data:null});assert.equal(workers[0].terminated,true);assert.equal(workers.length,1);assert.equal(errors,1);assert.equal(states.at(-1),'idle');
+  stop();const next=playSpanish(Array(30).fill('Una frase breve en español.').join(' '),s=>states.push(s),()=>errors++);await flush();assert.equal(workers.length,2);
   assert.equal(workers[1].jobs[0],workers[0].jobs[0]);workers[1].onmessage({data:new ArrayBuffer(100)});await flush();
-  assert.equal(sources.length,1);assert.equal(workers[1].jobs.length,2);stop();assert.equal(closed,1);assert.equal(workers[1].terminated,true);assert.equal(errors,0);assert.equal(states.at(-1),'idle');
+  assert.equal(sources.length,1);assert.equal(workers[1].jobs.length,2);next();assert.equal(closed,2);assert.equal(workers[1].terminated,true);assert.equal(errors,1);assert.equal(states.at(-1),'idle');
   workers[1].onmessage({data:new ArrayBuffer(100)});await flush();assert.equal(sources.length,1);
  }finally{Object.assign(globalThis,original);}
 });

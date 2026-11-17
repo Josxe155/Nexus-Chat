@@ -13,7 +13,7 @@ const permissions=[
  {id:'microphone',label:'Micrófono',description:'Llamadas y notas de voz',Icon:Mic},
  {id:'camera',label:'Cámara',description:'Videollamadas y fotos',Icon:Camera},
  {id:'notifications',label:'Notificaciones',description:'Avisos de mensajes y llamadas',Icon:Bell},
- {id:'location',label:'Ubicación',description:'Solo al compartir tu ubicación',Icon:MapPin},
+ {id:'location',label:'Ubicación',description:'Identificar tu país y compartir ubicación',Icon:MapPin},
 ] as const;
 export default function PermissionReview(){
  const desktop=useDesktopWeb(),[open,setOpen]=useState(()=>!alreadyIntroduced()),[busy,setBusy]=useState(false),[reviewed,setReviewed]=useState(false),[states,setStates]=useState<Record<string,PermissionState>>({});

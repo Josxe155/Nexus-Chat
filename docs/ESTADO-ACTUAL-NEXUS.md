@@ -1,4 +1,4 @@
-# Estado actual de Nexus Chat — v26.97.1
+# Estado actual de Nexus Chat — v26.98.0
 
 ## Implementado
 
@@ -9,6 +9,10 @@
 - Pantalla de cuenta bloqueada, logo oficial, favicon e iconos transparentes.
 - Lectura neuronal española con KokoroJS; necesita descargar y ejecutar el modelo en el navegador.
 - Sincronización del código con GitHub y publicación de entregas verificadas en Firebase Hosting.
+
+## Actualización v26.98.0
+
+La ubicación con permiso identifica el país también en computadora. Se corrigen números antiguos sin perder sus vínculos y nuevo contacto usa el país de la cuenta. Kokoro consume el archivo persistido y distingue descarga de preparación; el fallo no reinicia el motor automáticamente. Se verifica generación de audio real en tres lecturas con una sola transferencia del modelo. [Alcance y límites](PAIS-Y-VOZ-26.98.0.md).
 
 ## Corrección v26.97.1
 

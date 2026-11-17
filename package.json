@@ -47,7 +47,9 @@
     "test:voice-media-session": "node --import tsx scripts/voice-media-session.test.ts",
     "test:security:emulators": "node scripts/security-audit-emulator.test.cjs",
     "test:massive": "node --import tsx scripts/massive-update.test.ts",
-    "test:retention:emulators": "node scripts/massive-retention-emulator.test.cjs && node scripts/massive-realtime-emulator.test.cjs"
+    "test:retention:emulators": "node scripts/massive-retention-emulator.test.cjs && node scripts/massive-realtime-emulator.test.cjs",
+    "test:country": "node --import tsx scripts/country-location.test.ts",
+    "test:country:emulators": "node scripts/country-number-emulator.test.cjs"
   },
   "dependencies": {
     "@huggingface/transformers": "3.8.1",

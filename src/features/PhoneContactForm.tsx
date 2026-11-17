@@ -1,3 +1,4 @@
+import {useNexusNumber} from './profileIdentity';
 import GoogleContactSync,{useGoogleContactSync} from './GoogleContactSync';
 import ContactQrOverlay from './ContactQrOverlay';
 import {ArrowLeft,AtSign,Phone,QrCode,User} from 'lucide-react';
@@ -12,7 +13,9 @@ import {submitContactDraft,UnregisteredContactError,prepareContactDraft} from '.
 import {useMobileBack} from './useMobileBack';
 import type {UserProfile} from '../types';
 export default function PhoneContactForm({user,onClose,contact}:{user:UserProfile;onClose:()=>void;contact?:{phone:string;first:string;last:string}}){
- const [country,setCountry]=useState(contact?'OTHER':'EC'),[number,setNumber]=useState(contact?.phone||''),[first,setFirst]=useState(contact?.first||''),[last,setLast]=useState(contact?.last||''),[username,setUsername]=useState(''),[busy,setBusy]=useState(false),[error,setError]=useState(''),[invite,setInvite]=useState(false);
+ const identity=useNexusNumber(user.uid),countryChosen=useRef(false);
+ const [country,setCountry]=useState(contact?'OTHER':''),[number,setNumber]=useState(contact?.phone||''),[first,setFirst]=useState(contact?.first||''),[last,setLast]=useState(contact?.last||''),[username,setUsername]=useState(''),[busy,setBusy]=useState(false),[error,setError]=useState(''),[invite,setInvite]=useState(false);
+ useEffect(()=>{if(!contact&&!countryChosen.current&&identity.country)setCountry(identity.country);},[identity.country,contact]);
  const googleSync=useGoogleContactSync(user.uid,setError);
  const phone=usePhoneExpressions();const [qrOpen,setQrOpen]=useState(false);
  const valid=(()=>{try{prepareContactDraft({first,last,username,country,number});return true;}catch{return false;}})();
@@ -36,7 +39,7 @@ export default function PhoneContactForm({user,onClose,contact}:{user:UserProfil
  <label className="pcm-contact-field pcm-first">{phone&&<User/>}<span>Nombre</span><input placeholder={phone?"Nombre":undefined} required autoFocus={!phone} autoComplete="given-name" maxLength={80} value={first} onChange={e=>setFirst(e.target.value)} disabled={busy||googleSync.connecting}/></label>
  <label className="pcm-contact-field pcm-last"><span>Apellido</span><input placeholder={phone?"Apellido":undefined} autoComplete="family-name" maxLength={40} value={last} onChange={e=>setLast(e.target.value)} disabled={busy||googleSync.connecting}/></label>
  <label className="pcm-contact-field pcm-handle">{phone&&<AtSign/>}<span>Nombre de usuario</span><input autoCapitalize="none" autoCorrect="off" spellCheck={false} maxLength={33} placeholder={phone?"Nombre de usuario":"@usuario"} value={username} onChange={e=>setUsername(e.target.value)} disabled={busy||googleSync.connecting}/></label>
- <div className="pcm-contact-number">{phone&&<Phone/>}<PhoneField compact={phone} country={country} number={number} onCountry={setCountry} onNumber={setNumber} disabled={busy||googleSync.connecting}/></div>
+ <div className="pcm-contact-number">{phone&&<Phone/>}<PhoneField compact={phone} country={country} number={number} onCountry={value=>{countryChosen.current=true;setCountry(value);}} onNumber={setNumber} disabled={busy||googleSync.connecting}/></div>
  <p className="pcm-number-help">Usa el número de Nexus que aparece en su perfil o su nombre de usuario. El nombre y apellido que guardes solo los verás tú.</p>
  <GoogleContactSync sync={googleSync} disabled={busy||googleSync.connecting}/>
  {error&&<p role="alert">{error}</p>}
