@@ -1,6 +1,6 @@
 # Preparación de contactos mediante Apps Script
 
-Estado del 17 de noviembre de 2026: el propietario comprobó `ok:true` en la revisión 2. Se prepara v26.100.0 con conexión desde los formularios y revisión 3 del script. La revisión 3 incorpora el retorno confirmado necesario para la web; debe publicarse en Apps Script antes de activar la entrega en Hosting. [Implementación web y pruebas](CONTACTOS-APPS-SCRIPT-26.100.0.md).
+Estado del 17 de noviembre de 2026: el propietario confirmó `ok:true` y `revision:3` en el script. v26.100.0 se publicó en Firebase Hosting con conexión desde los formularios y retorno comprobado. Las escrituras reales y el recorrido con una segunda cuenta siguen pendientes de pruebas. [Implementación web y pruebas](CONTACTOS-APPS-SCRIPT-26.100.0.md).
 
 ## Evidencia y alcance
 
@@ -54,12 +54,12 @@ Se aprobaron 20 pruebas con servicios simulados: GET sin escritura ni datos pers
 
 Estado de los pasos necesarios:
 
-- Publicación por el propietario: revisión 2 confirmada. Pendiente revisión 3, que añade las pantallas de confirmación y enlaces de retorno.
+- Publicación por el propietario: revisión 3 confirmada, con pantallas de confirmación y enlaces de retorno.
 - Conexión web implementada: transporte POST, reserva de ventana, retorno validado, cancelación y estado del formulario. Sus pruebas de navegador utilizan Google/Firebase simulados; no sustituyen publicar el script real.
 - Pendiente prueba con dos cuentas de Google y guardado real de un contacto autorizado, repetición sin duplicados y conservación de sus otros campos.
 - Pruebas físicas pendientes. La matriz de navegador de v26.100.0 tiene celular 9/9, tablet 9/9 y computadora 9/9 (100 % de esos nueve casos por tamaño).
 
-Esta preparación no cambia Firebase Hosting, las reglas ni los datos de usuarios. No requiere contratar un servidor ni activar Blaze. Apps Script ejecuta código en la infraestructura de Google y tiene sus propias cuotas y requisitos de consentimiento/verificación.
+Los archivos de esta integración están publicados en Firebase Hosting; las reglas y los datos de usuarios de Firebase no se modificaron. No requiere contratar un servidor ni activar Blaze. Apps Script ejecuta código en la infraestructura de Google y tiene sus propias cuotas y requisitos de consentimiento/verificación.
 
 ## Fuentes oficiales
 

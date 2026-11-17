@@ -2,7 +2,7 @@
 
 ## Estado
 
-Implementación preparada. La web publicada permanece en v26.99.0 hasta que el propietario publique la revisión 3 de Apps Script. La revisión 2 fue autorizada y respondió `ok:true`, pero solo diagnostica acceso y no incluye el retorno a Nexus necesario para esta entrega. La URL pública no permite editar ni desplegar su proyecto; ese paso debe hacerlo el propietario.
+El propietario confirmó `ok:true` y `revision:3` en Apps Script el 17 de noviembre de 2026. Se publicó v26.100.0 en Firebase Hosting y se comprobó que su manifiesto y siete recursos críticos coinciden con la compilación local (release `e9b3fa8387ba4962`). El código de la integración está sincronizado con GitHub. La consulta confirmada acredita acceso a la cuenta y agenda; el primer guardado real y una segunda cuenta siguen pendientes de pruebas por su propietario.
 
 El archivo completo es [Code.gs](../integrations/google-contacts-apps-script/Code.gs). Incluye la función `autorizarYComprobarCuenta`; no hace falta volver a añadirla al final. Conservar el manifiesto con contactos, correo, People v1 y ejecución como usuario que accede. Reemplazar código.gs, guardar y publicar Nueva versión. GET `/exec` debe responder `ok:true`, `revision:3` y `protocolo:nexus-contacts-preview-v1`.
 
@@ -31,14 +31,15 @@ Este resultado es una confirmación de interfaz y no autoriza operaciones de Fir
 
 ## Verificación
 
-- TypeScript y compilación de Hosting correctos.
+- TypeScript y compilación de Hosting correctos; 210 pruebas unitarias aprobadas en conjunto y GitHub Actions correcto.
+- Publicación verificada: manifiesto, JavaScript/CSS principales y ambos archivos de retorno coinciden con la compilación. Acceso público y dashboard sin desbordamiento ni reCAPTCHA en los tres tamaños.
 - 20 pruebas del código de Apps Script con servicios simulados.
 - 12 pruebas del transporte y página de retorno: cuenta diferente, invitados, correo no verificado, popup bloqueado/cerrado, cancelación, cambio de sesión, vencimiento, borrador inválido, recibo adulterado y almacenamiento bloqueado.
 - 27 recorridos de Chromium sobre los formularios reales y el código real de Apps Script con People/Firebase simulados. Celular 9/9, tablet 9/9, computadora 9/9: 100 % de esos casos, no del proyecto completo.
 - Por tamaño: crear y editar, repetir sin duplicado, ausencia de desbordamiento en ambos formularios, fallo de Google con conservación del contacto/borrador y aviso de tres segundos, invitados sin opción y bloqueo de popup sin falso éxito.
 - El simulador aplica iframe con restricciones de HtmlService y `Cross-Origin-Opener-Policy: same-origin` para verificar el retorno sin opener. No se realizaron escrituras en agendas reales ni datos de producción.
 
-Pendientes: publicación del script real, primer guardado consentido, segunda cuenta de Google y pruebas físicas Android/iPhone. El consentimiento previamente demostrado por el propietario no acredita todavía estas escrituras ni el recorrido entre ambas aplicaciones.
+Pendientes: primer guardado consentido desde Nexus, segunda cuenta de Google y pruebas físicas Android/iPhone. El consentimiento previamente demostrado por el propietario no acredita todavía estas escrituras ni el recorrido entre ambas aplicaciones.
 
 ## Fuentes oficiales
 

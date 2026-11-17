@@ -6,8 +6,8 @@ El [README principal](../README.md) describe las funciones y el modelo de seguri
 
 | Documento | Contenido |
 | --- | --- |
-| [Conexión de contactos v26.100.0](CONTACTOS-APPS-SCRIPT-26.100.0.md) | Flujo de autorización y guardado desde Nexus, pruebas y activación pendiente. |
-| [Preparación de Apps Script para contactos](GOOGLE-CONTACTOS-APPS-SCRIPT.md) | Código instalable, permisos, 20 pruebas y conexión web pendiente. |
+| [Conexión de contactos v26.100.0](CONTACTOS-APPS-SCRIPT-26.100.0.md) | Conexión publicada, pruebas y validación de guardado real pendiente. |
+| [Preparación de Apps Script para contactos](GOOGLE-CONTACTOS-APPS-SCRIPT.md) | Código instalado, permisos y 20 pruebas del servicio. |
 | [Acceso administrativo y tareas aplazadas](PENDIENTES-ACCESO-ADMINISTRATIVO.md) | Acceso implementado, borrado a treinta días pendiente y tareas de moderación y Assistant. |
 | [Llamadas y segundo plano v26.95.0](LLAMADAS-Y-SEGUNDO-PLANO-26.95.0.md) | Salidas reales de audio, referencias móviles, notificaciones del worker y límites sin servidor. |
 | [Revisión general v26.95.1](AUDITORIA-26.95.1.md) | Correcciones de Ajustes/contactos, pruebas de permisos, reglas endurecidas y limitaciones pendientes. |
@@ -15,7 +15,7 @@ El [README principal](../README.md) describe las funciones y el modelo de seguri
 | [País y voz v26.98.0](PAIS-Y-VOZ-26.98.0.md) | Ubicación en computadora, prefijo de país y audio real sin repetir descargas. |
 | [Actualización masiva v26.97.1](ACTUALIZACION-MASIVA-26.97.0.md) | Caducidad, invitados, voz e identidad; alcance y límites. |
 | [Referencias de chat/contacto v26.96.0](REFERENCIAS-CHAT-CONTACTO-26.96.0.md) | Saludo, temporales, nuevo contacto y sincronización según las capturas. |
-| [Estado del código v26.100.0](ESTADO-ACTUAL-NEXUS.md) | Funciones implementadas, corrección de preparación y tareas pendientes. |
+| [Estado actual v26.100.0](ESTADO-ACTUAL-NEXUS.md) | Funciones implementadas, corrección de preparación y tareas pendientes. |
 | [Descarga de voz v26.94.2](DESCARGA-VOZ-REANUDABLE.md) | Reanudar descargas interrumpidas, caché y límites de almacenamiento. |
 | [Voz KokoroJS v26.94.0](VOZ-KOKOROJS.md) | Lectura neuronal española, carga local, cancelación y requisitos del navegador. |
 | [Confirmación y acceso v26.93.1](CONFIRMACION-Y-ACCESO-26.93.1.md) | CONFIRMAR sin códigos y recuperación de la verificación administrativa. |
