@@ -37,9 +37,11 @@ export function OfficialChatRow({latest,unread,onOpen,onDelete}:{latest?:Officia
  </button><button type="button" className="chat-actions-trigger" aria-label="Opciones del chat de Nexus" onClick={event=>{const rect=event.currentTarget.getBoundingClientRect();setMenu({x:rect.right,y:rect.bottom});}}><MoreVertical size={20}/></button>{menu&&<FloatingMenu at={menu} label="Acciones del chat" onClose={()=>setMenu(null)}><button type="button" onClick={()=>{setMenu(null);onDelete();}}><Trash2 size={18}/>Eliminar chat</button></FloatingMenu>}</article>;
 }
 
-export default function OfficialChat({notices,failed,retry}:{notices:OfficialNotice[]|null;failed:boolean;retry:()=>void}){
+export default function OfficialChat({notices,failed,retry,onDelete}:{notices:OfficialNotice[]|null;failed:boolean;retry:()=>void;onDelete:()=>void}){
+ const [menu,setMenu]=useState<{x:number;y:number}|null>(null);
  return <section className="official-chat" aria-label="Mensajes oficiales">
-  <header><Megaphone size={21} aria-hidden="true"/><div><strong>Mensajes del equipo de Nexus</strong><p>Aquí llegan novedades, avisos del servicio y recomendaciones de seguridad. Este chat es de solo lectura.</p></div></header>
+  <header><Megaphone size={21} aria-hidden="true"/><div><strong>Mensajes del equipo de Nexus</strong><p>Aquí llegan novedades, avisos del servicio y recomendaciones de seguridad. Este chat es de solo lectura.</p></div><button type="button" aria-label="Opciones del chat de Nexus" onClick={event=>{const rect=event.currentTarget.getBoundingClientRect();setMenu({x:rect.right,y:rect.bottom});}}><MoreVertical size={22}/></button></header>
+  {menu&&<FloatingMenu at={menu} label="Acciones del chat" onClose={()=>setMenu(null)}><button type="button" onClick={()=>{setMenu(null);onDelete();}}><Trash2 size={18}/>Eliminar chat</button></FloatingMenu>}
   {failed?<p role="alert">No se pudieron cargar los avisos. <button type="button" onClick={retry}>Reintentar</button></p>:notices===null?<p role="status">Cargando avisos…</p>:!notices.length?<p>Todavía no hay avisos publicados.</p>:<ol>{notices.map(notice=><li key={notice.id}>
    <small>{notice.category}</small><h2>{notice.title}</h2><p>{notice.body}</p>
    <time dateTime={notice.publishedAt.toDate().toISOString()}>{notice.publishedAt.toDate().toLocaleString('es',{dateStyle:'medium',timeStyle:'short'})}</time>
