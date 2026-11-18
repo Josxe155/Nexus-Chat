@@ -376,3 +376,5 @@ Se retiran los porcentajes globales anteriores: no tenían una medición reprodu
 ### Numeración de versiones
 
 Nexus usa `vAA.N.C`. `AA` son los dos últimos dígitos del año, `N` identifica la actualización general de ese año y `C` cuenta sus correcciones, hasta 5. Por ejemplo, `v27.100.5` es la quinta corrección de la actualización 100 de 2027. La comprobación y descarga se abren en **Acerca de la web**.
+
+La corrección **v26.101.4** permite eliminar el chat de avisos de Nexus de la lista personal desde sus opciones. La preferencia se sincroniza con la cuenta; los avisos originales y las listas de otros usuarios se conservan.
