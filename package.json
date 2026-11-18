@@ -60,7 +60,9 @@
     "test:media-cache-errors": "node --import tsx scripts/media-cache-errors.test.ts",
     "test:error-recovery": "node --import tsx scripts/error-recovery.test.ts",
     "test:history": "node --import tsx scripts/paged-messages.test.ts",
-    "test:browser-permissions": "node --import tsx scripts/browser-permissions.test.ts"
+    "test:browser-permissions": "node --import tsx scripts/browser-permissions.test.ts",
+    "test:private-settings:emulators": "node scripts/private-settings-emulator.test.cjs",
+    "test:chat-integrity:emulators": "node scripts/chat-integrity-emulator.test.cjs"
   },
   "dependencies": {
     "firebase": "^12.13.0",

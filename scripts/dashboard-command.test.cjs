@@ -28,7 +28,12 @@ const fs=require('node:fs'),path=require('node:path'),assert=require('node:asser
   await env.withSecurityRulesDisabled(async c=>{await setDoc(doc(c.firestore(),'chats/command-chat/messages/duplicate'),{...row,content:command.after});});
   assert.match(await editMessageByCommand(db,{uid:'admin'},{...command,before:command.after,after:'No debe aplicarse'},new AbortController().signal),/varias coincidencias/);
   assert.equal((await getDoc(doc(db,'chats/command-chat/messages/target'))).data().content,command.after);
+  const expiresAt=Date.now()+86400000;
+  await env.withSecurityRulesDisabled(async c=>{const admin=c.firestore();await setDoc(doc(admin,'chats/command-chat/messages/temporary'),{type:'text',senderId:'command-author',content:'Temporal del comando',timestamp:Date.now(),expiresAt});await setDoc(doc(admin,'chats/command-chat'),{title:'Aula de prueba',participants:['command-author'],lastMessage:{id:'temporary',senderId:'command-author',timestamp:Date.now(),content:'Mensaje temporal',expiresAt}});});
+  assert.match(await editMessageByCommand(db,{uid:'admin'},{...command,before:'Temporal del comando',after:'Temporal corregido'},new AbortController().signal),/actualizado/);
+  assert.equal((await getDoc(doc(db,'chats/command-chat/messages/temporary'))).data().content,'Temporal corregido');
+  const temporaryPreview=(await getDoc(doc(db,'chats/command-chat'))).data().lastMessage;assert.equal(temporaryPreview.content,'Mensaje temporal');assert.equal(temporaryPreview.expiresAt,expiresAt);
   await assert.rejects(editMessageByCommand(db,{uid:'admin'},command,AbortSignal.abort()));
-  console.log('Comando: edición exacta, resumen, auditoría, duplicados, reintentos y cancelación OK. Solo datos ficticios.');
+  console.log('Comando: edición exacta, resumen, auditoría, duplicados, reintentos, temporales y cancelación OK. Solo datos ficticios.');
  }finally{await env.cleanup();fs.rmSync(output,{force:true});fs.rmSync(session,{force:true});}
 })().catch(e=>{console.error(e);process.exit(1)});

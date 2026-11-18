@@ -92,7 +92,7 @@ export function createAssistantActions(db:Firestore,rtdb:Database,user:User,onPl
     else{after=materialize(applyActionPatch(before,patch));tx.update(target,materialize(patch));}
     if(textEdit)tx.set(doc(db,'dashboardEdits',plan.id),{actor:user.uid,chatId:messagePath![1],messageId:messagePath![2],senderId:before!.senderId,before:before!.content,after:plan.data.content,at:serverTimestamp()});
     const last=chatSnapshot?.data()?.lastMessage;
-    if(chat&&last&&(last.id===messagePath![2]||last.senderId===before?.senderId&&last.timestamp===before?.timestamp&&last.content===before?.content)){if(plan.operation==='delete')tx.update(chat,{lastMessage:deleteField()});else if(plan.operation==='update'&&typeof plan.data.content==='string')tx.update(chat,{'lastMessage.content':plan.data.content,'lastMessage.edited':true});}
+    if(chat&&last&&(last.id===messagePath![2]||last.senderId===before?.senderId&&last.timestamp===before?.timestamp&&last.content===before?.content)){if(plan.operation==='delete')tx.update(chat,{lastMessage:deleteField()});else if(plan.operation==='update'&&typeof plan.data.content==='string')tx.update(chat,{'lastMessage.content':after?.expiresAt?'Mensaje temporal':plan.data.content,'lastMessage.expiresAt':after?.expiresAt||deleteField(),'lastMessage.edited':true});}
     tx.set(audit,{actor:user.uid,target,operation:plan.operation,before,after,at:serverTimestamp()});
     tx.set(pointer,{actor:user.uid,id:plan.id,at:serverTimestamp()});
    });

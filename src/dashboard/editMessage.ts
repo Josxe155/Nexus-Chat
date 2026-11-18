@@ -1,4 +1,4 @@
-import {collection,doc,documentId,getDocFromServer,getDocsFromServer,query,where,orderBy,limit,startAfter,runTransaction,serverTimestamp,type Firestore,type QueryDocumentSnapshot} from 'firebase/firestore';
+import {collection,doc,documentId,getDocFromServer,getDocsFromServer,query,where,orderBy,limit,startAfter,runTransaction,serverTimestamp,deleteField,type Firestore,type QueryDocumentSnapshot} from 'firebase/firestore';
 import type {User} from 'firebase/auth';
 import {verifyDashboardAccess} from './session';
 import {assertEditableMessage,normalizeName,type MessageEditCommand} from './messageEditCommand';
@@ -37,7 +37,7 @@ export async function editMessageByCommand(db:Firestore,user:User,command:Messag
   tx.update(messageRef,edit);
   tx.set(auditRef,{actor:user.uid,chatId:match.chatId,messageId:match.messageId,senderId:person.id,before:command.before,after:command.after,at:serverTimestamp()});
   const last=chat.data()?.lastMessage;
-  if(last&&(last.id===match.messageId||last.senderId===person.id&&last.timestamp===previous!.timestamp&&last.content===command.before))tx.update(chatRef,{'lastMessage.content':command.after,'lastMessage.edited':true});
+  if(last&&(last.id===match.messageId||last.senderId===person.id&&last.timestamp===previous!.timestamp&&last.content===command.before))tx.update(chatRef,{'lastMessage.content':previous?.expiresAt?'Mensaje temporal':command.after,'lastMessage.expiresAt':previous?.expiresAt||deleteField(),'lastMessage.edited':true});
  });
  try{
   const verified=await getDocFromServer(messageRef);

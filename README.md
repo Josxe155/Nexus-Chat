@@ -54,7 +54,7 @@ Nexus Chat reúne conversaciones, archivos, estados, comunidades y llamadas en u
 
 Los siguientes bloques de trabajo incluyen Ajustes, información de contacto, copias y restauración, y pruebas físicas de multimedia. El estado y los criterios de cierre están en [la lista de pendientes](docs/PENDIENTES-WHATSAPP.md#prioridades-del-9-de-noviembre-de-2026).
 
-La corrección **v26.101.2** permite entrar con almacenamiento local bloqueado, recupera correctamente la aplicación y el dashboard ante errores y maneja abortos de la caché. Incluye normalización de ajustes y contactos. **La apertura pública sigue condicionada al tratamiento de claves de servicios utilizadas desde el cliente.** [Revisión para producción temporal y límites](docs/PRODUCCION-TEMPORAL-26.101.2.md).
+La corrección **v26.101.3** endurece las reglas de ajustes privados y vincula las vistas previas de chats con mensajes reales. Protege el resumen de los temporales al editarlos y corrige la edición o eliminación administrativa del último mensaje. **Las claves privadas de servicios incluidas en JavaScript siguen siendo un impedimento para una apertura pública sin restricciones.** [Auditoría de reglas y límites](docs/AUDITORIA-REGLAS-26.101.3.md). La recuperación de almacenamiento y errores de la entrega anterior se conserva: [producción temporal](docs/PRODUCCION-TEMPORAL-26.101.2.md).
 
 La corrección **v26.101.1** añade los índices que faltaban al abrir el historial y corrige la recuperación de errores y solicitudes simultáneas de paginación. Incluye una revisión de Ajustes, voz, emojis, contactos, dashboard y permisos. [Causa, pruebas y límites](docs/AUDITORIA-26.101.1.md).
 

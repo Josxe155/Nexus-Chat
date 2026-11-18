@@ -1,0 +1,25 @@
+{
+  "score": 4,
+  "summary": "Auditoría acotada de Firestore y Realtime Database con pruebas sintéticas. Se corrigen validaciones privadas e integridad de metadatos del chat. La puntuación no certifica la preparación global para producción ni garantiza ausencia de vulnerabilidades.",
+  "findings": [
+    {
+      "check": "Type Safety / Legacy Private Documents",
+      "severity": "minor",
+      "issue": "Los documentos privados distintos de settings, google-contacts, accountReports y preferences conservan la validación genérica de propiedad. Algunos modelos permiten al titular guardar formatos no inventariados. No se reprodujo acceso a documentos privados de otro titular.",
+      "recommendation": "Inventariar formatos actuales y anteriores antes de añadir validadores por documento, con pruebas de lectura y escritura válidas y adversarias."
+    },
+    {
+      "check": "Metadata Integrity / Unread Counters",
+      "severity": "minor",
+      "issue": "Los contadores quedan limitados a participantes y valores numéricos de hasta diez cifras, incluidos textos de dígitos. Modificar contadores ajenos requiere un mensaje propio nuevo, pero la regla no verifica un incremento exacto de una unidad para cada destinatario.",
+      "recommendation": "Considerar contadores por destinatario si se necesita exactitud adversaria; evaluar antes las escrituras, cuotas y migración. Los contadores no deben conferir permisos."
+    }
+  ],
+  "outsideRulesScope": [
+    {
+      "severity": "major",
+      "issue": "Las claves privadas compartidas de servicios de IA incorporadas a JavaScript son extraíbles del cliente aunque no se muestren en pantalla ni se guarden en Git.",
+      "recommendation": "Retirar esas claves del cliente y rotar las distribuidas antes de una apertura pública irrestricta. Las reglas de Firebase no protegen credenciales de otros servicios. No confundirlas con la configuración pública identificadora de Firebase."
+    }
+  ]
+}

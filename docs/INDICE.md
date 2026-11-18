@@ -6,6 +6,7 @@ El [README principal](../README.md) describe las funciones y el modelo de seguri
 
 | Documento | Contenido |
 | --- | --- |
+| [Auditoría de reglas v26.101.3](AUDITORIA-REGLAS-26.101.3.md) | Ajustes privados, integridad de resúmenes, contadores, permisos y límites para promoción. |
 | [Producción temporal v26.101.2](PRODUCCION-TEMPORAL-26.101.2.md) | Recuperación, almacenamiento, revisión prolongada y condición pendiente para apertura pública. |
 | [Revisión general v26.101.1](AUDITORIA-26.101.1.md) | Causa del historial, índices, paginación, revisión por dispositivo y reglas publicadas. |
 | [Contactos persistentes v26.101.0](CONTACTOS-PERSISTENTES-26.101.0.md) | Cuenta y sincronización recordadas, autorización con Firebase y pruebas. |
@@ -19,7 +20,7 @@ El [README principal](../README.md) describe las funciones y el modelo de seguri
 | [País y voz v26.98.0](PAIS-Y-VOZ-26.98.0.md) | Ubicación en computadora, prefijo de país y audio real sin repetir descargas. |
 | [Actualización masiva v26.97.1](ACTUALIZACION-MASIVA-26.97.0.md) | Caducidad, invitados, voz e identidad; alcance y límites. |
 | [Referencias de chat/contacto v26.96.0](REFERENCIAS-CHAT-CONTACTO-26.96.0.md) | Saludo, temporales, nuevo contacto y sincronización según las capturas. |
-| [Estado actual v26.101.2](ESTADO-ACTUAL-NEXUS.md) | Funciones implementadas, corrección de preparación y tareas pendientes. |
+| [Estado actual v26.101.3](ESTADO-ACTUAL-NEXUS.md) | Funciones implementadas, corrección de preparación y tareas pendientes. |
 | [Descarga de voz v26.94.2](DESCARGA-VOZ-REANUDABLE.md) | Reanudar descargas interrumpidas, caché y límites de almacenamiento. |
 | [Voz KokoroJS v26.94.0](VOZ-KOKOROJS.md) | Lectura neuronal española, carga local, cancelación y requisitos del navegador. |
 | [Confirmación y acceso v26.93.1](CONFIRMACION-Y-ACCESO-26.93.1.md) | CONFIRMAR sin códigos y recuperación de la verificación administrativa. |

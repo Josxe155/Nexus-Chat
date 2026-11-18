@@ -1,4 +1,4 @@
-# Estado actual de Nexus Chat — v26.101.2
+# Estado actual de Nexus Chat — v26.101.3
 
 ## Implementado
 
@@ -9,6 +9,10 @@
 - Pantalla de cuenta bloqueada, logo oficial, favicon e iconos transparentes.
 - Lectura remota española sin modelo local. Envía el texto leído al servicio de voz de Google; requiere conexión.
 - Sincronización del código con GitHub y publicación de entregas verificadas en Firebase Hosting.
+
+## Corrección v26.101.3
+
+Reglas de ajustes privados con tipos, campos y titularidad; vistas previas vinculadas al mensaje que se crea o modifica en la misma operación; contadores limitados a los miembros y a valores numéricos acotados. Edición de temporales sin exponer el texto en el resumen y actualización válida del último mensaje al moderarlo. [Auditoría y límites](AUDITORIA-REGLAS-26.101.3.md). No resuelve la exposición de claves de servicios incorporadas al cliente ni añade servidores o Blaze.
 
 ## Corrección v26.101.2
 
