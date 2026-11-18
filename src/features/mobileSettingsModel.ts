@@ -1,3 +1,4 @@
+import {readBrowserValue,writeBrowserValue} from './browserStorage';
 import {coloredBrandIcon} from './brandMark';
 export const mobileColors=[
  ['Verde','#22c56a'],['Grafito','#75848b'],['Océano','#209bc1'],['Ciruela','#ab65cf'],
@@ -10,8 +11,8 @@ export const mobileIcons=[['Nexus',''],['Verde','#21c063'],['Azul','#58a8ff'],['
 const accentKey='nexus-mobile-accent',iconKey='nexus-mobile-icon';
 export const mobileSettingsQuery='(max-width: 599px), (pointer: coarse) and (max-height: 599px)';
 export const mobileSettingsActive=()=>matchMedia(mobileSettingsQuery).matches;
-export const readMobileAccent=()=>mobileColors.find(([,color])=>color===localStorage.getItem(accentKey))?.[1]||mobileColors[0][1];
-export const readMobileIcon=()=>mobileIcons.find(([,color])=>color===localStorage.getItem(iconKey))?.[1]||'';
+export const readMobileAccent=()=>mobileColors.find(([,color])=>color===readBrowserValue(accentKey))?.[1]||mobileColors[0][1];
+export const readMobileIcon=()=>mobileIcons.find(([,color])=>color===readBrowserValue(iconKey))?.[1]||'';
 export function mobileIconURL(color:string){
  if(!mobileIcons.some(([,value])=>value===color)||!color)return '/nexus-icon.svg?v=26.93.0';
  return coloredBrandIcon(color);
@@ -23,7 +24,7 @@ export function applyMobileBranding(){
  document.querySelector<HTMLLinkElement>('link[rel=icon][type="image/svg+xml"]')?.setAttribute('href',mobileIconURL(active?readMobileIcon():''));
 }
 export function saveMobileBranding(key:'accent'|'icon',color:string){
- localStorage.setItem(key==='accent'?accentKey:iconKey,color);
+ writeBrowserValue(key==='accent'?accentKey:iconKey,color);
  applyMobileBranding();
 }
 

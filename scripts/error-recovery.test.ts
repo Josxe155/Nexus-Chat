@@ -1,0 +1,5 @@
+import {test} from 'node:test';import assert from 'node:assert/strict';import {readFileSync} from 'node:fs';import {runInNewContext} from 'node:vm';
+const script=readFileSync('public/error.html','utf8').match(/<script>([\s\S]*?)<\/script>/)![1];
+function fixture(blocked=false){let parent=0,self=0;const context:any={window:{get top(){if(blocked)throw Error('Cross-origin');return {location:{reload(){parent++}}}}},location:{search:'?mode=error',reload(){self++}},document:{getElementById:()=>({textContent:''})},URLSearchParams};runInNewContext(script,context);return {context,get parent(){return parent;},get self(){return self;}};}
+test('el reintento dentro del marco recarga la aplicación principal',()=>{const f=fixture();f.context.retryNexus();assert.equal(f.parent,1);assert.equal(f.self,0);});
+test('si otro origen impide acceder al padre se conserva un reintento local',()=>{const f=fixture(true);assert.doesNotThrow(()=>f.context.retryNexus());assert.equal(f.parent,0);assert.equal(f.self,1);});

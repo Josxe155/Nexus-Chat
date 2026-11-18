@@ -1,3 +1,4 @@
+import {readBrowserValue,writeBrowserValue,removeBrowserValue} from './browserStorage';
 import {dataErrorMessage} from './dataErrors';
 import React,{createContext,useContext,useEffect,useState} from 'react';
 import {collection,doc,onSnapshot,setDoc,writeBatch,runTransaction} from 'firebase/firestore';
@@ -24,5 +25,5 @@ export type HiddenTicket={at:number;messages:Pick<Message,'id'|'chatId'>[]};
 export async function restoreHiddenMessages(uid:string,ticket:HiddenTicket){for(let offset=0;offset<ticket.messages.length;offset+=100)await runTransaction(db,async tx=>{const refs=ticket.messages.slice(offset,offset+100).map(message=>doc(db,'users',uid,'messageFlags',flagId(message.chatId,message.id))),snapshots=await Promise.all(refs.map(target=>tx.get(target)));snapshots.forEach((snapshot,index)=>{if(snapshot.data()?.hidden&&snapshot.data()?.updatedAt===ticket.at)tx.update(refs[index],{hidden:false,updatedAt:Date.now()});});});}
 export async function hideMessages(uid:string,messages:Message[]){const at=Date.now();for(let offset=0;offset<messages.length;offset+=400){const batch=writeBatch(db);messages.slice(offset,offset+400).forEach(message=>batch.set(doc(db,'users',uid,'messageFlags',flagId(message.chatId,message.id)),{chatId:message.chatId,messageId:message.id,hidden:true,updatedAt:at},{merge:true}));await batch.commit();}return {at,messages:messages.filter(message=>!message.localState).map(({id,chatId})=>({id,chatId}))};}
 export function draftKey(uid:string,chatId:string){return 'nexus-draft:'+uid+':'+chatId;}
-export function readDraft(uid:string,chatId:string){return localStorage.getItem(draftKey(uid,chatId))||'';}
-export function writeDraft(uid:string,chatId:string,text:string){const key=draftKey(uid,chatId);if(text)localStorage.setItem(key,text.slice(0,20000));else localStorage.removeItem(key);window.dispatchEvent(new CustomEvent('nexus:draft',{detail:{uid,chatId}}));}
+export function readDraft(uid:string,chatId:string){return readBrowserValue(draftKey(uid,chatId))||'';}
+export function writeDraft(uid:string,chatId:string,text:string){const key=draftKey(uid,chatId);if(text)writeBrowserValue(key,text.slice(0,20000));else removeBrowserValue(key);window.dispatchEvent(new CustomEvent('nexus:draft',{detail:{uid,chatId}}));}

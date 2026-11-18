@@ -5,7 +5,23 @@ import type {UserProfile} from '../types';
 import {normalizePrivacy,statusAudience} from './privacy';
 import {normalizeContactNumber} from './contactDraft';
 export type ContactName={first:string;last:string};
-export function useContactNames(uid?:string){const [names,setNames]=useState<Record<string,ContactName>>({});useEffect(()=>{setNames({});if(!uid)return;return onSnapshot(doc(db,'users',uid,'private','contacts'),snapshot=>setNames(snapshot.data()?.names||{}),()=>{});},[uid]);return names;}
+export function normalizeContactNames(input:unknown):Record<string,ContactName>{
+ if(!input||typeof input!=='object'||Array.isArray(input))return {};
+ return Object.fromEntries(Object.entries(input).flatMap(([uid,value])=>{
+  if(!uid||uid.length>128||uid.includes('/')||!value||typeof value!=='object'||Array.isArray(value))return [];
+  const v=value as Partial<ContactName>,first=typeof v.first==='string'?v.first.slice(0,80):'',last=typeof v.last==='string'?v.last.slice(0,80):'';
+  return first||last?[[uid,{first,last}]]:[];
+ }));
+}
+export function normalizeContactNumbers(input:unknown):Record<string,string>{
+ if(!input||typeof input!=='object'||Array.isArray(input))return {};
+ return Object.fromEntries(Object.values(input).flatMap(value=>{
+  if(!value||typeof value!=='object')return [];const v=value as {uid?:unknown;phone?:unknown};
+  if(typeof v.uid!=='string'||!v.uid||v.uid.length>128||v.uid.includes('/')||typeof v.phone!=='string')return [];
+  const phone=v.phone.replace(/[\s()-]/g,'');return /^\+[1-9]\d{6,14}$/.test(phone)?[[v.uid,phone]]:[];
+ }));
+}
+export function useContactNames(uid?:string){const [names,setNames]=useState<Record<string,ContactName>>({});useEffect(()=>{setNames({});if(!uid)return;return onSnapshot(doc(db,'users',uid,'private','contacts'),snapshot=>setNames(normalizeContactNames(snapshot.data()?.names)),()=>{});},[uid]);return names;}
 export async function saveContact(user:UserProfile,person:UserProfile,name:ContactName,phone=''){
  if(!person.uid||person.uid.includes('/')||person.uid.length>128)throw Error('No se pudo comprobar el contacto.');
  const first=name.first.trim(),last=name.last.trim();
@@ -35,4 +51,4 @@ export async function saveContact(user:UserProfile,person:UserProfile,name:Conta
  active();return {...user,privacy:{...user.privacy,...result.options,updatedAt:result.updatedAt}};
 }
 
-export function useContactNumbers(uid:string){const [numbers,setNumbers]=useState<Record<string,string>>({});useEffect(()=>{setNumbers({});return onSnapshot(doc(db,'users',uid,'private','phone-contacts'),snapshot=>setNumbers(Object.fromEntries(Object.values(snapshot.data()?.contacts||{}).filter((value:any)=>typeof value.uid==='string'&&value.uid&&typeof value.phone==='string').map((value:any)=>[value.uid,value.phone]))),()=>{});},[uid]);return numbers;}
+export function useContactNumbers(uid:string){const [numbers,setNumbers]=useState<Record<string,string>>({});useEffect(()=>{setNumbers({});return onSnapshot(doc(db,'users',uid,'private','phone-contacts'),snapshot=>setNumbers(normalizeContactNumbers(snapshot.data()?.contacts)),()=>{});},[uid]);return numbers;}

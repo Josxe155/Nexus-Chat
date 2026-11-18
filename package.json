@@ -56,6 +56,9 @@
     "test:google-contacts:apps-script": "node scripts/google-contacts-apps-script.test.cjs",
     "test:google-contacts:bridge": "node --import tsx scripts/google-contacts-bridge.test.ts",
     "test:history:emulators": "node scripts/history-emulator.test.cjs",
+    "test:browser-preferences": "node --import tsx scripts/browser-preferences.test.ts",
+    "test:media-cache-errors": "node --import tsx scripts/media-cache-errors.test.ts",
+    "test:error-recovery": "node --import tsx scripts/error-recovery.test.ts",
     "test:history": "node --import tsx scripts/paged-messages.test.ts",
     "test:browser-permissions": "node --import tsx scripts/browser-permissions.test.ts"
   },

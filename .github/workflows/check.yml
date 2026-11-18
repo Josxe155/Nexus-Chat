@@ -40,6 +40,9 @@ jobs:
       - run: npm run test:call-audio-output
       - run: npm run test:voice-download
       - run: npm run test:country
+      - run: npm run test:browser-preferences
+      - run: npm run test:media-cache-errors
+      - run: npm run test:error-recovery
       - run: npm run test:history
       - run: npm run test:browser-permissions
       - run: npm run test:massive

@@ -1,3 +1,4 @@
+import ErrorBoundary from '../components/ErrorBoundary';
 import {createDataRetention} from './dataRetention';
 import {visibleAccountEmail} from '../features/guestIdentity';
 import useServerClock from '../features/useServerClock';
@@ -232,4 +233,4 @@ function Dashboard(){
   <footer>Dashboard · Nexus Chat <span>v{version}</span></footer>
  </>;
 }
-createRoot(document.getElementById('root')!).render(<Dashboard/>);
+createRoot(document.getElementById('root')!).render(<ErrorBoundary><Dashboard/></ErrorBoundary>);
