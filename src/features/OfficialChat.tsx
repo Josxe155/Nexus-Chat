@@ -30,11 +30,11 @@ export function OfficialBadge(){return <BadgeCheck className="official-verified"
 
 export function OfficialChatRow({latest,unread,onOpen,onDelete}:{latest?:OfficialNotice;unread:number;onOpen:()=>void;onDelete:()=>void}){
  const [menu,setMenu]=useState<{x:number;y:number}|null>(null);
- return <article className="mobile-chat-row official-chat-row"><button type="button" className="mobile-chat-open" onClick={onOpen}>
+ return <article className="mobile-chat-row official-chat-row"><button type="button" className="mobile-chat-open" style={{paddingRight:44}} onClick={onOpen}>
   <span className="chat-list-avatar"><img src="/nexus-icon.svg" alt=""/></span>
   <span><strong>Nexus Chat Oficial <OfficialBadge/></strong><small>{latest?.title||'Novedades y avisos de Nexus'}</small></span>
   {latest&&<aside><time dateTime={latest.publishedAt.toDate().toISOString()}>{latest.publishedAt.toDate().toLocaleDateString('es',{day:'numeric',month:'short'})}</time>{unread>0&&<span className="chat-row-meta"><b aria-label={`${unread} avisos sin leer`}>{unread}</b></span>}</aside>}
- </button><button type="button" aria-label="Opciones del chat de Nexus" onClick={event=>{const rect=event.currentTarget.getBoundingClientRect();setMenu({x:rect.right,y:rect.bottom});}}><MoreVertical size={20}/></button>{menu&&<FloatingMenu at={menu} label="Acciones del chat" onClose={()=>setMenu(null)}><button type="button" onClick={()=>{setMenu(null);onDelete();}}><Trash2 size={18}/>Eliminar chat</button></FloatingMenu>}</article>;
+ </button><button type="button" className="chat-actions-trigger" aria-label="Opciones del chat de Nexus" onClick={event=>{const rect=event.currentTarget.getBoundingClientRect();setMenu({x:rect.right,y:rect.bottom});}}><MoreVertical size={20}/></button>{menu&&<FloatingMenu at={menu} label="Acciones del chat" onClose={()=>setMenu(null)}><button type="button" onClick={()=>{setMenu(null);onDelete();}}><Trash2 size={18}/>Eliminar chat</button></FloatingMenu>}</article>;
 }
 
 export default function OfficialChat({notices,failed,retry}:{notices:OfficialNotice[]|null;failed:boolean;retry:()=>void}){
